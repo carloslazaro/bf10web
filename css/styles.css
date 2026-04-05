@@ -216,7 +216,7 @@ img {
 }
 
 .header__logo-img {
-    height: 44px;
+    height: 56px;
     width: auto;
 }
 
@@ -360,7 +360,7 @@ img {
    Servicios
    ============================================ */
 .servicios {
-    padding: 100px 0;
+    padding: 60px 0 100px;
 }
 
 .servicios__grid {
@@ -670,6 +670,11 @@ img {
 .zonas__svg {
     width: 100%;
     max-width: 360px;
+}
+
+.zonas__img {
+    width: 100%;
+    max-width: 320px;
 }
 
 .zonas__lista {
