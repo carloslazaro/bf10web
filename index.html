@@ -3,45 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BF10 - Sacas de escombro y recogida</title>
+    <title>BF10 - Sacas de escombro | Compra y recogida</title>
+    <meta name="description" content="BF10: servicio profesional de sacas de escombro. Compra tu saca, llénala y nosotros la recogemos. Rápido, limpio y sin complicaciones.">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="index.html" class="logo">BF10</a>
-            <ul>
-                <li><a href="#servicios">Servicios</a></li>
-                <li><a href="#pedido">Pedir saca</a></li>
-                <li><a href="#contacto">Contacto</a></li>
-            </ul>
-        </nav>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container header__inner">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">BF10</span>
+            </a>
+            <nav class="header__nav" id="nav">
+                <ul class="header__nav-list">
+                    <li><a href="#servicios" class="header__nav-link">Servicios</a></li>
+                    <li><a href="#como-funciona" class="header__nav-link">Cómo funciona</a></li>
+                    <li><a href="#contacto" class="header__nav-link">Contacto</a></li>
+                    <li><a href="#contacto" class="btn btn--small">Pedir saca</a></li>
+                </ul>
+            </nav>
+            <button class="header__menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </header>
 
-    <main>
-        <section id="hero">
-            <h1>BF10</h1>
-            <p>Sacas de escombro y servicio de recogida</p>
-        </section>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container hero__inner">
+            <div class="hero__content">
+                <h1 class="hero__title">Tu obra limpia,<br>sin complicaciones</h1>
+                <p class="hero__subtitle">Sacas de escombro a domicilio. Tú la llenas, nosotros la recogemos. Servicio rápido y profesional para obras, reformas y limpiezas.</p>
+                <div class="hero__actions">
+                    <a href="#contacto" class="btn btn--primary btn--large">Pedir mi saca</a>
+                    <a href="#como-funciona" class="btn btn--outline btn--large">Ver cómo funciona</a>
+                </div>
+            </div>
+            <div class="hero__visual">
+                <div class="hero__image-placeholder">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="35" width="80" height="65" rx="4" fill="#E8ECF0" stroke="#1A1A2E" stroke-width="2"/>
+                        <path d="M20 35 L35 15 H85 L100 35" fill="#D1D8E0" stroke="#1A1A2E" stroke-width="2"/>
+                        <rect x="40" y="50" width="15" height="10" rx="2" fill="#F59E0B" opacity="0.6"/>
+                        <rect x="60" y="55" width="20" height="8" rx="2" fill="#9CA3AF" opacity="0.5"/>
+                        <rect x="45" y="65" width="25" height="12" rx="2" fill="#D1D8E0" opacity="0.7"/>
+                    </svg>
+                    <span>Imagen de saca</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <section id="servicios">
-            <h2>Servicios</h2>
-            <!-- Contenido pendiente -->
-        </section>
+    <!-- Servicios -->
+    <section class="servicios" id="servicios">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Nuestros servicios</h2>
+                <p class="section-subtitle">Todo lo que necesitas para gestionar los escombros de tu obra o reforma</p>
+            </div>
+            <div class="servicios__grid">
+                <div class="servicio-card">
+                    <div class="servicio-card__icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="16" width="32" height="24" rx="3" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M8 16L14 6H34L40 16" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M24 22V34M18 28H30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="servicio-card__title">Compra de sacas</h3>
+                    <p class="servicio-card__text">Sacas de escombro de gran capacidad para obras, reformas y limpiezas. Te la llevamos donde nos digas.</p>
+                    <ul class="servicio-card__features">
+                        <li>Saca de 1m³ estándar</li>
+                        <li>Entrega en 24-48h</li>
+                        <li>Colocación incluida</li>
+                    </ul>
+                </div>
+                <div class="servicio-card servicio-card--destacado">
+                    <div class="servicio-card__badge">Más solicitado</div>
+                    <div class="servicio-card__icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="16" width="32" height="24" rx="3" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M8 16L14 6H34L40 16" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M16 28L22 34L34 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="servicio-card__title">Saca + Recogida</h3>
+                    <p class="servicio-card__text">El servicio completo: te llevamos la saca, tú la llenas a tu ritmo, y cuando esté lista la recogemos y gestionamos los residuos.</p>
+                    <ul class="servicio-card__features">
+                        <li>Entrega y recogida incluidas</li>
+                        <li>Gestión de residuos legal</li>
+                        <li>Sin límite de tiempo</li>
+                    </ul>
+                </div>
+                <div class="servicio-card">
+                    <div class="servicio-card__icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M24 14V24L30 30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="servicio-card__title">Recogida express</h3>
+                    <p class="servicio-card__text">¿Ya tienes la saca llena? Recogemos sacas de escombro en el menor tiempo posible. Llama y recogemos.</p>
+                    <ul class="servicio-card__features">
+                        <li>Recogida en 24h</li>
+                        <li>Cualquier proveedor</li>
+                        <li>Certificado de gestión</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <section id="pedido">
-            <h2>Pedir saca</h2>
-            <!-- Formulario pendiente -->
-        </section>
+    <!-- Cómo funciona -->
+    <section class="proceso" id="como-funciona">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Cómo funciona</h2>
+                <p class="section-subtitle">En 4 sencillos pasos tendrás tu obra limpia</p>
+            </div>
+            <div class="proceso__pasos">
+                <div class="paso">
+                    <div class="paso__numero">1</div>
+                    <div class="paso__contenido">
+                        <h3 class="paso__title">Pides tu saca</h3>
+                        <p class="paso__text">Contacta con nosotros por teléfono o a través de la web. Dinos dónde y cuándo la necesitas.</p>
+                    </div>
+                </div>
+                <div class="paso">
+                    <div class="paso__numero">2</div>
+                    <div class="paso__contenido">
+                        <h3 class="paso__title">Te la llevamos</h3>
+                        <p class="paso__text">Entregamos la saca en la dirección indicada y la colocamos donde mejor te convenga.</p>
+                    </div>
+                </div>
+                <div class="paso">
+                    <div class="paso__numero">3</div>
+                    <div class="paso__contenido">
+                        <h3 class="paso__title">La llenas</h3>
+                        <p class="paso__text">Llena la saca a tu ritmo con los escombros de tu obra o reforma. Sin prisas, sin límite de tiempo.</p>
+                    </div>
+                </div>
+                <div class="paso">
+                    <div class="paso__numero">4</div>
+                    <div class="paso__contenido">
+                        <h3 class="paso__title">La recogemos</h3>
+                        <p class="paso__text">Cuando esté llena, nos llamas y la recogemos. Nos encargamos de la gestión legal de los residuos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <section id="contacto">
-            <h2>Contacto</h2>
-            <!-- Datos de contacto pendientes -->
-        </section>
-    </main>
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container cta__inner">
+            <h2 class="cta__title">¿Necesitas una saca de escombro?</h2>
+            <p class="cta__text">Llámanos o solicita tu saca online. Te la llevamos en 24-48 horas.</p>
+            <div class="cta__actions">
+                <a href="tel:+34600000000" class="btn btn--white btn--large">
+                    <svg class="btn__icon" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                    </svg>
+                    Llamar ahora
+                </a>
+                <a href="#contacto" class="btn btn--outline-white btn--large">Solicitar online</a>
+            </div>
+        </div>
+    </section>
 
-    <footer>
-        <p>&copy; 2026 BF10. Todos los derechos reservados.</p>
+    <!-- Footer -->
+    <footer class="footer" id="contacto">
+        <div class="container footer__inner">
+            <div class="footer__brand">
+                <span class="footer__logo">BF10</span>
+                <p class="footer__tagline">Sacas de escombro y servicio de recogida profesional.</p>
+            </div>
+            <div class="footer__contacto">
+                <h3 class="footer__heading">Contacto</h3>
+                <ul class="footer__list">
+                    <li>
+                        <svg class="footer__icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                        <a href="tel:+34600000000">600 000 000</a>
+                    </li>
+                    <li>
+                        <svg class="footer__icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+                        <a href="mailto:info@bf10.es">info@bf10.es</a>
+                    </li>
+                    <li>
+                        <svg class="footer__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                        <span>Madrid, España</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer__horario">
+                <h3 class="footer__heading">Horario</h3>
+                <ul class="footer__list">
+                    <li>Lunes a Viernes: 8:00 - 18:00</li>
+                    <li>Sábados: 9:00 - 14:00</li>
+                    <li>Domingos: Cerrado</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <div class="container">
+                <p>&copy; 2026 BF10. Todos los derechos reservados.</p>
+            </div>
+        </div>
     </footer>
 
     <script src="js/main.js"></script>
