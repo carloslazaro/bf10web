@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BF10 - Sacas de escombro | Compra y recogida</title>
-    <meta name="description" content="BF10: servicio profesional de sacas de escombro. Compra tu saca, llénala y nosotros la recogemos. Rápido, limpio y sin complicaciones.">
+    <title>BF10 - Sacas de escombro en Madrid | Compra y recogida desde 49,99€</title>
+    <meta name="description" content="BF10: sacas de escombro en la Comunidad de Madrid. Precio claro desde 49,99€ con entrega y recogida incluida. Servicio en 24-48h. Sin sorpresas.">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -22,8 +22,10 @@
                 <ul class="header__nav-list">
                     <li><a href="#servicios" class="header__nav-link">Servicios</a></li>
                     <li><a href="#como-funciona" class="header__nav-link">Cómo funciona</a></li>
+                    <li><a href="#zonas" class="header__nav-link">Zonas</a></li>
+                    <li><a href="#faq" class="header__nav-link">FAQ</a></li>
                     <li><a href="#contacto" class="header__nav-link">Contacto</a></li>
-                    <li><a href="#contacto" class="btn btn--small">Pedir saca</a></li>
+                    <li><a href="#contacto" class="btn btn--primary btn--small">Pedir saca</a></li>
                 </ul>
             </nav>
             <button class="header__menu-toggle" id="menu-toggle" aria-label="Abrir menú">
@@ -39,23 +41,28 @@
         <div class="container hero__inner">
             <div class="hero__content">
                 <h1 class="hero__title">Tu obra limpia,<br>sin complicaciones</h1>
-                <p class="hero__subtitle">Sacas de escombro a domicilio. Tú la llenas, nosotros la recogemos. Servicio rápido y profesional para obras, reformas y limpiezas.</p>
+                <p class="hero__subtitle">Sacas de escombro a domicilio en toda la Comunidad de Madrid. Tú la llenas, nosotros la recogemos. Sin sorpresas, sin letra pequeña.</p>
+                <div class="hero__price">
+                    <span class="hero__price-tag">Desde 49,99€</span>
+                    <span class="hero__price-detail">IVA incl. · Entrega + Recogida incluida</span>
+                </div>
                 <div class="hero__actions">
                     <a href="#contacto" class="btn btn--primary btn--large">Pedir mi saca</a>
                     <a href="#como-funciona" class="btn btn--outline btn--large">Ver cómo funciona</a>
                 </div>
+                <div class="hero__trust">
+                    <div class="hero__trust-item">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        <span>Más de 2.000 sacas entregadas en Madrid</span>
+                    </div>
+                    <div class="hero__trust-item">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        <span>Entrega en 24-48h en toda la Comunidad</span>
+                    </div>
+                </div>
             </div>
             <div class="hero__visual">
-                <div class="hero__image-placeholder">
-                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="35" width="80" height="65" rx="4" fill="#E8ECF0" stroke="#1A1A2E" stroke-width="2"/>
-                        <path d="M20 35 L35 15 H85 L100 35" fill="#D1D8E0" stroke="#1A1A2E" stroke-width="2"/>
-                        <rect x="40" y="50" width="15" height="10" rx="2" fill="#F59E0B" opacity="0.6"/>
-                        <rect x="60" y="55" width="20" height="8" rx="2" fill="#9CA3AF" opacity="0.5"/>
-                        <rect x="45" y="65" width="25" height="12" rx="2" fill="#D1D8E0" opacity="0.7"/>
-                    </svg>
-                    <span>Imagen de saca</span>
-                </div>
+                <img src="img/saca-escombro.avif" alt="Saca de escombro BF10 de 1m³ para obras y reformas" class="hero__image" width="500" height="500">
             </div>
         </div>
     </section>
@@ -63,12 +70,12 @@
     <!-- Servicios -->
     <section class="servicios" id="servicios">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header fade-in">
                 <h2 class="section-title">Nuestros servicios</h2>
-                <p class="section-subtitle">Todo lo que necesitas para gestionar los escombros de tu obra o reforma</p>
+                <p class="section-subtitle">Precios claros desde el primer momento. Sin sorpresas ni costes ocultos.</p>
             </div>
             <div class="servicios__grid">
-                <div class="servicio-card">
+                <div class="servicio-card fade-in">
                     <div class="servicio-card__icon">
                         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="8" y="16" width="32" height="24" rx="3" stroke="currentColor" stroke-width="2.5"/>
@@ -77,14 +84,15 @@
                         </svg>
                     </div>
                     <h3 class="servicio-card__title">Compra de sacas</h3>
-                    <p class="servicio-card__text">Sacas de escombro de gran capacidad para obras, reformas y limpiezas. Te la llevamos donde nos digas.</p>
+                    <div class="servicio-card__price">Desde <strong>29€</strong></div>
+                    <p class="servicio-card__text">Sacas de escombro de 1m³ para obras, reformas y limpiezas. Te la llevamos donde nos digas.</p>
                     <ul class="servicio-card__features">
                         <li>Saca de 1m³ estándar</li>
                         <li>Entrega en 24-48h</li>
                         <li>Colocación incluida</li>
                     </ul>
                 </div>
-                <div class="servicio-card servicio-card--destacado">
+                <div class="servicio-card servicio-card--destacado fade-in">
                     <div class="servicio-card__badge">Más solicitado</div>
                     <div class="servicio-card__icon">
                         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -94,6 +102,7 @@
                         </svg>
                     </div>
                     <h3 class="servicio-card__title">Saca + Recogida</h3>
+                    <div class="servicio-card__price">Desde <strong>49,99€</strong></div>
                     <p class="servicio-card__text">El servicio completo: te llevamos la saca, tú la llenas a tu ritmo, y cuando esté lista la recogemos y gestionamos los residuos.</p>
                     <ul class="servicio-card__features">
                         <li>Entrega y recogida incluidas</li>
@@ -101,7 +110,7 @@
                         <li>Sin límite de tiempo</li>
                     </ul>
                 </div>
-                <div class="servicio-card">
+                <div class="servicio-card fade-in">
                     <div class="servicio-card__icon">
                         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2.5"/>
@@ -109,6 +118,7 @@
                         </svg>
                     </div>
                     <h3 class="servicio-card__title">Recogida express</h3>
+                    <div class="servicio-card__price">Desde <strong>39€</strong></div>
                     <p class="servicio-card__text">¿Ya tienes la saca llena? Recogemos sacas de escombro en el menor tiempo posible. Llama y recogemos.</p>
                     <ul class="servicio-card__features">
                         <li>Recogida en 24h</li>
@@ -123,37 +133,241 @@
     <!-- Cómo funciona -->
     <section class="proceso" id="como-funciona">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header fade-in">
                 <h2 class="section-title">Cómo funciona</h2>
                 <p class="section-subtitle">En 4 sencillos pasos tendrás tu obra limpia</p>
             </div>
             <div class="proceso__pasos">
-                <div class="paso">
-                    <div class="paso__numero">1</div>
+                <div class="paso fade-in">
+                    <div class="paso__icono-wrapper">
+                        <div class="paso__icono">
+                            <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="6" y="6" width="28" height="28" rx="4"/>
+                                <path d="M14 20h12M20 14v12"/>
+                            </svg>
+                        </div>
+                        <div class="paso__numero">1</div>
+                    </div>
+                    <div class="paso__conector"></div>
                     <div class="paso__contenido">
                         <h3 class="paso__title">Pides tu saca</h3>
-                        <p class="paso__text">Contacta con nosotros por teléfono o a través de la web. Dinos dónde y cuándo la necesitas.</p>
+                        <p class="paso__text">Contacta con nosotros por teléfono, WhatsApp o a través de la web. Dinos dónde y cuándo la necesitas.</p>
                     </div>
                 </div>
-                <div class="paso">
-                    <div class="paso__numero">2</div>
+                <div class="paso fade-in">
+                    <div class="paso__icono-wrapper">
+                        <div class="paso__icono">
+                            <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="16" width="32" height="16" rx="2"/>
+                                <circle cx="12" cy="32" r="3"/><circle cx="28" cy="32" r="3"/>
+                                <path d="M4 22h8l4-6h12l4 6h4"/>
+                            </svg>
+                        </div>
+                        <div class="paso__numero">2</div>
+                    </div>
+                    <div class="paso__conector"></div>
                     <div class="paso__contenido">
                         <h3 class="paso__title">Te la llevamos</h3>
-                        <p class="paso__text">Entregamos la saca en la dirección indicada y la colocamos donde mejor te convenga.</p>
+                        <p class="paso__text">Entregamos la saca en tu dirección y la colocamos donde mejor te convenga. En 24-48 horas.</p>
                     </div>
                 </div>
-                <div class="paso">
-                    <div class="paso__numero">3</div>
+                <div class="paso fade-in">
+                    <div class="paso__icono-wrapper">
+                        <div class="paso__icono">
+                            <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="6" y="14" width="28" height="20" rx="3"/>
+                                <path d="M6 14L12 6H28L34 14"/>
+                                <path d="M14 22l4 4 8-8"/>
+                            </svg>
+                        </div>
+                        <div class="paso__numero">3</div>
+                    </div>
+                    <div class="paso__conector"></div>
                     <div class="paso__contenido">
                         <h3 class="paso__title">La llenas</h3>
                         <p class="paso__text">Llena la saca a tu ritmo con los escombros de tu obra o reforma. Sin prisas, sin límite de tiempo.</p>
                     </div>
                 </div>
-                <div class="paso">
-                    <div class="paso__numero">4</div>
+                <div class="paso fade-in">
+                    <div class="paso__icono-wrapper">
+                        <div class="paso__icono">
+                            <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 12l12-6 12 6v12l-12 6-12-6z"/>
+                                <path d="M20 18v12M8 12l12 6 12-6"/>
+                                <path d="M26 8l-12 6"/>
+                            </svg>
+                        </div>
+                        <div class="paso__numero">4</div>
+                    </div>
                     <div class="paso__contenido">
                         <h3 class="paso__title">La recogemos</h3>
-                        <p class="paso__text">Cuando esté llena, nos llamas y la recogemos. Nos encargamos de la gestión legal de los residuos.</p>
+                        <p class="paso__text">Nos llamas, la recogemos y nos encargamos de la gestión legal de los residuos. Tú no te preocupas de nada.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Por qué elegirnos -->
+    <section class="ventajas" id="ventajas">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">Por qué elegirnos</h2>
+                <p class="section-subtitle">Lo que nos diferencia de la competencia</p>
+            </div>
+            <div class="ventajas__grid">
+                <div class="ventaja fade-in">
+                    <div class="ventaja__icon">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <circle cx="20" cy="20" r="14"/>
+                            <path d="M20 12v8h6"/>
+                        </svg>
+                    </div>
+                    <h3 class="ventaja__title">Entrega en 24-48h</h3>
+                    <p class="ventaja__text">Servicio rápido en toda la Comunidad de Madrid. Pides hoy, la tienes mañana.</p>
+                </div>
+                <div class="ventaja fade-in">
+                    <div class="ventaja__icon">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <rect x="6" y="8" width="28" height="24" rx="3"/>
+                            <path d="M6 16h28M14 8v-4M26 8v-4"/>
+                            <path d="M14 24l4 4 8-8"/>
+                        </svg>
+                    </div>
+                    <h3 class="ventaja__title">Precio transparente</h3>
+                    <p class="ventaja__text">Sabes lo que pagas desde el primer momento. Sin costes ocultos, sin sorpresas en la factura.</p>
+                </div>
+                <div class="ventaja fade-in">
+                    <div class="ventaja__icon">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M20 4l4 8h8l-6 5 2 9-8-5-8 5 2-9-6-5h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="ventaja__title">Gestión legal incluida</h3>
+                    <p class="ventaja__text">Nos encargamos de todo el papeleo. Certificado de gestión de residuos incluido con cada recogida.</p>
+                </div>
+                <div class="ventaja fade-in">
+                    <div class="ventaja__icon">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M20 6C12 6 6 12 6 20s6 14 14 14 14-6 14-14S28 6 20 6z"/>
+                            <path d="M14 20l4 4 8-8"/>
+                        </svg>
+                    </div>
+                    <h3 class="ventaja__title">Sin sorpresas</h3>
+                    <p class="ventaja__text">Proceso simple y claro de principio a fin. Sin letra pequeña, sin condiciones ocultas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Zonas de servicio -->
+    <section class="zonas" id="zonas">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">Zonas de servicio</h2>
+                <p class="section-subtitle">Operamos en toda la Comunidad de Madrid</p>
+            </div>
+            <div class="zonas__content fade-in">
+                <div class="zonas__mapa">
+                    <svg viewBox="0 0 400 360" fill="none" xmlns="http://www.w3.org/2000/svg" class="zonas__svg">
+                        <path d="M200 30 C120 30 50 80 40 160 C30 240 80 310 160 330 C200 340 240 340 280 320 C340 290 370 230 360 160 C350 90 280 30 200 30Z" fill="var(--color-bg-alt)" stroke="var(--color-primary)" stroke-width="2"/>
+                        <circle cx="200" cy="180" r="8" fill="var(--color-accent)"/>
+                        <text x="200" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="var(--color-primary)">MADRID</text>
+                        <circle cx="150" cy="140" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="250" cy="150" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="170" cy="220" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="240" cy="210" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="130" cy="190" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="270" cy="180" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="220" cy="130" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="180" cy="260" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="230" cy="250" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                        <circle cx="160" cy="170" r="4" fill="var(--color-primary)" opacity="0.4"/>
+                    </svg>
+                </div>
+                <div class="zonas__lista">
+                    <div class="zonas__grupo">
+                        <h3 class="zonas__grupo-title">Madrid Capital</h3>
+                        <p class="zonas__grupo-text">Todos los distritos: Centro, Arganzuela, Retiro, Salamanca, Chamartín, Tetuán, Chamberí, Fuencarral, Moncloa, Latina, Carabanchel, Usera, Puente de Vallecas, Moratalaz, Ciudad Lineal, Hortaleza, Villaverde, Villa de Vallecas, Vicálvaro, San Blas, Barajas.</p>
+                    </div>
+                    <div class="zonas__grupo">
+                        <h3 class="zonas__grupo-title">Zona Norte</h3>
+                        <p class="zonas__grupo-text">Alcobendas, San Sebastián de los Reyes, Tres Cantos, Colmenar Viejo, Las Rozas, Majadahonda, Pozuelo de Alarcón, Boadilla del Monte.</p>
+                    </div>
+                    <div class="zonas__grupo">
+                        <h3 class="zonas__grupo-title">Zona Sur</h3>
+                        <p class="zonas__grupo-text">Getafe, Leganés, Alcorcón, Móstoles, Fuenlabrada, Parla, Pinto, Valdemoro, Ciempozuelos.</p>
+                    </div>
+                    <div class="zonas__grupo">
+                        <h3 class="zonas__grupo-title">Zona Este</h3>
+                        <p class="zonas__grupo-text">Alcalá de Henares, Torrejón de Ardoz, Coslada, San Fernando de Henares, Rivas-Vaciamadrid, Arganda del Rey.</p>
+                    </div>
+                    <p class="zonas__nota">¿No ves tu municipio? Consúltanos, es posible que también lleguemos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">Preguntas frecuentes</h2>
+                <p class="section-subtitle">Resolvemos tus dudas antes de que las tengas</p>
+            </div>
+            <div class="faq__lista fade-in">
+                <div class="faq__item">
+                    <button class="faq__pregunta" aria-expanded="false">
+                        <span>¿Qué puedo echar en la saca?</span>
+                        <svg class="faq__arrow" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div class="faq__respuesta">
+                        <p>Puedes echar escombros de obra: ladrillos, azulejos, cemento, yeso, cerámica, hormigón, tejas, sanitarios rotos, etc. No se admiten residuos peligrosos (amianto, pinturas, disolventes), ni electrodomésticos, ni residuos orgánicos.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__pregunta" aria-expanded="false">
+                        <span>¿Cuánto tarda la entrega?</span>
+                        <svg class="faq__arrow" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div class="faq__respuesta">
+                        <p>La entrega se realiza en 24-48 horas laborables desde la confirmación del pedido. En casos urgentes, consúltanos disponibilidad para entrega en el mismo día.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__pregunta" aria-expanded="false">
+                        <span>¿Cuánto tiempo puedo tener la saca?</span>
+                        <svg class="faq__arrow" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div class="faq__respuesta">
+                        <p>No hay límite de tiempo. Puedes tener la saca el tiempo que necesites. Cuando esté llena, nos llamas y la recogemos. Sin cargos adicionales por tiempo.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__pregunta" aria-expanded="false">
+                        <span>¿Necesito licencia o permiso?</span>
+                        <svg class="faq__arrow" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div class="faq__respuesta">
+                        <p>Si la saca se coloca en la vía pública (acera o calzada), necesitas un permiso de ocupación de vía pública de tu ayuntamiento. Si la colocas dentro de tu propiedad (jardín, garaje, parcela), no necesitas ningún permiso.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__pregunta" aria-expanded="false">
+                        <span>¿Qué capacidad tiene la saca?</span>
+                        <svg class="faq__arrow" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div class="faq__respuesta">
+                        <p>Nuestras sacas tienen una capacidad de 1m³ (1.000 litros), equivalente aproximadamente a 1,5 toneladas de escombros. Es la medida estándar para reformas de viviendas y pequeñas obras.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__pregunta" aria-expanded="false">
+                        <span>¿Emitís factura y certificado de gestión?</span>
+                        <svg class="faq__arrow" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div class="faq__respuesta">
+                        <p>Sí, emitimos factura con todos los datos fiscales y certificado de correcta gestión de residuos. Es obligatorio por ley y lo incluimos sin coste adicional con cada servicio de recogida.</p>
                     </div>
                 </div>
             </div>
@@ -167,9 +381,7 @@
             <p class="cta__text">Llámanos o solicita tu saca online. Te la llevamos en 24-48 horas.</p>
             <div class="cta__actions">
                 <a href="tel:+34600000000" class="btn btn--white btn--large">
-                    <svg class="btn__icon" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                    </svg>
+                    <svg class="btn__icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
                     Llamar ahora
                 </a>
                 <a href="#contacto" class="btn btn--outline-white btn--large">Solicitar online</a>
@@ -182,7 +394,18 @@
         <div class="container footer__inner">
             <div class="footer__brand">
                 <span class="footer__logo">BF10</span>
-                <p class="footer__tagline">Sacas de escombro y servicio de recogida profesional.</p>
+                <p class="footer__tagline">Sacas de escombro y servicio de recogida profesional en la Comunidad de Madrid.</p>
+                <div class="footer__social">
+                    <a href="#" aria-label="Instagram" class="footer__social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Facebook" class="footer__social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Google Business" class="footer__social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    </a>
+                </div>
             </div>
             <div class="footer__contacto">
                 <h3 class="footer__heading">Contacto</h3>
@@ -197,7 +420,7 @@
                     </li>
                     <li>
                         <svg class="footer__icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                        <span>Madrid, España</span>
+                        <span>Comunidad de Madrid</span>
                     </li>
                 </ul>
             </div>
@@ -211,11 +434,21 @@
             </div>
         </div>
         <div class="footer__bottom">
-            <div class="container">
+            <div class="container footer__bottom-inner">
                 <p>&copy; 2026 BF10. Todos los derechos reservados.</p>
+                <div class="footer__legal">
+                    <a href="#">Aviso legal</a>
+                    <a href="#">Política de privacidad</a>
+                    <a href="#">Cookies</a>
+                </div>
             </div>
         </div>
     </footer>
+
+    <!-- WhatsApp flotante -->
+    <a href="https://wa.me/34600000000?text=Hola%2C%20me%20gustar%C3%ADa%20pedir%20una%20saca%20de%20escombro" class="whatsapp-float" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">
+        <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16.004 0h-.008C7.174 0 0 7.176 0 16.004c0 3.5 1.132 6.738 3.052 9.372L1.054 31.14l5.96-1.966A15.9 15.9 0 0016.004 32C24.826 32 32 24.826 32 16.004 32 7.176 24.826 0 16.004 0zm9.298 22.602c-.388 1.098-1.94 2.01-3.164 2.276-.84.178-1.936.32-5.628-1.21-4.722-1.956-7.762-6.744-7.998-7.058-.226-.314-1.9-2.53-1.9-4.826s1.2-3.424 1.628-3.892c.428-.468.934-.586 1.244-.586.31 0 .622.002.894.016.286.014.672-.11 1.05.802.39.938 1.326 3.232 1.442 3.466.116.234.194.508.038.82-.156.314-.234.508-.468.782-.234.274-.49.612-.702.822-.234.234-.478.488-.204.956.274.468 1.22 2.012 2.618 3.26 1.798 1.604 3.314 2.1 3.782 2.334.468.234.742.194 1.016-.118.274-.312 1.166-1.362 1.478-1.83.312-.468.624-.39 1.05-.234.43.156 2.718 1.282 3.186 1.516.468.234.78.35.896.546.116.194.116 1.136-.272 2.234z"/></svg>
+    </a>
 
     <script src="js/main.js"></script>
 </body>
