@@ -1,0 +1,363 @@
+/* ============================================
+   Pedido Form - Estilos
+   ============================================ */
+
+.pedido {
+    padding: 80px 0;
+    background: var(--color-bg-alt);
+}
+
+.pedido__form {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+/* Steps */
+.pedido__step {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 24px;
+}
+
+.pedido__step-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 20px;
+}
+
+/* Pack selection */
+.pedido__packs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.pedido__pack input {
+    display: none;
+}
+
+.pedido__pack-card {
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.pedido__pack-card:hover {
+    border-color: var(--color-green);
+}
+
+.pedido__pack input:checked + .pedido__pack-card {
+    border-color: var(--color-green);
+    background: var(--color-green-light);
+    box-shadow: 0 0 0 1px var(--color-green);
+}
+
+.pedido__pack-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-accent);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.pedido__pack-qty {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.pedido__pack-price {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--color-accent);
+}
+
+.pedido__pack-desc {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+}
+
+/* Fields */
+.pedido__fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.pedido__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pedido__field--full {
+    grid-column: 1 / -1;
+}
+
+.pedido__field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.pedido__field input,
+.pedido__field textarea {
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    color: var(--color-text);
+    transition: border-color var(--transition);
+    background: var(--color-bg);
+}
+
+.pedido__field input:focus,
+.pedido__field textarea:focus {
+    outline: none;
+    border-color: var(--color-green);
+    box-shadow: 0 0 0 3px var(--color-green-light);
+}
+
+.pedido__field input:invalid:not(:placeholder-shown) {
+    border-color: var(--color-accent);
+}
+
+.pedido__field-hint {
+    font-size: 0.8rem;
+    min-height: 1.2em;
+}
+
+/* Checkbox */
+.pedido__checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+.pedido__checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--color-green);
+    flex-shrink: 0;
+}
+
+.pedido__checkbox a {
+    color: var(--color-green);
+    text-decoration: underline;
+}
+
+/* Billing toggle */
+.pedido__billing-toggle {
+    margin-bottom: 16px;
+}
+
+.pedido__billing-fields {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Payment methods */
+.pedido__payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pedido__payment input {
+    display: none;
+}
+
+.pedido__payment-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.pedido__payment-card:hover {
+    border-color: var(--color-green);
+}
+
+.pedido__payment input:checked + .pedido__payment-card {
+    border-color: var(--color-green);
+    background: var(--color-green-light);
+}
+
+.pedido__payment-card svg {
+    color: var(--color-green);
+    flex-shrink: 0;
+}
+
+.pedido__payment-card strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--color-primary);
+}
+
+.pedido__payment-card span {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+}
+
+.pedido__payment--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Summary */
+.pedido__summary {
+    margin-bottom: 24px;
+}
+
+.pedido__summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.95rem;
+    color: var(--color-text);
+}
+
+.pedido__summary-total {
+    border-bottom: 2px solid var(--color-primary);
+    padding: 14px 0;
+}
+
+.pedido__summary-total strong {
+    font-size: 1.3rem;
+    color: var(--color-accent);
+}
+
+/* Legal */
+.pedido__legal {
+    margin-bottom: 24px;
+}
+
+/* Submit */
+.pedido__submit {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+}
+
+.pedido__submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Messages */
+.pedido__message {
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.pedido__message h3 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+}
+
+.pedido__message p {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: var(--color-text);
+}
+
+.pedido__message--success {
+    background: var(--color-green-light);
+    border: 2px solid var(--color-green);
+}
+
+.pedido__message--success h3 {
+    color: var(--color-green);
+}
+
+.pedido__message--error {
+    background: var(--color-accent-light);
+    border: 2px solid var(--color-accent);
+}
+
+.pedido__message--error p {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+/* Bank details in success message */
+.pedido__bank-details {
+    background: var(--color-bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px auto;
+    max-width: 400px;
+    text-align: left;
+}
+
+.pedido__bank-details h4 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    color: var(--color-primary);
+}
+
+.pedido__bank-details p {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .pedido {
+        padding: 60px 0;
+    }
+
+    .pedido__step {
+        padding: 24px 20px;
+    }
+
+    .pedido__packs {
+        grid-template-columns: 1fr;
+    }
+
+    .pedido__fields {
+        grid-template-columns: 1fr;
+    }
+
+    .pedido__pack-card {
+        flex-direction: row;
+        text-align: left;
+        gap: 16px;
+    }
+
+    .pedido__pack-badge {
+        position: static;
+        transform: none;
+        align-self: flex-start;
+    }
+}

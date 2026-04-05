@@ -8,6 +8,7 @@
     <meta name="keywords" content="sacos escombro Madrid, telesaco Madrid, recogida escombros Madrid, sacos obra reformas, big bag escombros Madrid, residuos construcción Madrid">
     <link rel="canonical" href="https://carloslazaro.github.io/bf10web/">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pedido.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -477,6 +478,194 @@
         </div>
     </section>
 
+    <!-- Formulario de pedido -->
+    <section class="pedido" id="pedido">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">Pedir mis sacos</h2>
+                <p class="section-subtitle">Completa el formulario y recibe tus sacos en 24-48 horas</p>
+            </div>
+
+            <form class="pedido__form fade-in" id="pedido-form" novalidate>
+                <!-- Step 1: Package selection -->
+                <div class="pedido__step" id="step-1">
+                    <h3 class="pedido__step-title">1. Elige tu pack</h3>
+                    <div class="pedido__packs">
+                        <label class="pedido__pack">
+                            <input type="radio" name="package_qty" value="5">
+                            <div class="pedido__pack-card">
+                                <span class="pedido__pack-qty">5 sacos</span>
+                                <span class="pedido__pack-price">5,00 €</span>
+                                <span class="pedido__pack-desc">Pack básico · 1m³/saco</span>
+                            </div>
+                        </label>
+                        <label class="pedido__pack">
+                            <input type="radio" name="package_qty" value="25" checked>
+                            <div class="pedido__pack-card">
+                                <span class="pedido__pack-badge">Más solicitado</span>
+                                <span class="pedido__pack-qty">25 sacos</span>
+                                <span class="pedido__pack-price">25,00 €</span>
+                                <span class="pedido__pack-desc">Pack estándar · 1m³/saco</span>
+                            </div>
+                        </label>
+                        <label class="pedido__pack">
+                            <input type="radio" name="package_qty" value="50">
+                            <div class="pedido__pack-card">
+                                <span class="pedido__pack-qty">50 sacos</span>
+                                <span class="pedido__pack-price">50,00 €</span>
+                                <span class="pedido__pack-desc">Pack profesional · 1m³/saco</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 2: Delivery info -->
+                <div class="pedido__step" id="step-2">
+                    <h3 class="pedido__step-title">2. Datos de entrega</h3>
+                    <div class="pedido__fields">
+                        <div class="pedido__field">
+                            <label for="pedido-name">Nombre completo *</label>
+                            <input type="text" id="pedido-name" name="name" required placeholder="Tu nombre y apellidos">
+                        </div>
+                        <div class="pedido__field">
+                            <label for="pedido-email">Email *</label>
+                            <input type="email" id="pedido-email" name="email" required placeholder="tu@email.com">
+                        </div>
+                        <div class="pedido__field">
+                            <label for="pedido-phone">Teléfono móvil *</label>
+                            <input type="tel" id="pedido-phone" name="phone" required placeholder="600 000 000">
+                        </div>
+                        <div class="pedido__field pedido__field--full">
+                            <label for="pedido-address">Dirección de entrega *</label>
+                            <input type="text" id="pedido-address" name="address" required placeholder="Calle, número, piso..." autocomplete="street-address">
+                            <span class="pedido__field-hint" id="address-hint"></span>
+                        </div>
+                        <div class="pedido__field">
+                            <label for="pedido-city">Municipio *</label>
+                            <input type="text" id="pedido-city" name="city" required placeholder="Madrid, Getafe, Alcorcón...">
+                        </div>
+                        <div class="pedido__field">
+                            <label for="pedido-postal">Código postal *</label>
+                            <input type="text" id="pedido-postal" name="postal_code" required placeholder="28001" maxlength="5" pattern="(28|45)\d{3}">
+                        </div>
+                        <div class="pedido__field pedido__field--full">
+                            <label for="pedido-observations">Observaciones</label>
+                            <textarea id="pedido-observations" name="observations" rows="3" placeholder="Indicaciones para la entrega, portal, horario preferido..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Billing (optional) -->
+                <div class="pedido__step" id="step-3">
+                    <h3 class="pedido__step-title">3. Datos de facturación</h3>
+                    <div class="pedido__billing-toggle">
+                        <label class="pedido__checkbox">
+                            <input type="checkbox" id="billing-same" name="billing_same" checked>
+                            <span>Usar los mismos datos de entrega</span>
+                        </label>
+                    </div>
+                    <div class="pedido__billing-fields" id="billing-fields" style="display:none">
+                        <div class="pedido__fields">
+                            <div class="pedido__field">
+                                <label for="billing-name">Nombre / Razón social *</label>
+                                <input type="text" id="billing-name" name="billing_name" placeholder="Nombre o razón social">
+                            </div>
+                            <div class="pedido__field">
+                                <label for="billing-company">Empresa</label>
+                                <input type="text" id="billing-company" name="billing_company" placeholder="Nombre de la empresa">
+                            </div>
+                            <div class="pedido__field">
+                                <label for="billing-cif">CIF / NIF *</label>
+                                <input type="text" id="billing-cif" name="billing_cif" placeholder="B12345678 o 12345678A">
+                            </div>
+                            <div class="pedido__field pedido__field--full">
+                                <label for="billing-address">Dirección de facturación *</label>
+                                <input type="text" id="billing-address" name="billing_address" placeholder="Dirección fiscal completa">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Payment -->
+                <div class="pedido__step" id="step-4">
+                    <h3 class="pedido__step-title">4. Método de pago</h3>
+                    <div class="pedido__payment-methods">
+                        <label class="pedido__payment">
+                            <input type="radio" name="payment_method" value="transfer" checked>
+                            <div class="pedido__payment-card">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                                <div>
+                                    <strong>Transferencia bancaria</strong>
+                                    <span>Recibirás los datos para realizar la transferencia</span>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="pedido__payment pedido__payment--disabled">
+                            <input type="radio" name="payment_method" value="card" disabled>
+                            <div class="pedido__payment-card">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22M7 15h4"/></svg>
+                                <div>
+                                    <strong>Tarjeta de crédito/débito</strong>
+                                    <span>Próximamente — pago seguro con Stripe</span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Summary & Submit -->
+                <div class="pedido__step" id="step-5">
+                    <div class="pedido__summary">
+                        <h3 class="pedido__step-title">Resumen del pedido</h3>
+                        <div class="pedido__summary-row">
+                            <span>Pack seleccionado</span>
+                            <strong id="summary-pack">25 sacos</strong>
+                        </div>
+                        <div class="pedido__summary-row">
+                            <span>Entrega y recogida incluida</span>
+                            <span>✓</span>
+                        </div>
+                        <div class="pedido__summary-row">
+                            <span>Gestión de residuos</span>
+                            <span>✓</span>
+                        </div>
+                        <div class="pedido__summary-row pedido__summary-total">
+                            <span>Total (IVA incluido)</span>
+                            <strong id="summary-price">25,00 €</strong>
+                        </div>
+                        <div class="pedido__summary-row">
+                            <span>Método de pago</span>
+                            <strong id="summary-payment">Transferencia bancaria</strong>
+                        </div>
+                    </div>
+
+                    <div class="pedido__legal">
+                        <label class="pedido__checkbox">
+                            <input type="checkbox" id="accept-terms" required>
+                            <span>Acepto las <a href="#" target="_blank">condiciones del servicio</a> y la <a href="#" target="_blank">política de privacidad</a> *</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn--primary btn--large pedido__submit" id="pedido-submit">
+                        Confirmar pedido
+                    </button>
+                </div>
+
+                <!-- Messages -->
+                <div class="pedido__message pedido__message--success" id="pedido-success" style="display:none">
+                    <h3>¡Pedido realizado con éxito!</h3>
+                    <p>Tu código de pedido es: <strong id="pedido-code"></strong></p>
+                    <div id="pedido-bank-info"></div>
+                    <p>Te hemos enviado los detalles a tu email. Nos pondremos en contacto contigo para confirmar la entrega.</p>
+                </div>
+
+                <div class="pedido__message pedido__message--error" id="pedido-error" style="display:none">
+                    <p id="pedido-error-text"></p>
+                </div>
+            </form>
+        </div>
+    </section>
+
     <!-- CTA -->
     <section class="cta">
         <div class="container cta__inner">
@@ -555,5 +744,6 @@
     </a>
 
     <script src="js/main.js"></script>
+    <script src="js/pedido.js"></script>
 </body>
 </html>

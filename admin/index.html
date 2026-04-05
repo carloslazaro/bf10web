@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BF10 Admin — Panel de gestión de pedidos</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Login -->
+    <div class="login" id="login-screen">
+        <div class="login__card">
+            <h1 class="login__title">BF10 Admin</h1>
+            <p class="login__subtitle">Panel de gestión de pedidos</p>
+            <form id="login-form">
+                <div class="login__field">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="admin@bf10.es">
+                </div>
+                <div class="login__field">
+                    <label for="login-pass">Contraseña</label>
+                    <input type="password" id="login-pass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="login__btn" id="login-btn">Entrar</button>
+                <p class="login__error" id="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard" style="display:none">
+        <!-- Header -->
+        <header class="dash-header">
+            <div class="dash-header__inner">
+                <h1 class="dash-header__title">BF10 Admin</h1>
+                <div class="dash-header__actions">
+                    <span id="user-name"></span>
+                    <button class="dash-header__logout" id="logout-btn">Cerrar sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <section class="dash-stats" id="stats-section">
+            <div class="dash-stat">
+                <span class="dash-stat__value" id="stat-total">0</span>
+                <span class="dash-stat__label">Pedidos totales</span>
+            </div>
+            <div class="dash-stat dash-stat--pending">
+                <span class="dash-stat__value" id="stat-pending">0</span>
+                <span class="dash-stat__label">Pendientes de pago</span>
+            </div>
+            <div class="dash-stat dash-stat--confirmed">
+                <span class="dash-stat__value" id="stat-confirmed">0</span>
+                <span class="dash-stat__label">Confirmados</span>
+            </div>
+            <div class="dash-stat dash-stat--shipped">
+                <span class="dash-stat__value" id="stat-shipped">0</span>
+                <span class="dash-stat__label">Enviados</span>
+            </div>
+            <div class="dash-stat dash-stat--revenue">
+                <span class="dash-stat__value" id="stat-revenue">0 €</span>
+                <span class="dash-stat__label">Facturación</span>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="dash-filters">
+            <button class="dash-filter dash-filter--active" data-status="">Todos</button>
+            <button class="dash-filter" data-status="pendiente_pago">Pendientes</button>
+            <button class="dash-filter" data-status="confirmado">Confirmados</button>
+            <button class="dash-filter" data-status="enviado">Enviados</button>
+        </section>
+
+        <!-- Orders table -->
+        <section class="dash-orders">
+            <div class="dash-table-wrapper">
+                <table class="dash-table" id="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Pack</th>
+                            <th>Precio</th>
+                            <th>Pago</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-body">
+                    </tbody>
+                </table>
+            </div>
+            <p class="dash-empty" id="orders-empty" style="display:none">No hay pedidos con este filtro</p>
+        </section>
+
+        <!-- Order detail modal -->
+        <div class="modal" id="order-modal" style="display:none">
+            <div class="modal__overlay" id="modal-overlay"></div>
+            <div class="modal__content">
+                <button class="modal__close" id="modal-close">&times;</button>
+                <h2 class="modal__title">Detalle del pedido</h2>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

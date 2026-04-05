@@ -1,0 +1,10 @@
+# Deny direct access to config.php
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Allow JSON responses
+<IfModule mod_headers.c>
+    Header set Content-Type "application/json; charset=utf-8"
+</IfModule>
