@@ -213,14 +213,11 @@ img {
 .header__logo {
     display: flex;
     align-items: center;
-    gap: 10px;
 }
 
-.header__logo-icon {
-    font-size: 1.6rem;
-    font-weight: 900;
-    color: var(--color-primary);
-    letter-spacing: -0.03em;
+.header__logo-img {
+    height: 44px;
+    width: auto;
 }
 
 .header__nav-list {
