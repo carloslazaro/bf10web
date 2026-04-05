@@ -12,17 +12,20 @@
 }
 
 :root {
-    --color-primary: #1A1A2E;
-    --color-primary-light: #2D2D44;
-    --color-accent: #F5A623;
-    --color-accent-hover: #E0950D;
-    --color-accent-light: rgba(245,166,35,0.1);
-    --color-text: #374151;
-    --color-text-light: #6B7280;
+    --color-primary: #111111;
+    --color-primary-light: #1C1C1C;
+    --color-accent: #DA291C;
+    --color-accent-hover: #B71F14;
+    --color-accent-light: rgba(218,41,28,0.08);
+    --color-green: #00A651;
+    --color-green-hover: #008C44;
+    --color-green-light: rgba(0,166,81,0.08);
+    --color-text: #333333;
+    --color-text-light: #5F5F5F;
     --color-bg: #FFFFFF;
-    --color-bg-alt: #F9FAFB;
-    --color-border: #E5E7EB;
-    --color-success: #10B981;
+    --color-bg-alt: #F7F7F7;
+    --color-border: #E0E0E0;
+    --color-success: #00A651;
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --container-max: 1140px;
     --header-height: 72px;
@@ -95,17 +98,17 @@ img {
 }
 
 .btn--primary {
-    background: var(--color-accent);
-    color: var(--color-primary);
-    border-color: var(--color-accent);
+    background: var(--color-green);
+    color: #fff;
+    border-color: var(--color-green);
     font-weight: 700;
 }
 
 .btn--primary:hover {
-    background: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
+    background: var(--color-green-hover);
+    border-color: var(--color-green-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(245,166,35,0.4);
+    box-shadow: 0 4px 16px rgba(0,166,81,0.4);
 }
 
 .btn--outline {
@@ -466,7 +469,7 @@ img {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--color-accent-light);
+    background: var(--color-green-light);
 }
 
 .servicio-card__features li::after {
@@ -476,7 +479,7 @@ img {
     top: 9px;
     width: 8px;
     height: 8px;
-    background: var(--color-accent);
+    background: var(--color-green);
     border-radius: 50%;
 }
 
@@ -619,8 +622,8 @@ img {
 .ventaja__icon {
     width: 56px;
     height: 56px;
-    background: var(--color-accent-light);
-    color: var(--color-accent);
+    background: var(--color-green-light);
+    color: var(--color-green);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -870,7 +873,7 @@ img {
 
 .footer__social-link:hover {
     background: var(--color-accent);
-    color: var(--color-primary);
+    color: #fff;
 }
 
 .footer__heading {
