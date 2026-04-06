@@ -30,9 +30,40 @@
         radio.addEventListener('change', updateSummary);
     });
 
+    // Stripe setup
+    var stripeCardEl = document.getElementById('stripe-card-element');
+    var stripe = null;
+    var stripeCard = null;
+    var stripeReady = false;
+
+    function initStripe() {
+        if (stripeReady || !window.Stripe) return;
+        var key = document.querySelector('meta[name="stripe-key"]');
+        if (!key || !key.content) return;
+        stripe = Stripe(key.content);
+        var elements = stripe.elements({ locale: 'es' });
+        stripeCard = elements.create('card');
+        stripeCard.mount('#stripe-card-element');
+        stripeReady = true;
+    }
+
+    // Toggle Stripe card element visibility
+    function updatePaymentUI() {
+        var method = form.querySelector('input[name="payment_method"]:checked');
+        if (method && method.value === 'card') {
+            stripeCardEl.style.display = 'block';
+            initStripe();
+        } else {
+            stripeCardEl.style.display = 'none';
+        }
+    }
+
     // Update summary when payment method changes
     form.querySelectorAll('input[name="payment_method"]').forEach(function (radio) {
-        radio.addEventListener('change', updateSummary);
+        radio.addEventListener('change', function () {
+            updateSummary();
+            updatePaymentUI();
+        });
     });
 
     function updateSummary() {
@@ -173,7 +204,29 @@
         submitBtn.textContent = 'Procesando...';
         hideMessages();
 
-        // Send request
+        // Handle Stripe payment if card selected
+        if (data.payment_method === 'card' && stripeReady && stripe && stripeCard) {
+            stripe.createPaymentMethod({ type: 'card', card: stripeCard })
+                .then(function (result) {
+                    if (result.error) {
+                        showError(result.error.message);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Confirmar pedido';
+                        return;
+                    }
+                    data.stripe_payment_method = result.paymentMethod.id;
+                    sendOrder(data);
+                });
+        } else if (data.payment_method === 'card' && !stripeReady) {
+            showError('El pago con tarjeta no está disponible en este momento. Usa transferencia bancaria.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Confirmar pedido';
+        } else {
+            sendOrder(data);
+        }
+    });
+
+    function sendOrder(data) {
         fetch(API_URL + '?action=create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -229,6 +282,18 @@
     function hideMessages() {
         errorMsg.style.display = 'none';
     }
+
+    // Pack preselection from service cards
+    document.querySelectorAll('[data-select-pack]').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            var qty = this.getAttribute('data-select-pack');
+            var radio = form.querySelector('input[name="package_qty"][value="' + qty + '"]');
+            if (radio) {
+                radio.checked = true;
+                updateSummary();
+            }
+        });
+    });
 
     // Initial summary
     updateSummary();

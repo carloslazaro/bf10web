@@ -1,0 +1,353 @@
+/* ============================================
+   BF10 - Mi Cuenta (Client Area)
+   ============================================ */
+
+/* Login */
+.cuenta-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--color-primary);
+}
+
+.cuenta-login__card {
+    background: var(--color-bg);
+    border-radius: 12px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.cuenta-login__logo {
+    display: inline-block;
+    margin-bottom: 24px;
+}
+
+.cuenta-login__title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 4px;
+}
+
+.cuenta-login__subtitle {
+    color: var(--color-text-light);
+    margin-bottom: 28px;
+    font-size: 0.95rem;
+}
+
+.cuenta-login__field {
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.cuenta-login__field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 6px;
+}
+
+.cuenta-login__field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    color: var(--color-text);
+    background: white;
+}
+
+.cuenta-login__field input:focus {
+    outline: none;
+    border-color: var(--color-green);
+    box-shadow: 0 0 0 3px rgba(0,166,81,0.1);
+}
+
+.cuenta-login__btn {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.cuenta-login__error {
+    color: var(--color-accent);
+    font-size: 0.85rem;
+    margin-top: 12px;
+    min-height: 1.2em;
+}
+
+.cuenta-login__help {
+    margin-top: 20px;
+    font-size: 0.85rem;
+}
+
+.cuenta-login__help a {
+    color: var(--color-green);
+}
+
+/* Dashboard Header */
+.cuenta__header {
+    background: var(--color-primary);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.cuenta__header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cuenta__logo img {
+    display: block;
+}
+
+.cuenta__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    font-size: 0.85rem;
+}
+
+.cuenta__logout {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-family: var(--font-family);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.cuenta__logout:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* Main content */
+.cuenta__main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+}
+
+.cuenta__welcome h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 4px;
+}
+
+.cuenta__welcome p {
+    color: var(--color-text-light);
+    margin-bottom: 32px;
+}
+
+.cuenta__section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 16px;
+}
+
+/* Order cards */
+.cuenta__order-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.cuenta__order-card:hover {
+    border-color: var(--color-green);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.cuenta__order-info {
+    flex: 1;
+}
+
+.cuenta__order-code {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 1rem;
+}
+
+.cuenta__order-meta {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    margin-top: 4px;
+}
+
+.cuenta__order-right {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.cuenta__order-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.cuenta__order-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+.cuenta__order-status--pendiente-pago {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.cuenta__order-status--confirmado {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.cuenta__order-status--enviado {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.cuenta__empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--color-text-light);
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.cuenta__empty a {
+    color: var(--color-green);
+    font-weight: 600;
+}
+
+/* Modal */
+.cuenta__modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cuenta__modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+}
+
+.cuenta__modal-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+.cuenta__modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--color-text-light);
+    line-height: 1;
+}
+
+.cuenta__modal-close:hover {
+    color: var(--color-accent);
+}
+
+.cuenta__modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 20px;
+}
+
+.cuenta__detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.cuenta__detail-section h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-light);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.cuenta__detail-section p {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    line-height: 1.5;
+}
+
+/* Footer */
+.cuenta__footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    border-top: 1px solid var(--color-border);
+}
+
+.cuenta__footer a {
+    color: var(--color-green);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .cuenta-login__card {
+        margin: 16px;
+        padding: 32px 24px;
+    }
+
+    .cuenta__order-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cuenta__order-right {
+        text-align: left;
+    }
+
+    .cuenta__detail-grid {
+        grid-template-columns: 1fr;
+    }
+}

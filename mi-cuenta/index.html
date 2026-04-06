@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi cuenta — BF10 Sacos de Escombro Madrid</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/cuenta.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Login -->
+    <div class="cuenta-login" id="login-screen">
+        <div class="cuenta-login__card">
+            <a href="../index.html" class="cuenta-login__logo">
+                <img src="../img/logo-bf10.png" alt="BF10" height="40">
+            </a>
+            <h1 class="cuenta-login__title">Mi cuenta</h1>
+            <p class="cuenta-login__subtitle">Accede para ver tus pedidos</p>
+            <form id="login-form">
+                <div class="cuenta-login__field">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="tu@email.com">
+                </div>
+                <div class="cuenta-login__field">
+                    <label for="login-pass">Contraseña</label>
+                    <input type="password" id="login-pass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn--primary btn--large cuenta-login__btn" id="login-btn">Entrar</button>
+                <p class="cuenta-login__error" id="login-error"></p>
+            </form>
+            <p class="cuenta-login__help">
+                <a href="../index.html">Volver a la web</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="cuenta" id="dashboard" style="display:none">
+        <!-- Header -->
+        <header class="cuenta__header">
+            <div class="cuenta__header-inner">
+                <a href="../index.html" class="cuenta__logo">
+                    <img src="../img/logo-bf10.png" alt="BF10" height="36">
+                </a>
+                <div class="cuenta__header-actions">
+                    <span class="cuenta__user-name" id="user-name"></span>
+                    <button class="cuenta__logout" id="logout-btn">Cerrar sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="cuenta__main">
+            <div class="cuenta__welcome" id="welcome-section">
+                <h1>Hola, <span id="welcome-name"></span></h1>
+                <p>Aquí puedes consultar el estado de tus pedidos</p>
+            </div>
+
+            <!-- Orders list -->
+            <section class="cuenta__orders" id="orders-section">
+                <h2 class="cuenta__section-title">Mis pedidos</h2>
+                <div id="orders-list"></div>
+                <p class="cuenta__empty" id="orders-empty" style="display:none">
+                    No tienes pedidos todavía. <a href="../index.html#pedido">Haz tu primer pedido</a>
+                </p>
+            </section>
+
+            <!-- Order detail modal -->
+            <div class="cuenta__modal" id="order-modal" style="display:none">
+                <div class="cuenta__modal-overlay" id="modal-overlay"></div>
+                <div class="cuenta__modal-content">
+                    <button class="cuenta__modal-close" id="modal-close">&times;</button>
+                    <h2 class="cuenta__modal-title">Detalle del pedido</h2>
+                    <div id="modal-body"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="cuenta__footer">
+            <p>¿Necesitas ayuda? Llámanos al <a href="tel:674783479">674 78 34 79</a> o escríbenos a <a href="mailto:servisaco2026@gmail.com">servisaco2026@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <script src="js/cuenta.js"></script>
+</body>
+</html>

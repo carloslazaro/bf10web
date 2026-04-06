@@ -96,7 +96,8 @@
                     <li><a href="#faq" class="header__nav-link">FAQ</a></li>
                     <li><a href="blog.html" class="header__nav-link">Blog</a></li>
                     <li><a href="#contacto" class="header__nav-link">Contacto</a></li>
-                    <li><a href="#contacto" class="btn btn--primary btn--small">Pedir sacos</a></li>
+                    <li><a href="mi-cuenta/" class="header__nav-link">Mi cuenta</a></li>
+                    <li><a href="#pedido" class="btn btn--primary btn--small">Pedir sacos</a></li>
                 </ul>
             </nav>
             <button class="header__menu-toggle" id="menu-toggle" aria-label="Abrir menú">
@@ -166,6 +167,7 @@
                         <li>Entrega en 24-48h</li>
                         <li>Colocación incluida</li>
                     </ul>
+                    <a href="#pedido" class="btn btn--primary btn--small servicio-card__btn" data-select-pack="5">Pedir 5 sacos</a>
                 </div>
                 <div class="servicio-card servicio-card--destacado fade-in">
                     <div class="servicio-card__badge">Más solicitado</div>
@@ -184,6 +186,7 @@
                         <li>Gestión de residuos legal</li>
                         <li>Sin límite de tiempo</li>
                     </ul>
+                    <a href="#pedido" class="btn btn--primary btn--small servicio-card__btn" data-select-pack="25">Pedir 25 sacos</a>
                 </div>
                 <div class="servicio-card fade-in">
                     <div class="servicio-card__icon">
@@ -202,6 +205,7 @@
                         <li>Entrega y recogida incluidas</li>
                         <li>Certificado de gestión</li>
                     </ul>
+                    <a href="#pedido" class="btn btn--primary btn--small servicio-card__btn" data-select-pack="50">Pedir 50 sacos</a>
                 </div>
             </div>
         </div>
@@ -600,16 +604,17 @@
                                 </div>
                             </div>
                         </label>
-                        <label class="pedido__payment pedido__payment--disabled">
-                            <input type="radio" name="payment_method" value="card" disabled>
+                        <label class="pedido__payment">
+                            <input type="radio" name="payment_method" value="card">
                             <div class="pedido__payment-card">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22M7 15h4"/></svg>
                                 <div>
                                     <strong>Tarjeta de crédito/débito</strong>
-                                    <span>Próximamente — pago seguro con Stripe</span>
+                                    <span>Pago seguro con Stripe</span>
                                 </div>
                             </div>
                         </label>
+                        <div id="stripe-card-element" style="display:none;padding:16px;border:1px solid var(--color-border);border-radius:var(--radius);margin-top:-4px"></div>
                     </div>
                 </div>
 
@@ -657,6 +662,7 @@
                     <p>Tu código de pedido es: <strong id="pedido-code"></strong></p>
                     <div id="pedido-bank-info"></div>
                     <p>Te hemos enviado los detalles a tu email. Nos pondremos en contacto contigo para confirmar la entrega.</p>
+                    <p style="margin-top:16px"><a href="mi-cuenta/" class="btn btn--outline btn--small">Ver mis pedidos</a></p>
                 </div>
 
                 <div class="pedido__message pedido__message--error" id="pedido-error" style="display:none">
