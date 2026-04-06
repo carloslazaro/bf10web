@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 350" width="700" height="350">
+  <!-- Fondo claro -->
+  <rect width="700" height="350" fill="#F5F5F0"/>
+
+  <!-- SACOS grande y fino -->
+  <text x="350" y="140"
+        font-family="Helvetica Neue, Arial, sans-serif"
+        font-weight="300"
+        font-size="100"
+        fill="#1A1A1A"
+        text-anchor="middle"
+        letter-spacing="25">SACOS</text>
+
+  <!-- Línea separadora roja -->
+  <rect x="120" y="165" width="460" height="4" fill="#DA291C"/>
+
+  <!-- BF 10 grande y bold -->
+  <text x="350" y="270"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="120"
+        fill="#00A94F"
+        text-anchor="middle"
+        letter-spacing="10">BF 10</text>
+</svg>

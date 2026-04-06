@@ -6,15 +6,20 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/fpdf.php';
 
-// Company fiscal data
-const COMPANY_NAME    = 'SERVISACO Recuperación y Logística SL';
-const COMPANY_CIF     = 'B12345678'; // TODO: poner CIF real
-const COMPANY_ADDR    = 'Calle Ejemplo 1';
-const COMPANY_CITY    = '28001 Madrid';
-const COMPANY_COUNTRY = 'España';
-const COMPANY_PHONE   = '674 78 34 79';
-const COMPANY_EMAIL   = 'servisaco2026@gmail.com';
-const COMPANY_WEB     = 'sacosescombromadridbf10.es';
+// Company data
+// IMPORTANTE: en una factura fiscal española la razón social legal y el CIF son obligatorios.
+// COMPANY_TRADE_NAME es el nombre comercial visible en la cabecera; COMPANY_LEGAL_NAME es la
+// razón social fiscal real que debe figurar en el documento por requerimiento legal.
+const COMPANY_TRADE_NAME = 'BF10 Sacos de Escombro';
+const COMPANY_LEGAL_NAME = 'SERVISACO Recuperación y Logística SL';
+const COMPANY_NAME       = COMPANY_TRADE_NAME; // Mostrar nombre comercial en la cabecera
+const COMPANY_CIF        = 'B26764688';
+const COMPANY_ADDR       = 'Calle Ejemplo 1'; // TODO: poner dirección fiscal real
+const COMPANY_CITY       = '28001 Madrid';
+const COMPANY_COUNTRY    = 'España';
+const COMPANY_PHONE      = '674 78 34 79';
+const COMPANY_EMAIL      = 'pedidos@sacosescombromadridbf10.es';
+const COMPANY_WEB        = 'sacosescombromadridbf10.es';
 
 const IVA_RATE = 0.21; // 21% IVA
 
@@ -87,7 +92,12 @@ function renderInvoicePdf($orderCode, $destination = 'I', $filename = '') {
 
     $pdf->SetFont('Arial', '', 9);
     $pdf->Cell(0, 4, utf8d(COMPANY_NAME), 0, 1);
-    $pdf->Cell(0, 4, utf8d('CIF: ' . COMPANY_CIF), 0, 1);
+    // Razón social fiscal real (obligatoria por ley en facturas)
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetTextColor(110, 110, 110);
+    $pdf->Cell(0, 3.5, utf8d(COMPANY_LEGAL_NAME . ' · CIF: ' . COMPANY_CIF), 0, 1);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('Arial', '', 9);
     $pdf->Cell(0, 4, utf8d(COMPANY_ADDR), 0, 1);
     $pdf->Cell(0, 4, utf8d(COMPANY_CITY . ', ' . COMPANY_COUNTRY), 0, 1);
     $pdf->Cell(0, 4, utf8d('Tel: ' . COMPANY_PHONE . '  ·  ' . COMPANY_EMAIL), 0, 1);

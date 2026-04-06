@@ -1,0 +1,33 @@
+name: Deploy to Sered via FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          server-dir: /public_html/bf10web/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.claude/**
+            **/PROPUESTA_SEO_BF10.md
+            **/comparativa_logos.html
+            **/LT-310 DAR01022.pdf
+            **/Logo BF10*
+            **/Madrid*
+            **/SACOS_BF10_*
+            **/*.psd

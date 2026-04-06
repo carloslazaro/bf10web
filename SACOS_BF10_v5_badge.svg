@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <!-- Fondo claro -->
+  <rect width="500" height="500" fill="#F5F5F0"/>
+
+  <!-- Círculo verde exterior -->
+  <circle cx="250" cy="250" r="220" fill="none" stroke="#00A94F" stroke-width="12"/>
+
+  <!-- Círculo rojo interior -->
+  <circle cx="250" cy="250" r="195" fill="none" stroke="#DA291C" stroke-width="4"/>
+
+  <!-- SACOS arriba -->
+  <text x="250" y="220"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="80"
+        fill="#1A1A1A"
+        text-anchor="middle"
+        letter-spacing="6">SACOS</text>
+
+  <!-- BF 10 abajo -->
+  <text x="250" y="310"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="85"
+        fill="#DA291C"
+        text-anchor="middle"
+        letter-spacing="4">BF 10</text>
+</svg>

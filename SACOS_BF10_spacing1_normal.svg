@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" width="800" height="350">
+  <rect width="800" height="350" fill="#F5F5F0"/>
+  <rect x="50" y="30" width="700" height="6" fill="#00A94F" rx="3"/>
+  <text x="400" y="155" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="120" fill="#1A1A1A" text-anchor="middle" letter-spacing="8">SACOS</text>
+  <text x="400" y="270" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="140" fill="#DA291C" text-anchor="middle" letter-spacing="0">BF 10</text>
+  <rect x="50" y="310" width="700" height="6" fill="#00A94F" rx="3"/>
+</svg>

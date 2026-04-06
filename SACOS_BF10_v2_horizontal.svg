@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" width="900" height="200">
+  <!-- Fondo claro -->
+  <rect width="900" height="200" fill="#F5F5F0"/>
+
+  <!-- Todo en una línea horizontal -->
+  <text x="450" y="130"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="80"
+        fill="#1A1A1A"
+        text-anchor="middle"
+        letter-spacing="5">SACOS <tspan fill="#DA291C">BF 10</tspan></text>
+
+  <!-- Barra verde inferior gruesa -->
+  <rect x="80" y="160" width="740" height="10" fill="#00A94F" rx="5"/>
+</svg>

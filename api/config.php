@@ -10,7 +10,7 @@ define('DB_PASS', 'Serv1saco2026');
 // Site config
 define('SITE_URL', 'https://sacosescombromadridbf10.es');
 define('SITE_NAME', 'BF10 - Sacos de Escombro Madrid');
-define('CONTACT_EMAIL', 'servisaco2026@gmail.com');
+define('CONTACT_EMAIL', 'pedidos@sacosescombromadridbf10.es');
 define('CONTACT_PHONE', '674 78 34 79');
 
 // Bank transfer details

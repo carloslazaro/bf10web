@@ -6,9 +6,9 @@
  */
 require_once __DIR__ . '/config.php';
 
-const MAIL_FROM_EMAIL = 'servisaco2026@gmail.com';
+const MAIL_FROM_EMAIL = 'pedidos@sacosescombromadridbf10.es';
 const MAIL_FROM_NAME  = 'BF10 Sacos de Escombro';
-const MAIL_REPLY_TO   = 'servisaco2026@gmail.com';
+const MAIL_REPLY_TO   = 'pedidos@sacosescombromadridbf10.es';
 
 /**
  * Low-level mail sender. Supports HTML + optional single attachment.
@@ -121,7 +121,7 @@ function sendOrderConfirmationEmail($order) {
             <p style="font-size:13px;color:#666;">Gracias por confiar en BF10.</p>
         </div>
         <div style="background:#f4f4f4;padding:16px;text-align:center;font-size:11px;color:#999;">
-            SERVISACO Recuperación y Logística SL · ' . CONTACT_PHONE . ' · ' . SITE_URL . '
+            BF10 Sacos de Escombro · ' . CONTACT_PHONE . ' · ' . SITE_URL . '
         </div>
     </body></html>';
 
@@ -157,7 +157,8 @@ function sendInvoiceEmail($order, $invoice, $pdfPath) {
             <p style="font-size:13px;color:#666;">Si tienes cualquier duda fiscal o administrativa, escríbenos a ' . MAIL_FROM_EMAIL . '.</p>
         </div>
         <div style="background:#f4f4f4;padding:16px;text-align:center;font-size:11px;color:#999;">
-            SERVISACO Recuperación y Logística SL · ' . CONTACT_PHONE . '
+            BF10 Sacos de Escombro · ' . CONTACT_PHONE . '<br>
+            <span style="font-size:10px;">(Razón social fiscal en la factura adjunta)</span>
         </div>
     </body></html>';
 

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300">
+  <!-- Fondo claro -->
+  <rect width="800" height="300" fill="#F5F5F0"/>
+
+  <!-- Barra lateral verde izquierda -->
+  <rect x="0" y="0" width="20" height="300" fill="#00A94F"/>
+
+  <!-- SACOS alineado izquierda -->
+  <text x="60" y="130"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="100"
+        fill="#1A1A1A"
+        letter-spacing="3">SACOS</text>
+
+  <!-- BF 10 alineado izquierda, rojo -->
+  <text x="62" y="250"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="90"
+        fill="#DA291C"
+        letter-spacing="3">BF 10</text>
+
+  <!-- Barra lateral verde derecha -->
+  <rect x="780" y="0" width="20" height="300" fill="#00A94F"/>
+</svg>
