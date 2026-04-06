@@ -169,10 +169,12 @@ if ($method === 'POST' && $action === 'create') {
         }
 
         // Add bank details if transfer
+        // NOTE: 'beneficiary' (titular de la cuenta) is intentionally NOT exposed
+        // in the public API response. It only appears inside the confirmation email
+        // (mail_helper.php) where the customer needs it to make the transfer.
         if ($paymentMethod === 'transfer') {
             $response['bank'] = [
                 'iban' => BANK_IBAN,
-                'beneficiary' => BANK_BENEFICIARY,
                 'concept' => $orderCode,
                 'amount' => number_format($package['price'], 2, ',', '.') . ' €',
             ];

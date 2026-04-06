@@ -9,6 +9,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/stripe_helper.php';
 require_once __DIR__ . '/mail_helper.php';
 require_once __DIR__ . '/invoice_generator.php';
+require_once __DIR__ . '/whatsapp_notify.php';
 
 // Read raw body and signature header
 $payload = file_get_contents('php://input');
@@ -62,6 +63,17 @@ switch ($event['type']) {
             $order = $sel->fetch();
             if ($order) {
                 @sendOrderConfirmationEmail($order);
+
+                // WhatsApp notification: only for orders created from WhatsApp
+                // (the `phone` field then matches the WA wa_id format).
+                if (!empty($order['source']) && $order['source'] === 'whatsapp' && !empty($order['phone'])) {
+                    @waNotify($order['phone'],
+                        "✅ Pago recibido - Pedido " . $order['order_code'] . "\n\n" .
+                        "Hemos confirmado el pago de tu pack " . $order['package_name'] . ".\n" .
+                        "Te entregaremos los sacos en 24-48 horas en " . $order['address'] . ", " . $order['city'] . ".\n\n" .
+                        "Cuando necesites recogida, escríbenos por aquí con la palabra 'recogida'."
+                    );
+                }
 
                 // If invoice requested, generate PDF + send it
                 if (!empty($order['request_invoice'])) {

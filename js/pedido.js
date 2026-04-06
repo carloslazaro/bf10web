@@ -245,9 +245,9 @@
                 '<div class="pedido__bank-details">' +
                 '<h4>Datos para la transferencia:</h4>' +
                 '<p><strong>IBAN:</strong> ' + result.bank.iban + '</p>' +
-                '<p><strong>Beneficiario:</strong> ' + result.bank.beneficiary + '</p>' +
                 '<p><strong>Concepto:</strong> ' + result.bank.concept + '</p>' +
                 '<p><strong>Importe:</strong> ' + result.bank.amount + '</p>' +
+                '<p style="margin-top:8px;font-size:13px;color:#666;">Te hemos enviado los datos completos por email, incluyendo el beneficiario de la cuenta.</p>' +
                 '</div>';
         } else {
             bankInfo.innerHTML = '';

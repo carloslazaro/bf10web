@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/whatsapp_notify.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -84,6 +85,21 @@ if ($method === 'PUT' && $action === 'update-status') {
 
     if ($stmt->rowCount() === 0) {
         jsonResponse(['error' => 'Pedido no encontrado'], 404);
+    }
+
+    // WhatsApp notify for orders that came from the bot
+    $sel = $pdo->prepare("SELECT order_code, source, phone, package_name FROM orders WHERE id = ?");
+    $sel->execute([$orderId]);
+    $row = $sel->fetch();
+    if ($row && !empty($row['source']) && $row['source'] === 'whatsapp' && !empty($row['phone'])) {
+        $labels = [
+            'confirmado'     => '✅ Tu pedido ' . $row['order_code'] . ' ha sido CONFIRMADO. Te entregaremos los sacos en 24-48h.',
+            'enviado'        => '🚚 Tu pedido ' . $row['order_code'] . ' está EN CAMINO. ¡En breve llegan los sacos!',
+            'pendiente_pago' => '⏳ Tu pedido ' . $row['order_code'] . ' está pendiente de pago. Si necesitas el enlace, escribe "estado" por aquí.',
+        ];
+        if (isset($labels[$newStatus])) {
+            @waNotify($row['phone'], $labels[$newStatus]);
+        }
     }
 
     jsonResponse(['success' => true, 'message' => "Estado actualizado a '$newStatus'"]);

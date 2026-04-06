@@ -4,8 +4,8 @@ session_start();
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'sacosbf10_bbdd_bf10');
-define('DB_USER', 'sacosbf10_bbdd2');
-define('DB_PASS', 'Serv1saco2026');
+define('DB_USER', 'sacosbf10_bbdd3');
+define('DB_PASS', 'N@tur2026');
 
 // Site config
 define('SITE_URL', 'https://sacosescombromadridbf10.es');
