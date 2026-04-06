@@ -190,6 +190,10 @@
             'enviado': 'Enviado'
         };
 
+        var wantsInvoice = order.request_invoice == 1 || order.request_invoice === '1';
+        var paidStr = order.paid_at ? new Date(order.paid_at).toLocaleString('es-ES') : '';
+        var price = parseFloat(order.package_price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+
         body.innerHTML =
             '<div class="modal-grid">' +
                 '<div class="modal-section">' +
@@ -197,13 +201,15 @@
                     '<p><strong>Código:</strong> ' + esc(order.order_code) + '</p>' +
                     '<p><strong>Fecha:</strong> ' + date.toLocaleString('es-ES') + '</p>' +
                     '<p><strong>Pack:</strong> ' + esc(order.package_name) + ' (' + order.package_qty + ' sacos)</p>' +
-                    '<p><strong>Precio:</strong> ' + parseFloat(order.package_price).toFixed(2).replace('.', ',') + ' €</p>' +
+                    '<p><strong>Precio:</strong> ' + price + '</p>' +
                     '<p><strong>Pago:</strong> ' + (order.payment_method === 'card' ? 'Tarjeta' : 'Transferencia') + '</p>' +
                     '<p><strong>Estado:</strong> <span class="status status--' + order.status.replace('_', '-') + '">' + (statusLabel[order.status] || order.status) + '</span></p>' +
+                    (paidStr ? '<p><strong>Pagado:</strong> ' + paidStr + '</p>' : '') +
                 '</div>' +
                 '<div class="modal-section">' +
                     '<h3>Cliente</h3>' +
-                    '<p><strong>Nombre:</strong> ' + esc(order.name) + '</p>' +
+                    '<p><strong>Nombre / Razón social:</strong> ' + esc(order.name) + '</p>' +
+                    (order.nif ? '<p><strong>NIF/CIF:</strong> ' + esc(order.nif) + '</p>' : '') +
                     '<p><strong>Email:</strong> <a href="mailto:' + esc(order.email) + '">' + esc(order.email) + '</a></p>' +
                     '<p><strong>Teléfono:</strong> <a href="tel:' + esc(order.phone) + '">' + esc(order.phone) + '</a></p>' +
                 '</div>' +
@@ -213,19 +219,63 @@
                     '<p>' + esc(order.postal_code) + ' ' + esc(order.city) + '</p>' +
                     (order.observations ? '<p><strong>Observaciones:</strong> ' + esc(order.observations) + '</p>' : '') +
                 '</div>' +
-                (order.billing_same === '0' || order.billing_same === 0 ?
-                    '<div class="modal-section">' +
-                        '<h3>Facturación</h3>' +
-                        '<p><strong>Nombre:</strong> ' + esc(order.billing_name) + '</p>' +
-                        (order.billing_company ? '<p><strong>Empresa:</strong> ' + esc(order.billing_company) + '</p>' : '') +
-                        '<p><strong>CIF/NIF:</strong> ' + esc(order.billing_cif) + '</p>' +
-                        '<p><strong>Dirección:</strong> ' + esc(order.billing_address) + '</p>' +
-                    '</div>'
-                : '') +
+                '<div class="modal-section">' +
+                    '<h3>Factura</h3>' +
+                    (wantsInvoice
+                        ? '<p>✓ Cliente solicitó factura</p>' +
+                          '<p><a class="btn-action btn-view" href="../api/invoices.php?action=download&code=' + encodeURIComponent(order.order_code) + '" target="_blank">📄 Ver / descargar PDF</a></p>' +
+                          '<p><button class="btn-action" onclick="resendOrderEmail(\'' + order.order_code + '\')">✉️ Reenviar email</button></p>'
+                        : '<p><em>El cliente no solicitó factura.</em></p>' +
+                          '<p><button class="btn-action" onclick="forceInvoice(\'' + order.order_code + '\')">Emitir factura</button></p>') +
+                '</div>' +
             '</div>';
 
         modal.style.display = 'flex';
     }
+
+    // Resend order confirmation email
+    window.resendOrderEmail = function (code) {
+        if (!confirm('¿Reenviar email de confirmación al cliente?')) return;
+        fetch(API + 'invoices.php?action=resend-confirmation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code }),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            alert(data.success ? '✓ Email reenviado' : (data.error || 'Error al reenviar'));
+        })
+        .catch(function () { alert('Error de conexión'); });
+    };
+
+    // Force-issue invoice (admin override) + send it
+    window.forceInvoice = function (code) {
+        if (!confirm('¿Emitir factura para este pedido y enviarla al cliente por email?')) return;
+        fetch(API + 'invoices.php?action=issue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code }),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.success) {
+                alert(data.error || 'Error al emitir');
+                return;
+            }
+            // Then send it
+            return fetch(API + 'invoices.php?action=send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code }),
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                alert(d.success ? '✓ Factura emitida y enviada' : (d.error || 'Factura emitida pero fallo al enviar email'));
+                window.open('../api/invoices.php?action=download&code=' + encodeURIComponent(code), '_blank');
+            });
+        })
+        .catch(function () { alert('Error de conexión'); });
+    };
 
     // Close modal
     document.getElementById('modal-close').addEventListener('click', closeModal);

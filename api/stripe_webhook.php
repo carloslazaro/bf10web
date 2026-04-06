@@ -7,6 +7,8 @@
  */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/stripe_helper.php';
+require_once __DIR__ . '/mail_helper.php';
+require_once __DIR__ . '/invoice_generator.php';
 
 // Read raw body and signature header
 $payload = file_get_contents('php://input');
@@ -53,6 +55,32 @@ switch ($event['type']) {
                 WHERE order_code = ?
             ");
             $stmt->execute([$paymentIntent, $orderCode]);
+
+            // Fetch full order and send emails
+            $sel = $pdo->prepare("SELECT * FROM orders WHERE order_code = ?");
+            $sel->execute([$orderCode]);
+            $order = $sel->fetch();
+            if ($order) {
+                @sendOrderConfirmationEmail($order);
+
+                // If invoice requested, generate PDF + send it
+                if (!empty($order['request_invoice'])) {
+                    try {
+                        $tmp = sys_get_temp_dir() . '/bf10_' . $orderCode . '.pdf';
+                        $result = renderInvoicePdf($orderCode, 'F', $tmp);
+                        if ($result && file_exists($tmp)) {
+                            @sendInvoiceEmail($order, $result['invoice'], $tmp);
+                            $pdo->prepare("UPDATE invoices SET sent_at = NOW() WHERE id = ?")
+                                ->execute([$result['invoice']['id']]);
+                            @unlink($tmp);
+                        }
+                    } catch (Exception $e) {
+                        @file_put_contents(__DIR__ . '/stripe_webhook.log',
+                            '[' . date('c') . "] invoice generation failed: " . $e->getMessage() . "\n",
+                            FILE_APPEND);
+                    }
+                }
+            }
         }
         break;
 

@@ -15,9 +15,10 @@ if ($method === 'GET' && $action === 'orders') {
 
     $sql = "
         SELECT o.id, o.order_code, o.package_name, o.package_qty, o.package_price,
-               o.name, o.email, o.phone, o.address, o.city, o.postal_code, o.observations,
-               o.billing_same, o.billing_name, o.billing_company, o.billing_cif, o.billing_address,
-               o.payment_method, o.status, o.created_at, o.updated_at
+               o.name, o.nif, o.email, o.phone, o.address, o.city, o.postal_code, o.observations,
+               o.request_invoice, o.payment_method, o.status,
+               o.stripe_session_id, o.stripe_payment_intent, o.paid_at,
+               o.created_at, o.updated_at
         FROM orders o
     ";
 

@@ -145,7 +145,22 @@
         };
         var statusClass = 'cuenta__order-status--' + order.status.replace('_', '-');
 
+        var wantsInvoice = order.request_invoice == 1 || order.request_invoice === '1';
+        var paidStr = order.paid_at ? new Date(order.paid_at).toLocaleString('es-ES') : null;
+
+        // Progress tracker: 3 steps
+        var step = 1;
+        if (order.status === 'confirmado') step = 2;
+        if (order.status === 'enviado') step = 3;
+        var tracker =
+            '<div class="cuenta__tracker">' +
+                '<div class="cuenta__tracker-step' + (step >= 1 ? ' is-done' : '') + '"><span>1</span>Pedido recibido</div>' +
+                '<div class="cuenta__tracker-step' + (step >= 2 ? ' is-done' : '') + '"><span>2</span>' + (order.payment_method === 'card' ? 'Pago confirmado' : 'Transferencia recibida') + '</div>' +
+                '<div class="cuenta__tracker-step' + (step >= 3 ? ' is-done' : '') + '"><span>3</span>Sacos entregados</div>' +
+            '</div>';
+
         body.innerHTML =
+            tracker +
             '<div class="cuenta__detail-grid">' +
                 '<div class="cuenta__detail-section">' +
                     '<h3>Pedido</h3>' +
@@ -155,6 +170,7 @@
                     '<p><strong>Precio:</strong> ' + parseFloat(order.package_price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €</p>' +
                     '<p><strong>Pago:</strong> ' + (order.payment_method === 'card' ? 'Tarjeta' : 'Transferencia') + '</p>' +
                     '<p><strong>Estado:</strong> <span class="cuenta__order-status ' + statusClass + '">' + (statusLabels[order.status] || order.status) + '</span></p>' +
+                    (paidStr ? '<p><strong>Pagado el:</strong> ' + paidStr + '</p>' : '') +
                 '</div>' +
                 '<div class="cuenta__detail-section">' +
                     '<h3>Entrega</h3>' +
@@ -162,6 +178,13 @@
                     '<p>' + esc(order.postal_code) + ' ' + esc(order.city) + '</p>' +
                     (order.observations ? '<p><strong>Notas:</strong> ' + esc(order.observations) + '</p>' : '') +
                 '</div>' +
+                (wantsInvoice ?
+                    '<div class="cuenta__detail-section cuenta__detail-section--full">' +
+                        '<h3>Factura</h3>' +
+                        '<p>Solicitaste factura para este pedido.</p>' +
+                        '<a class="cuenta__btn cuenta__btn--primary" href="../api/invoices.php?action=download&code=' + encodeURIComponent(order.order_code) + '" target="_blank">📄 Descargar factura PDF</a>' +
+                    '</div>'
+                : '') +
             '</div>';
 
         modal.style.display = 'flex';

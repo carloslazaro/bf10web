@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/stripe_helper.php';
+require_once __DIR__ . '/mail_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -177,6 +178,18 @@ if ($method === 'POST' && $action === 'create') {
             ];
         }
 
+        // Send confirmation email for non-card orders immediately.
+        // Card orders send email from stripe_webhook.php on checkout.session.completed.
+        if ($paymentMethod !== 'card') {
+            // Reload the inserted row so we pass a full array
+            $sel = $pdo->prepare("SELECT * FROM orders WHERE id = ?");
+            $sel->execute([$orderId]);
+            $fullOrder = $sel->fetch();
+            if ($fullOrder) {
+                @sendOrderConfirmationEmail($fullOrder);
+            }
+        }
+
         jsonResponse($response, 201);
 
     } catch (PDOException $e) {
@@ -212,9 +225,9 @@ if ($method === 'GET' && $action === 'detail') {
 
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT order_code, package_name, package_qty, package_price,
+        SELECT id, user_id, order_code, package_name, package_qty, package_price,
                name, nif, email, phone, address, city, postal_code, observations,
-               request_invoice, payment_method, status, created_at
+               request_invoice, payment_method, status, paid_at, created_at
         FROM orders
         WHERE order_code = ?
     ");
@@ -223,6 +236,12 @@ if ($method === 'GET' && $action === 'detail') {
 
     if (!$order) {
         jsonResponse(['error' => 'Pedido no encontrado'], 404);
+    }
+
+    // Access control: manager OR owner of the order
+    $isOwner = isLoggedIn() && (int)$order['user_id'] === (int)$_SESSION['user_id'];
+    if (!isManager() && !$isOwner) {
+        jsonResponse(['error' => 'Acceso denegado'], 403);
     }
 
     jsonResponse(['order' => $order]);

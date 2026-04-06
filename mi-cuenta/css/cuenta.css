@@ -351,3 +351,76 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Progress tracker */
+.cuenta__tracker {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    position: relative;
+    padding: 0 20px;
+}
+.cuenta__tracker::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: 40px;
+    right: 40px;
+    height: 2px;
+    background: #e5e5e5;
+    z-index: 0;
+}
+.cuenta__tracker-step {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #999;
+    flex: 1;
+    text-align: center;
+}
+.cuenta__tracker-step span {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #999;
+}
+.cuenta__tracker-step.is-done {
+    color: #111;
+    font-weight: 600;
+}
+.cuenta__tracker-step.is-done span {
+    background: #00A651;
+    border-color: #00A651;
+    color: #fff;
+}
+.cuenta__detail-section--full {
+    grid-column: 1 / -1;
+}
+.cuenta__btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    margin-top: 8px;
+}
+.cuenta__btn--primary {
+    background: #DA291C;
+    color: #fff;
+}
+.cuenta__btn--primary:hover {
+    background: #b8221a;
+}
