@@ -82,7 +82,7 @@
                     document.getElementById('stat-pending').textContent = s.by_status.pendiente_pago || 0;
                     document.getElementById('stat-confirmed').textContent = s.by_status.confirmado || 0;
                     document.getElementById('stat-shipped').textContent = s.by_status.enviado || 0;
-                    document.getElementById('stat-revenue').textContent = parseFloat(s.revenue).toFixed(2).replace('.', ',') + ' €';
+                    document.getElementById('stat-revenue').textContent = parseFloat(s.revenue).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
                 }
             });
     }

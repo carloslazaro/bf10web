@@ -37,9 +37,9 @@
     })();
 
     const packages = {
-        5:  { name: '5 sacos',  price: 5.00 },
-        25: { name: '25 sacos', price: 25.00 },
-        50: { name: '50 sacos', price: 50.00 },
+        10: { name: '10 sacos', price: 450.00 },
+        25: { name: '25 sacos', price: 1050.00 },
+        50: { name: '50 sacos', price: 2000.00 },
     };
 
     // Elements
@@ -98,7 +98,7 @@
         if (qty) {
             var pkg = packages[qty.value];
             summaryPack.textContent = pkg.name;
-            summaryPrice.textContent = pkg.price.toFixed(2).replace('.', ',') + ' €';
+            summaryPrice.textContent = pkg.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
         }
 
         var method = form.querySelector('input[name="payment_method"]:checked');

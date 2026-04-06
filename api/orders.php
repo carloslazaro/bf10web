@@ -173,7 +173,7 @@ if ($method === 'POST' && $action === 'create') {
                 'iban' => BANK_IBAN,
                 'beneficiary' => BANK_BENEFICIARY,
                 'concept' => $orderCode,
-                'amount' => $package['price'] . ' €',
+                'amount' => number_format($package['price'], 2, ',', '.') . ' €',
             ];
         }
 

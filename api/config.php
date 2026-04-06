@@ -20,9 +20,9 @@ define('BANK_CONCEPT_PREFIX', 'BF10-');
 
 // Packages
 define('PACKAGES', [
-    5  => ['name' => '5 sacos',  'price' => 5.00,  'description' => 'Pack básico de 5 sacos de 1m³'],
-    25 => ['name' => '25 sacos', 'price' => 25.00, 'description' => 'Pack estándar de 25 sacos de 1m³'],
-    50 => ['name' => '50 sacos', 'price' => 50.00, 'description' => 'Pack profesional de 50 sacos de 1m³'],
+    10 => ['name' => '10 sacos', 'price' => 450.00,  'description' => 'Pedido mínimo — 10 sacos de 1m³ a 45€/saco'],
+    25 => ['name' => '25 sacos', 'price' => 1050.00, 'description' => 'Pack estándar — 25 sacos de 1m³ a 42€/saco'],
+    50 => ['name' => '50 sacos', 'price' => 2000.00, 'description' => 'Pack profesional — 50 sacos de 1m³ a 40€/saco'],
 ]);
 
 // Load secrets (API keys). File is gitignored.

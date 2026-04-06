@@ -109,7 +109,7 @@
                     '<div class="cuenta__order-meta">' + dateStr + ' · ' + esc(o.package_name) + ' · ' + paymentLabel + '</div>' +
                 '</div>' +
                 '<div class="cuenta__order-right">' +
-                    '<div class="cuenta__order-price">' + parseFloat(o.package_price).toFixed(2).replace('.', ',') + ' €</div>' +
+                    '<div class="cuenta__order-price">' + parseFloat(o.package_price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €</div>' +
                     '<span class="cuenta__order-status ' + statusClass + '">' + (statusLabels[o.status] || o.status) + '</span>' +
                 '</div>' +
             '</div>';
@@ -152,7 +152,7 @@
                     '<p><strong>Código:</strong> ' + esc(order.order_code) + '</p>' +
                     '<p><strong>Fecha:</strong> ' + date.toLocaleString('es-ES') + '</p>' +
                     '<p><strong>Pack:</strong> ' + esc(order.package_name) + ' (' + order.package_qty + ' sacos)</p>' +
-                    '<p><strong>Precio:</strong> ' + parseFloat(order.package_price).toFixed(2).replace('.', ',') + ' €</p>' +
+                    '<p><strong>Precio:</strong> ' + parseFloat(order.package_price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €</p>' +
                     '<p><strong>Pago:</strong> ' + (order.payment_method === 'card' ? 'Tarjeta' : 'Transferencia') + '</p>' +
                     '<p><strong>Estado:</strong> <span class="cuenta__order-status ' + statusClass + '">' + (statusLabels[order.status] || order.status) + '</span></p>' +
                 '</div>' +
