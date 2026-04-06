@@ -57,40 +57,13 @@
         radio.addEventListener('change', updateSummary);
     });
 
-    // Stripe setup
+    // Hide any legacy Stripe card element (now using Checkout redirect)
     var stripeCardEl = document.getElementById('stripe-card-element');
-    var stripe = null;
-    var stripeCard = null;
-    var stripeReady = false;
-
-    function initStripe() {
-        if (stripeReady || !window.Stripe) return;
-        var key = document.querySelector('meta[name="stripe-key"]');
-        if (!key || !key.content) return;
-        stripe = Stripe(key.content);
-        var elements = stripe.elements({ locale: 'es' });
-        stripeCard = elements.create('card');
-        stripeCard.mount('#stripe-card-element');
-        stripeReady = true;
-    }
-
-    // Toggle Stripe card element visibility
-    function updatePaymentUI() {
-        var method = form.querySelector('input[name="payment_method"]:checked');
-        if (method && method.value === 'card') {
-            stripeCardEl.style.display = 'block';
-            initStripe();
-        } else {
-            stripeCardEl.style.display = 'none';
-        }
-    }
+    if (stripeCardEl) stripeCardEl.style.display = 'none';
 
     // Update summary when payment method changes
     form.querySelectorAll('input[name="payment_method"]').forEach(function (radio) {
-        radio.addEventListener('change', function () {
-            updateSummary();
-            updatePaymentUI();
-        });
+        radio.addEventListener('change', updateSummary);
     });
 
     function updateSummary() {
@@ -229,26 +202,9 @@
         submitBtn.textContent = 'Procesando...';
         hideMessages();
 
-        // Handle Stripe payment if card selected
-        if (data.payment_method === 'card' && stripeReady && stripe && stripeCard) {
-            stripe.createPaymentMethod({ type: 'card', card: stripeCard })
-                .then(function (result) {
-                    if (result.error) {
-                        showError(result.error.message);
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Confirmar pedido';
-                        return;
-                    }
-                    data.stripe_payment_method = result.paymentMethod.id;
-                    sendOrder(data);
-                });
-        } else if (data.payment_method === 'card' && !stripeReady) {
-            showError('El pago con tarjeta no está disponible en este momento. Usa transferencia bancaria.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Confirmar pedido';
-        } else {
-            sendOrder(data);
-        }
+        // Send order. Backend will create Stripe Checkout Session if card
+        // and return checkout_url for redirect (handled in sendOrder's .then).
+        sendOrder(data);
     });
 
     function sendOrder(data) {
