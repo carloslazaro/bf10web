@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS orders (
     -- Payment
     payment_method ENUM('card', 'transfer') NOT NULL,
     stripe_payment_id VARCHAR(255),
+    stripe_session_id VARCHAR(255),
+    stripe_payment_intent VARCHAR(255),
+    paid_at DATETIME NULL,
 
     -- Status
     status ENUM('confirmado', 'pendiente_pago', 'enviado') DEFAULT 'pendiente_pago',

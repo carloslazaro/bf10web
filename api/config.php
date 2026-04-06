@@ -3,9 +3,9 @@ session_start();
 
 // Database configuration
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'sacosbf10_pedidos');
-define('DB_USER', 'sacosbf10_admin');
-define('DB_PASS', 'Bf10_2026!');
+define('DB_NAME', 'sacosbf10_bbdd_bf10');
+define('DB_USER', 'sacosbf10_bbdd2');
+define('DB_PASS', 'Serv1saco2026');
 
 // Site config
 define('SITE_URL', 'https://sacosescombromadridbf10.es');
@@ -25,9 +25,14 @@ define('PACKAGES', [
     50 => ['name' => '50 sacos', 'price' => 50.00, 'description' => 'Pack profesional de 50 sacos de 1m³'],
 ]);
 
-// Stripe (placeholder - user will provide keys later)
-define('STRIPE_PUBLIC_KEY', '');
-define('STRIPE_SECRET_KEY', '');
+// Load secrets (API keys). File is gitignored.
+if (file_exists(__DIR__ . '/secrets.php')) {
+    require_once __DIR__ . '/secrets.php';
+}
+// Fallbacks so code never breaks if secrets.php missing
+if (!defined('STRIPE_PUBLIC_KEY'))    define('STRIPE_PUBLIC_KEY', '');
+if (!defined('STRIPE_SECRET_KEY'))    define('STRIPE_SECRET_KEY', '');
+if (!defined('STRIPE_WEBHOOK_SECRET')) define('STRIPE_WEBHOOK_SECRET', '');
 
 // Database connection
 function getDB() {

@@ -8,6 +8,34 @@
     const form = document.getElementById('pedido-form');
     if (!form) return;
 
+    // Handle Stripe return (?pedido=BF10-XXXX&pago=ok|cancelado)
+    (function handleStripeReturn() {
+        var params = new URLSearchParams(window.location.search);
+        var pedido = params.get('pedido');
+        var pago = params.get('pago');
+        var banner = document.getElementById('stripe-return-banner');
+        if (!banner || !pedido || !pago) return;
+
+        if (pago === 'ok') {
+            banner.className = 'pedido__banner pedido__banner--success';
+            banner.innerHTML =
+                '<strong>✓ Pago recibido</strong><br>' +
+                'Tu pedido <strong>' + pedido + '</strong> está confirmado. ' +
+                'En breve recibirás un email con la confirmación. Te entregaremos los sacos en 24-48 horas.';
+        } else if (pago === 'cancelado') {
+            banner.className = 'pedido__banner pedido__banner--warning';
+            banner.innerHTML =
+                '<strong>Pago cancelado</strong><br>' +
+                'No hemos cobrado nada. Tu pedido <strong>' + pedido + '</strong> sigue pendiente. ' +
+                'Puedes volver a enviar el formulario para reintentar el pago.';
+        }
+        banner.style.display = 'block';
+        // Clean URL
+        if (window.history.replaceState) {
+            window.history.replaceState({}, '', window.location.pathname + '#pedido');
+        }
+    })();
+
     const packages = {
         5:  { name: '5 sacos',  price: 5.00 },
         25: { name: '25 sacos', price: 25.00 },
@@ -232,6 +260,12 @@
         .then(function (res) { return res.json(); })
         .then(function (result) {
             if (result.success) {
+                // If Stripe Checkout URL returned, redirect user to pay
+                if (result.checkout_url) {
+                    submitBtn.textContent = 'Redirigiendo a la pasarela de pago...';
+                    window.location.href = result.checkout_url;
+                    return;
+                }
                 showSuccess(result);
             } else {
                 showError(result.error || 'Error al procesar el pedido');

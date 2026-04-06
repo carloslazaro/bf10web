@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/stripe_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -110,8 +111,8 @@ if ($method === 'POST' && $action === 'create') {
     // Find or create user
     $userId = findOrCreateUser($email, $name, $phone);
 
-    // Determine status
-    $status = ($paymentMethod === 'card') ? 'confirmado' : 'pendiente_pago';
+    // All orders start as pendiente_pago. Stripe webhook will mark card orders as confirmado.
+    $status = 'pendiente_pago';
 
     // Generate order code
     $orderCode = generateOrderCode();
@@ -132,6 +133,7 @@ if ($method === 'POST' && $action === 'create') {
             $name, $nif, $email, $phone, $address, $city, $postalCode, $observations,
             $requestInvoice, $paymentMethod, $status
         ]);
+        $orderId = $pdo->lastInsertId();
 
         $response = [
             'success' => true,
@@ -143,6 +145,27 @@ if ($method === 'POST' && $action === 'create') {
                 'payment_method' => $paymentMethod,
             ]
         ];
+
+        // If card payment: create Stripe Checkout Session
+        if ($paymentMethod === 'card') {
+            $session = stripeCreateCheckoutSession([
+                'id' => $orderId,
+                'order_code' => $orderCode,
+                'package_qty' => $qty,
+                'email' => $email,
+            ]);
+
+            if (!empty($session['__error'])) {
+                // Mark order as failed-to-create-checkout but keep it for manual follow-up
+                jsonResponse(['error' => 'Error al iniciar el pago: ' . $session['__error']], 500);
+            }
+
+            // Save Stripe session id
+            $upd = $pdo->prepare("UPDATE orders SET stripe_session_id = ? WHERE id = ?");
+            $upd->execute([$session['id'], $orderId]);
+
+            $response['checkout_url'] = $session['url'];
+        }
 
         // Add bank details if transfer
         if ($paymentMethod === 'transfer') {

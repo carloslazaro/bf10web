@@ -1,0 +1,12 @@
+# Secrets
+api/secrets.php
+api/*.log
+api/stripe_webhook.log
+
+# Migration scripts (temporary)
+api/migrate_*.php
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.log

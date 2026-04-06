@@ -361,3 +361,23 @@
         align-self: flex-start;
     }
 }
+
+/* Stripe return banner */
+.pedido__banner {
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-left: 4px solid;
+}
+.pedido__banner--success {
+    background: #e8f5ee;
+    border-color: #00A651;
+    color: #0a4a2a;
+}
+.pedido__banner--warning {
+    background: #fff4e5;
+    border-color: #e6a23c;
+    color: #6b4a0f;
+}
