@@ -528,8 +528,13 @@
                     <h3 class="pedido__step-title">2. Datos de entrega</h3>
                     <div class="pedido__fields">
                         <div class="pedido__field">
-                            <label for="pedido-name">Nombre completo *</label>
-                            <input type="text" id="pedido-name" name="name" required placeholder="Tu nombre y apellidos">
+                            <label for="pedido-name">Nombre / Razón social *</label>
+                            <input type="text" id="pedido-name" name="name" required placeholder="Nombre completo o razón social">
+                        </div>
+                        <div class="pedido__field">
+                            <label for="pedido-nif">NIF / CIF</label>
+                            <input type="text" id="pedido-nif" name="nif" placeholder="12345678A o B12345678">
+                            <span class="pedido__field-hint" id="nif-hint"></span>
                         </div>
                         <div class="pedido__field">
                             <label for="pedido-email">Email *</label>
@@ -559,34 +564,14 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Billing (optional) -->
+                <!-- Step 3: Invoice request -->
                 <div class="pedido__step" id="step-3">
-                    <h3 class="pedido__step-title">3. Datos de facturación</h3>
+                    <h3 class="pedido__step-title">3. Factura</h3>
                     <div class="pedido__billing-toggle">
                         <label class="pedido__checkbox">
-                            <input type="checkbox" id="billing-same" name="billing_same" checked>
-                            <span>Usar los mismos datos de entrega</span>
+                            <input type="checkbox" id="request-invoice" name="request_invoice">
+                            <span>Solicitar factura <small>(requiere NIF/CIF en datos de entrega)</small></span>
                         </label>
-                    </div>
-                    <div class="pedido__billing-fields" id="billing-fields" style="display:none">
-                        <div class="pedido__fields">
-                            <div class="pedido__field">
-                                <label for="billing-name">Nombre / Razón social *</label>
-                                <input type="text" id="billing-name" name="billing_name" placeholder="Nombre o razón social">
-                            </div>
-                            <div class="pedido__field">
-                                <label for="billing-company">Empresa</label>
-                                <input type="text" id="billing-company" name="billing_company" placeholder="Nombre de la empresa">
-                            </div>
-                            <div class="pedido__field">
-                                <label for="billing-cif">CIF / NIF *</label>
-                                <input type="text" id="billing-cif" name="billing_cif" placeholder="B12345678 o 12345678A">
-                            </div>
-                            <div class="pedido__field pedido__field--full">
-                                <label for="billing-address">Dirección de facturación *</label>
-                                <input type="text" id="billing-address" name="billing_address" placeholder="Dirección fiscal completa">
-                            </div>
-                        </div>
                     </div>
                 </div>
 

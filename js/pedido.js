@@ -18,8 +18,7 @@
     const summaryPack = document.getElementById('summary-pack');
     const summaryPrice = document.getElementById('summary-price');
     const summaryPayment = document.getElementById('summary-payment');
-    const billingSame = document.getElementById('billing-same');
-    const billingFields = document.getElementById('billing-fields');
+    const requestInvoice = document.getElementById('request-invoice');
     const successMsg = document.getElementById('pedido-success');
     const errorMsg = document.getElementById('pedido-error');
     const errorText = document.getElementById('pedido-error-text');
@@ -82,21 +81,27 @@
         }
     }
 
-    // Toggle billing fields
-    billingSame.addEventListener('change', function () {
-        billingFields.style.display = this.checked ? 'none' : 'block';
+    // NIF/CIF validation hint
+    var nifInput = document.getElementById('pedido-nif');
+    var nifHint = document.getElementById('nif-hint');
+    var nifRegex = /^[A-Za-z]\d{7}[A-Za-z0-9]$|^\d{8}[A-Za-z]$/;
 
-        if (!this.checked) {
-            // Copy delivery data to billing
-            var name = document.getElementById('pedido-name').value;
-            var address = document.getElementById('pedido-address').value;
-            var billingNameField = document.getElementById('billing-name');
-            var billingAddressField = document.getElementById('billing-address');
-
-            if (!billingNameField.value) billingNameField.value = name;
-            if (!billingAddressField.value) billingAddressField.value = address;
-        }
-    });
+    if (nifInput) {
+        nifInput.addEventListener('blur', function () {
+            var val = this.value.trim();
+            if (!val) {
+                nifHint.textContent = '';
+                return;
+            }
+            if (nifRegex.test(val)) {
+                nifHint.textContent = '✓ NIF/CIF válido';
+                nifHint.style.color = '#00A651';
+            } else {
+                nifHint.textContent = 'Formato no válido (ej: 12345678A o B12345678)';
+                nifHint.style.color = '#DA291C';
+            }
+        });
+    }
 
     // Postal code validation - auto format
     var postalInput = document.getElementById('pedido-postal');
@@ -136,6 +141,7 @@
         var errors = [];
 
         var name = document.getElementById('pedido-name').value.trim();
+        var nif = document.getElementById('pedido-nif').value.trim();
         var email = document.getElementById('pedido-email').value.trim();
         var phone = document.getElementById('pedido-phone').value.trim();
         var address = document.getElementById('pedido-address').value.trim();
@@ -143,7 +149,8 @@
         var postal = document.getElementById('pedido-postal').value.trim();
         var terms = document.getElementById('accept-terms').checked;
 
-        if (!name) errors.push('El nombre es obligatorio');
+        if (!name) errors.push('El nombre / razón social es obligatorio');
+        if (nif && !nifRegex.test(nif)) errors.push('NIF/CIF no válido');
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email no válido');
         if (!phone || phone.replace(/\s/g, '').length < 9) errors.push('Teléfono no válido');
         if (!address) errors.push('La dirección es obligatoria');
@@ -151,17 +158,13 @@
         if (!postal || !/^(28|45)\d{3}$/.test(postal)) errors.push('Código postal no válido para la zona de Madrid');
         if (!terms) errors.push('Debes aceptar las condiciones del servicio');
 
-        // Billing validation if different
-        if (!billingSame.checked) {
-            var billingName = document.getElementById('billing-name').value.trim();
-            var billingCif = document.getElementById('billing-cif').value.trim();
-            var billingAddress = document.getElementById('billing-address').value.trim();
-
-            if (!billingName) errors.push('El nombre de facturación es obligatorio');
-            if (!billingCif || !/^[A-Za-z]\d{7}[A-Za-z0-9]$|^\d{8}[A-Za-z]$/.test(billingCif)) {
-                errors.push('CIF/NIF no válido');
+        // Invoice validation: requires NIF/CIF
+        if (requestInvoice && requestInvoice.checked) {
+            if (!nif) {
+                errors.push('Para solicitar factura debes indicar tu NIF/CIF en datos de entrega');
+            } else if (!nifRegex.test(nif)) {
+                errors.push('NIF/CIF no válido para emitir factura');
             }
-            if (!billingAddress) errors.push('La dirección de facturación es obligatoria');
         }
 
         return errors;
@@ -182,6 +185,7 @@
         var data = {
             package_qty: parseInt(form.querySelector('input[name="package_qty"]:checked').value),
             name: document.getElementById('pedido-name').value.trim(),
+            nif: document.getElementById('pedido-nif').value.trim(),
             email: document.getElementById('pedido-email').value.trim(),
             phone: document.getElementById('pedido-phone').value.trim(),
             address: document.getElementById('pedido-address').value.trim(),
@@ -189,15 +193,8 @@
             postal_code: document.getElementById('pedido-postal').value.trim(),
             observations: document.getElementById('pedido-observations').value.trim(),
             payment_method: form.querySelector('input[name="payment_method"]:checked').value,
-            billing_same: billingSame.checked ? 1 : 0,
+            request_invoice: requestInvoice && requestInvoice.checked ? 1 : 0,
         };
-
-        if (!billingSame.checked) {
-            data.billing_name = document.getElementById('billing-name').value.trim();
-            data.billing_company = document.getElementById('billing-company').value.trim();
-            data.billing_cif = document.getElementById('billing-cif').value.trim();
-            data.billing_address = document.getElementById('billing-address').value.trim();
-        }
 
         // Disable button
         submitBtn.disabled = true;
@@ -247,7 +244,7 @@
             submitBtn.disabled = false;
             submitBtn.textContent = 'Confirmar pedido';
         });
-    });
+    }
 
     function showSuccess(result) {
         document.getElementById('pedido-code').textContent = result.order.code;
@@ -289,7 +286,12 @@
             var qty = this.getAttribute('data-select-pack');
             var radio = form.querySelector('input[name="package_qty"][value="' + qty + '"]');
             if (radio) {
+                // Defensive: uncheck all others first
+                form.querySelectorAll('input[name="package_qty"]').forEach(function (r) {
+                    r.checked = false;
+                });
                 radio.checked = true;
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
                 updateSummary();
             }
         });

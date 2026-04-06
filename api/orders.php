@@ -93,19 +93,18 @@ if ($method === 'POST' && $action === 'create') {
     $city = sanitize($data['city']);
     $observations = sanitize($data['observations'] ?? '');
 
-    // Billing data
-    $billingSame = !empty($data['billing_same']) ? 1 : 0;
-    $billingName = sanitize($data['billing_name'] ?? '');
-    $billingCompany = sanitize($data['billing_company'] ?? '');
-    $billingCif = sanitize($data['billing_cif'] ?? '');
-    $billingAddress = sanitize($data['billing_address'] ?? '');
+    // NIF/CIF and invoice request
+    $nif = sanitize($data['nif'] ?? '');
+    $requestInvoice = !empty($data['request_invoice']) ? 1 : 0;
 
-    // If billing different, validate CIF
-    if (!$billingSame && $billingCif) {
-        // Basic Spanish CIF/NIF validation (letter + 8 digits or 8 digits + letter)
-        if (!preg_match('/^[A-Za-z]\d{7}[A-Za-z0-9]$|^\d{8}[A-Za-z]$/', $billingCif)) {
-            jsonResponse(['error' => 'CIF/NIF no válido'], 400);
-        }
+    // Validate NIF/CIF if provided
+    if ($nif && !preg_match('/^[A-Za-z]\d{7}[A-Za-z0-9]$|^\d{8}[A-Za-z]$/', $nif)) {
+        jsonResponse(['error' => 'NIF/CIF no válido'], 400);
+    }
+
+    // If invoice requested, NIF is mandatory
+    if ($requestInvoice && !$nif) {
+        jsonResponse(['error' => 'Para solicitar factura debes indicar un NIF/CIF válido'], 400);
     }
 
     // Find or create user
@@ -122,18 +121,16 @@ if ($method === 'POST' && $action === 'create') {
     $stmt = $pdo->prepare("
         INSERT INTO orders (
             order_code, user_id, package_qty, package_name, package_price,
-            name, email, phone, address, city, postal_code, observations,
-            billing_same, billing_name, billing_company, billing_cif, billing_address,
-            payment_method, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            name, nif, email, phone, address, city, postal_code, observations,
+            request_invoice, payment_method, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     try {
         $stmt->execute([
             $orderCode, $userId, $qty, $package['name'], $package['price'],
-            $name, $email, $phone, $address, $city, $postalCode, $observations,
-            $billingSame, $billingName, $billingCompany, $billingCif, $billingAddress,
-            $paymentMethod, $status
+            $name, $nif, $email, $phone, $address, $city, $postalCode, $observations,
+            $requestInvoice, $paymentMethod, $status
         ]);
 
         $response = [
@@ -193,9 +190,8 @@ if ($method === 'GET' && $action === 'detail') {
     $pdo = getDB();
     $stmt = $pdo->prepare("
         SELECT order_code, package_name, package_qty, package_price,
-               name, email, phone, address, city, postal_code, observations,
-               billing_same, billing_name, billing_company, billing_cif, billing_address,
-               payment_method, status, created_at
+               name, nif, email, phone, address, city, postal_code, observations,
+               request_invoice, payment_method, status, created_at
         FROM orders
         WHERE order_code = ?
     ");

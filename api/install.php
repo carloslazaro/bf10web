@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
     -- Delivery info
     name VARCHAR(255) NOT NULL,
+    nif VARCHAR(20),
     email VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     address VARCHAR(500) NOT NULL,
@@ -39,12 +40,8 @@ CREATE TABLE IF NOT EXISTS orders (
     postal_code VARCHAR(10) NOT NULL,
     observations TEXT,
 
-    -- Billing
-    billing_same TINYINT(1) DEFAULT 1,
-    billing_name VARCHAR(255),
-    billing_company VARCHAR(255),
-    billing_cif VARCHAR(20),
-    billing_address VARCHAR(500),
+    -- Invoice
+    request_invoice TINYINT(1) DEFAULT 0,
 
     -- Payment
     payment_method ENUM('card', 'transfer') NOT NULL,
