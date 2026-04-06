@@ -207,15 +207,59 @@ if ($method === 'GET' && $action === 'my-orders') {
 
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT order_code, package_name, package_price, status, payment_method,
-               address, city, created_at
-        FROM orders
-        WHERE user_id = ?
-        ORDER BY created_at DESC
+        SELECT o.id, o.order_code, o.package_name, o.package_qty, o.package_price,
+               o.status, o.payment_method, o.address, o.city, o.postal_code,
+               o.nif, o.request_invoice, o.observations, o.created_at, o.paid_at,
+               i.id AS invoice_id, i.invoice_number, i.issued_at AS invoice_issued_at
+        FROM orders o
+        LEFT JOIN invoices i ON i.order_id = o.id
+        WHERE o.user_id = ?
+        ORDER BY o.created_at DESC
     ");
     $stmt->execute([$_SESSION['user_id']]);
 
     jsonResponse(['orders' => $stmt->fetchAll()]);
+}
+
+// GET: Stats for current logged-in user (mi-cuenta dashboard cards)
+if ($method === 'GET' && $action === 'my-stats') {
+    if (!isLoggedIn()) {
+        jsonResponse(['error' => 'Debes iniciar sesión'], 401);
+    }
+
+    $pdo = getDB();
+    $uid = (int)$_SESSION['user_id'];
+
+    $stats = [
+        'total'      => 0,
+        'pagados'    => 0,
+        'pendientes' => 0,
+        'enviados'   => 0,
+        'gasto_total'  => 0.0,
+        'gasto_pagado' => 0.0,
+    ];
+
+    $stmt = $pdo->prepare("
+        SELECT status, COUNT(*) c, COALESCE(SUM(package_price),0) total
+        FROM orders WHERE user_id = ? GROUP BY status
+    ");
+    $stmt->execute([$uid]);
+    while ($r = $stmt->fetch()) {
+        $stats['total']       += (int)$r['c'];
+        $stats['gasto_total'] += (float)$r['total'];
+        if ($r['status'] === 'pendiente_pago') {
+            $stats['pendientes'] += (int)$r['c'];
+        } elseif ($r['status'] === 'confirmado') {
+            $stats['pagados']      += (int)$r['c'];
+            $stats['gasto_pagado'] += (float)$r['total'];
+        } elseif ($r['status'] === 'enviado') {
+            $stats['enviados']     += (int)$r['c'];
+            $stats['pagados']      += (int)$r['c'];
+            $stats['gasto_pagado'] += (float)$r['total'];
+        }
+    }
+
+    jsonResponse(['stats' => $stats]);
 }
 
 // GET: Get single order by code

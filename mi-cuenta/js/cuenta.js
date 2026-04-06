@@ -67,7 +67,24 @@
         dashboard.style.display = 'block';
         document.getElementById('user-name').textContent = user.name;
         document.getElementById('welcome-name').textContent = user.name.split(' ')[0];
+        loadStats();
         loadOrders();
+    }
+
+    function loadStats() {
+        fetch(API + 'orders.php?action=my-stats')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data.stats) return;
+                var s = data.stats;
+                document.getElementById('stat-total').textContent      = s.total;
+                document.getElementById('stat-pagados').textContent    = s.pagados;
+                document.getElementById('stat-pendientes').textContent = s.pendientes;
+                document.getElementById('stat-enviados').textContent   = s.enviados;
+                document.getElementById('stat-gasto').textContent =
+                    parseFloat(s.gasto_total).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+            })
+            .catch(function () {});
     }
 
     // Load orders
@@ -178,17 +195,39 @@
                     '<p>' + esc(order.postal_code) + ' ' + esc(order.city) + '</p>' +
                     (order.observations ? '<p><strong>Notas:</strong> ' + esc(order.observations) + '</p>' : '') +
                 '</div>' +
-                (wantsInvoice ?
-                    '<div class="cuenta__detail-section cuenta__detail-section--full">' +
-                        '<h3>Factura</h3>' +
-                        '<p>Solicitaste factura para este pedido.</p>' +
-                        '<a class="cuenta__btn cuenta__btn--primary" href="../api/invoices.php?action=download&code=' + encodeURIComponent(order.order_code) + '" target="_blank">📄 Descargar factura PDF</a>' +
-                    '</div>'
-                : '') +
+                '<div class="cuenta__detail-section cuenta__detail-section--full">' +
+                    '<h3>Documentos</h3>' +
+                    (wantsInvoice
+                        ? '<p>Solicitaste factura para este pedido.</p>'
+                        : '<p>Si necesitas factura con NIF/CIF, puedes emitirla aquí.</p>') +
+                    '<div class="cuenta__detail-actions">' +
+                        '<a class="cuenta__btn cuenta__btn--secondary" href="../api/invoices.php?action=download-receipt&code=' + encodeURIComponent(order.order_code) + '" target="_blank">📑 Descargar recibo</a>' +
+                        '<button class="cuenta__btn cuenta__btn--primary" onclick="bf10IssueAndDownload(\'' + encodeURIComponent(order.order_code) + '\')">📄 Descargar factura</button>' +
+                    '</div>' +
+                '</div>' +
             '</div>';
 
         modal.style.display = 'flex';
     }
+
+    // Issue invoice (if missing) then download
+    window.bf10IssueAndDownload = function (encodedCode) {
+        var code = decodeURIComponent(encodedCode);
+        fetch(API + 'invoices.php?action=issue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code, send: false }),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success || data.invoice) {
+                window.open(API + 'invoices.php?action=download&code=' + encodeURIComponent(code), '_blank');
+            } else {
+                alert(data.error || 'No se pudo emitir la factura. Llámanos al 674 78 34 79.');
+            }
+        })
+        .catch(function () { alert('Error de conexión'); });
+    };
 
     // Close modal
     document.getElementById('modal-close').addEventListener('click', closeModal);

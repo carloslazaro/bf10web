@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BF10 Admin — Panel de gestión de pedidos</title>
+    <title>BF10 Admin — Panel de gestión</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin-extra.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,7 +17,7 @@
     <div class="login" id="login-screen">
         <div class="login__card">
             <h1 class="login__title">BF10 Admin</h1>
-            <p class="login__subtitle">Panel de gestión de pedidos</p>
+            <p class="login__subtitle">Panel de gestión</p>
             <form id="login-form">
                 <div class="login__field">
                     <label for="login-email">Email</label>
@@ -34,7 +35,6 @@
 
     <!-- Dashboard -->
     <div class="dashboard" id="dashboard" style="display:none">
-        <!-- Header -->
         <header class="dash-header">
             <div class="dash-header__inner">
                 <h1 class="dash-header__title">BF10 Admin</h1>
@@ -45,68 +45,185 @@
             </div>
         </header>
 
-        <!-- Stats -->
-        <section class="dash-stats" id="stats-section">
-            <div class="dash-stat">
-                <span class="dash-stat__value" id="stat-total">0</span>
-                <span class="dash-stat__label">Pedidos totales</span>
-            </div>
-            <div class="dash-stat dash-stat--pending">
-                <span class="dash-stat__value" id="stat-pending">0</span>
-                <span class="dash-stat__label">Pendientes de pago</span>
-            </div>
-            <div class="dash-stat dash-stat--confirmed">
-                <span class="dash-stat__value" id="stat-confirmed">0</span>
-                <span class="dash-stat__label">Confirmados</span>
-            </div>
-            <div class="dash-stat dash-stat--shipped">
-                <span class="dash-stat__value" id="stat-shipped">0</span>
-                <span class="dash-stat__label">Enviados</span>
-            </div>
-            <div class="dash-stat dash-stat--revenue">
-                <span class="dash-stat__value" id="stat-revenue">0 €</span>
-                <span class="dash-stat__label">Facturación</span>
-            </div>
-        </section>
+        <!-- Tabs -->
+        <nav class="tabs">
+            <button class="tab tab--active" data-tab="orders">📦 Pedidos</button>
+            <button class="tab" data-tab="invoices">🧾 Facturas emitidas</button>
+            <button class="tab" data-tab="emails">✉️ Log de emails</button>
+        </nav>
 
-        <!-- Filters -->
-        <section class="dash-filters">
-            <button class="dash-filter dash-filter--active" data-status="">Todos</button>
-            <button class="dash-filter" data-status="pendiente_pago">Pendientes</button>
-            <button class="dash-filter" data-status="confirmado">Confirmados</button>
-            <button class="dash-filter" data-status="enviado">Enviados</button>
-        </section>
+        <!-- ============ ORDERS TAB ============ -->
+        <div class="tab-panel tab-panel--active" id="tab-orders">
 
-        <!-- Orders table -->
-        <section class="dash-orders">
-            <div class="dash-table-wrapper">
-                <table class="dash-table" id="orders-table">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Fecha</th>
-                            <th>Cliente</th>
-                            <th>Pack</th>
-                            <th>Precio</th>
-                            <th>Pago</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orders-body">
-                    </tbody>
-                </table>
-            </div>
-            <p class="dash-empty" id="orders-empty" style="display:none">No hay pedidos con este filtro</p>
-        </section>
+            <!-- Stats -->
+            <section class="dash-stats">
+                <div class="dash-stat">
+                    <span class="dash-stat__value" id="stat-total">0</span>
+                    <span class="dash-stat__label">Pedidos totales</span>
+                </div>
+                <div class="dash-stat dash-stat--pending">
+                    <span class="dash-stat__value" id="stat-pending">0</span>
+                    <span class="dash-stat__label">Pendientes</span>
+                </div>
+                <div class="dash-stat dash-stat--confirmed">
+                    <span class="dash-stat__value" id="stat-confirmed">0</span>
+                    <span class="dash-stat__label">Confirmados</span>
+                </div>
+                <div class="dash-stat dash-stat--shipped">
+                    <span class="dash-stat__value" id="stat-shipped">0</span>
+                    <span class="dash-stat__label">Enviados</span>
+                </div>
+                <div class="dash-stat dash-stat--revenue">
+                    <span class="dash-stat__value" id="stat-revenue">0 €</span>
+                    <span class="dash-stat__label">Facturación</span>
+                </div>
+                <div class="dash-stat">
+                    <span class="dash-stat__value" id="stat-month">0</span>
+                    <span class="dash-stat__label">Pedidos este mes</span>
+                </div>
+            </section>
+
+            <!-- Filters -->
+            <section class="dash-filters">
+                <button class="dash-filter dash-filter--active" data-status="">Todos</button>
+                <button class="dash-filter" data-status="pendiente_pago">Pendientes</button>
+                <button class="dash-filter" data-status="confirmado">Confirmados</button>
+                <button class="dash-filter" data-status="enviado">Enviados</button>
+            </section>
+
+            <section class="filter-bar">
+                <input type="search" id="filter-q" placeholder="🔍 Buscar código, nombre, email o teléfono…">
+                <select id="filter-source">
+                    <option value="">Todos los orígenes</option>
+                    <option value="web">Web</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <input type="date" id="filter-from" title="Desde">
+                <input type="date" id="filter-to" title="Hasta">
+                <button class="btn-action" id="btn-apply-filters">Filtrar</button>
+                <button class="btn-action" id="btn-clear-filters">Limpiar</button>
+                <button class="btn-action btn-csv" id="btn-export-csv">⬇ CSV</button>
+            </section>
+
+            <!-- Orders table -->
+            <section class="dash-orders">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table" id="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Fecha</th>
+                                <th>Origen</th>
+                                <th>Cliente</th>
+                                <th>Pack</th>
+                                <th>Precio</th>
+                                <th>Pago</th>
+                                <th>Estado</th>
+                                <th>Factura</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="orders-empty" style="display:none">No hay pedidos con este filtro</p>
+            </section>
+        </div>
+
+        <!-- ============ INVOICES TAB ============ -->
+        <div class="tab-panel" id="tab-invoices">
+            <section class="dash-stats">
+                <div class="dash-stat">
+                    <span class="dash-stat__value" id="stat-inv-total">0</span>
+                    <span class="dash-stat__label">Facturas emitidas</span>
+                </div>
+                <div class="dash-stat dash-stat--confirmed">
+                    <span class="dash-stat__value" id="stat-inv-sent">0</span>
+                    <span class="dash-stat__label">Enviadas por email</span>
+                </div>
+                <div class="dash-stat dash-stat--pending">
+                    <span class="dash-stat__value" id="stat-inv-pending">0</span>
+                    <span class="dash-stat__label">Sin enviar</span>
+                </div>
+            </section>
+
+            <section class="dash-filters">
+                <button class="dash-filter dash-filter--active" data-sent="">Todas</button>
+                <button class="dash-filter" data-sent="yes">Enviadas</button>
+                <button class="dash-filter" data-sent="no">Sin enviar</button>
+            </section>
+
+            <section class="dash-orders">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Nº Factura</th>
+                                <th>Fecha</th>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>NIF</th>
+                                <th>Total</th>
+                                <th>Email enviado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoices-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="invoices-empty" style="display:none">No hay facturas</p>
+            </section>
+        </div>
+
+        <!-- ============ EMAIL LOG TAB ============ -->
+        <div class="tab-panel" id="tab-emails">
+            <section class="dash-orders">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Pedido</th>
+                                <th>Destinatario</th>
+                                <th>Asunto</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emails-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="emails-empty" style="display:none">Sin entradas</p>
+            </section>
+        </div>
 
         <!-- Order detail modal -->
         <div class="modal" id="order-modal" style="display:none">
             <div class="modal__overlay" id="modal-overlay"></div>
-            <div class="modal__content">
+            <div class="modal__content modal__content--wide">
                 <button class="modal__close" id="modal-close">&times;</button>
                 <h2 class="modal__title">Detalle del pedido</h2>
                 <div id="modal-body"></div>
+            </div>
+        </div>
+
+        <!-- Issue invoice modal -->
+        <div class="modal" id="issue-modal" style="display:none">
+            <div class="modal__overlay" id="issue-overlay"></div>
+            <div class="modal__content">
+                <button class="modal__close" id="issue-close">&times;</button>
+                <h2 class="modal__title">Emitir factura</h2>
+                <p>Vas a emitir una factura fiscal para el pedido <strong id="issue-code"></strong>.</p>
+                <p style="color:#888;font-size:13px">Una vez emitida tendrá un número correlativo definitivo y no podrá borrarse.</p>
+                <label class="checkbox-label" style="display:flex;align-items:center;gap:10px;margin:20px 0">
+                    <input type="checkbox" id="issue-send"> Enviar por email al cliente al emitirla
+                </label>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                    <button class="btn-action" id="issue-cancel">Cancelar</button>
+                    <button class="btn-action btn-primary" id="issue-confirm">Emitir factura</button>
+                </div>
             </div>
         </div>
     </div>
