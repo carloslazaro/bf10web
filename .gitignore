@@ -1,7 +1,12 @@
-# Secrets
+# Secrets / credentials
 api/secrets.php
+api/dbtest.php
+deploy_ftp.py
+
+# Logs
 api/*.log
 api/stripe_webhook.log
+*.log
 
 # Migration scripts (temporary)
 api/migrate_*.php
@@ -9,4 +14,13 @@ api/migrate_*.php
 # Editor / OS
 .DS_Store
 Thumbs.db
-*.log
+.claude/
+.vscode/
+
+# Heavy binary assets — not part of deployable site
+*.psd
+*.ai
+LT-*.pdf
+
+# Test/scratch
+comparativa_logos.html
