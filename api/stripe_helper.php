@@ -62,8 +62,12 @@ function stripeCreateCheckoutSession($order) {
         'metadata[order_code]' => $order['order_code'],
         'metadata[order_id]' => $order['id'],
         'metadata[package_qty]' => $order['package_qty'],
-        'success_url' => SITE_URL . '/?pedido=' . $order['order_code'] . '&pago=ok',
-        'cancel_url' => SITE_URL . '/?pedido=' . $order['order_code'] . '&pago=cancelado#pedido',
+        'success_url' => (!empty($order['source']) && $order['source'] === 'whatsapp')
+            ? SITE_URL . '/pago-confirmado.html?code=' . $order['order_code'] . '&src=wa'
+            : SITE_URL . '/?pedido=' . $order['order_code'] . '&pago=ok',
+        'cancel_url' => (!empty($order['source']) && $order['source'] === 'whatsapp')
+            ? SITE_URL . '/pago-confirmado.html?code=' . $order['order_code'] . '&src=wa&status=cancel'
+            : SITE_URL . '/?pedido=' . $order['order_code'] . '&pago=cancelado#pedido',
         'locale' => 'es',
         'billing_address_collection' => 'auto',
     ];

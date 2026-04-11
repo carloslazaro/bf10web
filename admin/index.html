@@ -3,25 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BF10 Admin — Panel de gestión</title>
+    <title>Servisaco Admin — Panel de gestión</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/admin-extra.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+    /* Ranking gaming-style */
+    .ranking-period{background:#f0f0f0;border:1px solid #ddd;padding:6px 16px;border-radius:20px;font-weight:600;cursor:pointer;transition:all .2s}
+    .ranking-period--active{background:linear-gradient(135deg,#FFD700,#FFA000);color:#333;border-color:#FFA000;box-shadow:0 2px 8px rgba(255,160,0,.3)}
+    .podium-card{text-align:center;border-radius:12px;padding:16px 12px 12px;min-width:90px;position:relative;transition:transform .2s}
+    .podium-card:hover{transform:translateY(-4px)}
+    .podium-1{background:linear-gradient(135deg,#FFD700 0%,#FFC107 100%);color:#333;box-shadow:0 4px 20px rgba(255,193,7,.4)}
+    .podium-2{background:linear-gradient(135deg,#B0BEC5 0%,#90A4AE 100%);color:#333;box-shadow:0 4px 16px rgba(176,190,197,.4)}
+    .podium-3{background:linear-gradient(135deg,#BCAAA4 0%,#A1887F 100%);color:#333;box-shadow:0 4px 16px rgba(161,136,127,.4)}
+    .podium-rank{font-size:28px;font-weight:800;line-height:1}
+    .podium-name{font-size:14px;font-weight:700;margin:6px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px}
+    .podium-stat{font-size:20px;font-weight:800}
+    .podium-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.7}
+    .rank-row{display:flex;align-items:center;padding:10px 14px;border-radius:8px;margin-bottom:6px;background:#f9f9f9;border:1px solid #eee;transition:background .15s}
+    .rank-row:hover{background:#f0f0f0}
+    .rank-pos{font-size:18px;font-weight:800;width:36px;text-align:center;color:#777}
+    .rank-name{flex:1;font-weight:600;font-size:14px;margin-left:8px}
+    .rank-stats{display:flex;gap:16px;font-size:13px;color:#555}
+    .rank-stats span{display:flex;flex-direction:column;align-items:center}
+    .rank-stats .rv{font-weight:700;font-size:16px;color:#333}
+    .rank-stats .rl{font-size:10px;text-transform:uppercase;color:#999;letter-spacing:.3px}
+    </style>
 </head>
 <body>
 
     <!-- Login -->
     <div class="login" id="login-screen">
         <div class="login__card">
-            <h1 class="login__title">BF10 Admin</h1>
+            <h1 class="login__title">Servisaco Admin</h1>
             <p class="login__subtitle">Panel de gestión</p>
             <form id="login-form">
                 <div class="login__field">
                     <label for="login-email">Email</label>
-                    <input type="email" id="login-email" required placeholder="admin@bf10.es">
+                    <input type="email" id="login-email" required placeholder="admin@servisaco.es">
                 </div>
                 <div class="login__field">
                     <label for="login-pass">Contraseña</label>
@@ -37,9 +59,15 @@
     <div class="dashboard" id="dashboard" style="display:none">
         <header class="dash-header">
             <div class="dash-header__inner">
-                <h1 class="dash-header__title">BF10 Admin</h1>
-                <div class="dash-header__actions">
-                    <span id="user-name"></span>
+                <h1 class="dash-header__title">Servisaco Admin</h1>
+                <div class="dash-header__actions" style="display:flex;align-items:center;gap:8px">
+                    <nav style="display:flex;gap:4px;margin-right:8px">
+                        <a href="../facturacion/" style="color:#fff;text-decoration:none;background:rgba(255,255,255,.12);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;transition:background .2s;border:1px solid rgba(255,255,255,.1)" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">💰 Facturación</a>
+                        <a href="../reporting/" style="color:#fff;text-decoration:none;background:rgba(255,255,255,.12);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;transition:background .2s;border:1px solid rgba(255,255,255,.1)" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">📊 Reporting</a>
+                        <a href="../rutas/" style="color:#fff;text-decoration:none;background:rgba(255,255,255,.12);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;transition:background .2s;border:1px solid rgba(255,255,255,.1)" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">🗺️ Rutas</a>
+                    </nav>
+                    <span style="color:rgba(255,255,255,.3);font-size:18px;margin:0 4px">|</span>
+                    <span id="user-name" style="font-size:13px;color:rgba(255,255,255,.8)"></span>
                     <button class="dash-header__logout" id="logout-btn">Cerrar sesión</button>
                 </div>
             </div>
@@ -47,13 +75,24 @@
 
         <!-- Tabs -->
         <nav class="tabs">
-            <button class="tab tab--active" data-tab="orders">📦 Pedidos</button>
-            <button class="tab" data-tab="invoices">🧾 Facturas emitidas</button>
-            <button class="tab" data-tab="emails">✉️ Log de emails</button>
+            <button class="tab tab--active" data-tab="albaranes">📋 Ventas</button>
+            <button class="tab" data-tab="stock">📊 Stock</button>
+            <button class="tab" data-tab="pedidos">📦 Pedidos</button>
+            <button class="tab" data-tab="customers">👥 Clientes</button>
+            <button class="tab" data-tab="orders">🛒 Compras Web</button>
+            <div class="tab-dropdown">
+                <button class="tab" id="tab-otros-btn">⚙️ Otros ▾</button>
+                <div class="tab-dropdown__menu" id="tab-otros-menu">
+                    <button class="tab-dropdown__item" data-tab="users">👥 Usuarios</button>
+                    <button class="tab-dropdown__item" data-tab="camiones">🚛 Camiones</button>
+                    <button class="tab-dropdown__item" data-tab="emails">✉️ Log de emails</button>
+                    <button class="tab-dropdown__item" data-tab="ranking">🏆 Ranking</button>
+                </div>
+            </div>
         </nav>
 
         <!-- ============ ORDERS TAB ============ -->
-        <div class="tab-panel tab-panel--active" id="tab-orders">
+        <div class="tab-panel" id="tab-orders">
 
             <!-- Stats -->
             <section class="dash-stats">
@@ -89,6 +128,7 @@
                 <button class="dash-filter" data-status="pendiente_pago">Pendientes</button>
                 <button class="dash-filter" data-status="confirmado">Confirmados</button>
                 <button class="dash-filter" data-status="enviado">Enviados</button>
+                <button class="dash-filter" data-status="recogida">Recogidos ♻️</button>
             </section>
 
             <section class="filter-bar">
@@ -104,6 +144,7 @@
                 <button class="btn-action" id="btn-apply-filters">Filtrar</button>
                 <button class="btn-action" id="btn-clear-filters">Limpiar</button>
                 <button class="btn-action btn-csv" id="btn-export-csv">⬇ CSV</button>
+                <button class="btn-action btn-primary" id="btn-create-order">＋ Crear pedido</button>
             </section>
 
             <!-- Orders table -->
@@ -120,7 +161,7 @@
                                 <th>Precio</th>
                                 <th>Pago</th>
                                 <th>Estado</th>
-                                <th>Factura</th>
+                                <th>Factura solicitada</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -131,49 +172,84 @@
             </section>
         </div>
 
-        <!-- ============ INVOICES TAB ============ -->
-        <div class="tab-panel" id="tab-invoices">
-            <section class="dash-stats">
-                <div class="dash-stat">
-                    <span class="dash-stat__value" id="stat-inv-total">0</span>
-                    <span class="dash-stat__label">Facturas emitidas</span>
-                </div>
-                <div class="dash-stat dash-stat--confirmed">
-                    <span class="dash-stat__value" id="stat-inv-sent">0</span>
-                    <span class="dash-stat__label">Enviadas por email</span>
-                </div>
-                <div class="dash-stat dash-stat--pending">
-                    <span class="dash-stat__value" id="stat-inv-pending">0</span>
-                    <span class="dash-stat__label">Sin enviar</span>
-                </div>
+        <!-- ============ CUSTOMERS TAB ============ -->
+        <div class="tab-panel" id="tab-customers">
+            <section class="filter-bar">
+                <input type="search" id="cust-q" placeholder="🔍 Buscar cliente por nombre, teléfono, email o NIF…">
+                <button class="btn-action" id="btn-cust-search">Buscar</button>
+                <button class="btn-action" id="btn-cust-clear">Limpiar</button>
             </section>
-
-            <section class="dash-filters">
-                <button class="dash-filter dash-filter--active" data-sent="">Todas</button>
-                <button class="dash-filter" data-sent="yes">Enviadas</button>
-                <button class="dash-filter" data-sent="no">Sin enviar</button>
-            </section>
-
             <section class="dash-orders">
                 <div class="dash-table-wrapper">
                     <table class="dash-table">
                         <thead>
                             <tr>
-                                <th>Nº Factura</th>
-                                <th>Fecha</th>
-                                <th>Pedido</th>
-                                <th>Cliente</th>
+                                <th>Nombre</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
                                 <th>NIF</th>
-                                <th>Total</th>
-                                <th>Email enviado</th>
+                                <th>Ciudad</th>
+                                <th>Pedidos</th>
+                                <th>Gasto total</th>
+                                <th>Último pedido</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="invoices-body"></tbody>
+                        <tbody id="customers-body"></tbody>
                     </table>
                 </div>
-                <p class="dash-empty" id="invoices-empty" style="display:none">No hay facturas</p>
+                <p class="dash-empty" id="customers-empty" style="display:none">No hay clientes</p>
             </section>
+        </div>
+
+        <!-- Invoices tab removed — now in /facturacion/ -->
+
+        <!-- ============ USERS TAB ============ -->
+        <div class="tab-panel" id="tab-users">
+            <section class="filter-bar">
+                <button class="btn-action btn-primary" id="btn-user-new">+ Nuevo usuario</button>
+            </section>
+            <section class="dash-orders">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>PIN</th>
+                                <th>Contraseña</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="users-empty" style="display:none">No hay usuarios</p>
+            </section>
+
+            <section class="dash-orders" style="margin-top:24px">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                    <h3 style="margin:0">Conductores (tabla conductores)</h3>
+                    <button class="btn btn--sm btn--primary" onclick="showConductorModal()">+ Nuevo Conductor</button>
+                </div>
+                <div class="dash-table-wrapper">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>PIN</th>
+                                <th>Camión habitual</th>
+                                <th>Activo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conductores-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="conductores-empty" style="display:none">No hay conductores</p>
+            </section>
+
         </div>
 
         <!-- ============ EMAIL LOG TAB ============ -->
@@ -199,13 +275,463 @@
             </section>
         </div>
 
+        <!-- ============ RANKING TAB ============ -->
+        <div class="tab-panel" id="tab-ranking">
+            <section class="dash-orders">
+                <div style="text-align:center;margin-bottom:16px">
+                    <h2 style="margin:0 0 12px;font-size:24px">🏆 Ranking Conductores</h2>
+                    <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+                        <button class="btn ranking-period ranking-period--active" data-period="day">Hoy</button>
+                        <button class="btn ranking-period" data-period="week">Semana</button>
+                        <button class="btn ranking-period" data-period="month">Mes</button>
+                        <button class="btn ranking-period" data-period="year">Año</button>
+                    </div>
+                    <p id="ranking-range" style="color:#777;font-size:12px;margin-top:4px"></p>
+                </div>
+                <div id="ranking-podium" style="display:flex;justify-content:center;align-items:flex-end;gap:12px;margin-bottom:20px;min-height:180px"></div>
+                <div id="ranking-list"></div>
+                <p class="dash-empty" id="ranking-empty" style="display:none">Sin datos para este periodo</p>
+            </section>
+        </div>
+
+        <!-- ============ CAMIONES TAB ============ -->
+        <div class="tab-panel" id="tab-camiones">
+            <section class="dash-orders">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+                    <h3 style="margin:0">Flota de Camiones</h3>
+                    <button class="btn btn--primary" onclick="showCamionModal()">+ Nuevo Camion</button>
+                </div>
+                <div class="dash-table-wrapper">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Matricula</th>
+                                <th>Modelo</th>
+                                <th>Conductor habitual</th>
+                                <th>Cap. m3</th>
+                                <th>Cap. sacas</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="camiones-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="camiones-empty" style="display:none">Sin camiones registrados</p>
+            </section>
+
+            <section class="dash-orders" style="margin-top:20px">
+                <h3 style="margin-bottom:12px">Asignacion Conductor-Camion</h3>
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+                    <label>Fecha: <input type="date" id="assign-fecha" style="padding:6px 8px;border-radius:6px;border:1px solid var(--border,#ddd)"></label>
+                    <button class="btn btn--primary" onclick="loadAssignments()">Cargar</button>
+                    <button class="btn" onclick="showAssignModal()">+ Asignar</button>
+                </div>
+                <div class="dash-table-wrapper">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Camion</th>
+                                <th>Conductor</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assign-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="assign-empty" style="display:none">Sin asignaciones para esta fecha</p>
+            </section>
+        </div>
+
+        <!-- ============ STOCK TAB ============ -->
+        <div class="tab-panel" id="tab-stock">
+            <!-- Stock summary cards -->
+            <section class="dash-stats" id="stock-summary"></section>
+
+            <!-- Filters + add button -->
+            <section class="filter-bar">
+                <select id="stock-marca">
+                    <option value="">Todas las marcas</option>
+                    <option value="BF10">BF10</option>
+                    <option value="SERVISACO">SERVISACO</option>
+                    <option value="ATUSACO">ATUSACO</option>
+                    <option value="ATUSACO_LUISFER">ATUSACO LUISFER</option>
+                    <option value="ATUSACO_HERREROCON">ATUSACO HERREROCON</option>
+                    <option value="ATUSACO_COSASCASA">ATUSACO COSAS CASA</option>
+                    <option value="ECOSACO">ECOSACO</option>
+                    <option value="SACAS_BLANCAS">SACAS BLANCAS</option>
+                </select>
+                <select id="stock-tipo">
+                    <option value="">Entradas y salidas</option>
+                    <option value="entrada">Entradas</option>
+                    <option value="salida">Salidas</option>
+                </select>
+                <select id="stock-motivo">
+                    <option value="">Todos los motivos</option>
+                    <option value="compra">Compra</option>
+                    <option value="devolucion">Devolución</option>
+                    <option value="venta_albaran">Venta (albarán)</option>
+                    <option value="ajuste">Ajuste</option>
+                    <option value="otro">Otro</option>
+                </select>
+                <input type="date" id="stock-desde" title="Desde">
+                <input type="date" id="stock-hasta" title="Hasta">
+                <button class="btn-action" id="btn-stock-filter">Filtrar</button>
+                <button class="btn-action" id="btn-stock-clear">Limpiar</button>
+                <button class="btn-action btn-primary" id="btn-stock-add">+ Registrar movimiento</button>
+                <button class="btn-action" id="btn-stock-trash">Papelera</button>
+            </section>
+
+            <!-- Movements table -->
+            <section class="dash-orders">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table" id="stock-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Marca</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Motivo</th>
+                                <th>Numeración</th>
+                                <th>Albarán</th>
+                                <th>Usuario</th>
+                                <th>Comentarios</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="stock-empty" style="display:none">Sin movimientos de stock</p>
+            </section>
+        </div>
+
+        <!-- ============ PEDIDOS PROVEEDOR TAB ============ -->
+        <div class="tab-panel" id="tab-pedidos">
+            <section class="filter-bar">
+                <button class="btn-action btn-primary" id="btn-ped-new">+ Nuevo pedido</button>
+                <select id="ped-marca">
+                    <option value="">Todas las marcas</option>
+                    <option value="BF10">BF10</option>
+                    <option value="SERVISACO">SERVISACO</option>
+                    <option value="ATUSACO">ATUSACO</option>
+                    <option value="ATUSACO_LUISFER">ATUSACO LUISFER</option>
+                    <option value="ATUSACO_HERREROCON">ATUSACO HERREROCON</option>
+                    <option value="ATUSACO_COSASCASA">ATUSACO COSAS CASA</option>
+                    <option value="ECOSACO">ECOSACO</option>
+                    <option value="SACAS_BLANCAS">SACAS BLANCAS</option>
+                </select>
+                <select id="ped-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="borrador">Borrador</option>
+                    <option value="pedido_hecho">Pedido hecho</option>
+                    <option value="en_almacen_proveedor">En almacén proveedor</option>
+                </select>
+                <button class="btn-action" id="btn-ped-filter">Filtrar</button>
+                <button class="btn-action" id="btn-ped-clear">Limpiar</button>
+                <button class="btn-action" id="btn-ped-trash">Papelera</button>
+            </section>
+
+            <!-- Active orders table -->
+            <div class="ped-section-header">📋 Pedidos realizados</div>
+            <section class="dash-orders" style="margin-top:8px">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table" id="ped-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Estado</th>
+                                <th>Marca</th>
+                                <th>Cantidad</th>
+                                <th>Numeración</th>
+                                <th>Proveedor</th>
+                                <th>F. Pedido</th>
+                                <th>F. Prevista</th>
+                                <th>Comentarios</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ped-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="ped-empty" style="display:none">No hay pedidos activos</p>
+            </section>
+
+            <!-- Received orders section -->
+            <div id="ped-recibidos-section" style="margin-top:24px">
+                <div class="ped-section-header ped-section-header--received">✅ Pedidos recibidos</div>
+                <section class="dash-orders" style="margin-top:8px">
+                    <div class="dash-table-wrapper">
+                        <table class="dash-table" id="ped-rec-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Marca</th>
+                                    <th>Cantidad</th>
+                                    <th>Numeración</th>
+                                    <th>Proveedor</th>
+                                    <th>F. Pedido</th>
+                                    <th>F. Prevista</th>
+                                    <th>F. Real</th>
+                                    <th>Comentarios</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ped-rec-body"></tbody>
+                        </table>
+                    </div>
+                    <p class="dash-empty" id="ped-rec-empty" style="display:none">No hay pedidos recibidos</p>
+                </section>
+            </div>
+        </div>
+
+        <!-- Pedido proveedor modal -->
+        <div class="modal" id="ped-modal" style="display:none">
+            <div class="modal__overlay" id="ped-overlay"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="ped-modal-title">Nuevo pedido a proveedor</h2>
+                    <button class="modal__close" id="ped-close">&times;</button>
+                </div>
+                <form id="ped-form" class="modal__body">
+                    <input type="hidden" id="ped-f-id">
+                    <div class="form-row">
+                        <label>Marca *
+                            <select id="ped-f-marca" required>
+                                <option value="BF10">BF10</option>
+                                <option value="SERVISACO">SERVISACO</option>
+                                <option value="ATUSACO">ATUSACO</option>
+                                <option value="ATUSACO_LUISFER">ATUSACO LUISFER</option>
+                                <option value="ATUSACO_HERREROCON">ATUSACO HERREROCON</option>
+                                <option value="ATUSACO_COSASCASA">ATUSACO COSAS CASA</option>
+                                <option value="ECOSACO">ECOSACO</option>
+                            </select>
+                        </label>
+                        <label>Cantidad *<input type="number" id="ped-f-cantidad" min="1" required></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Numeración inicial<input type="number" id="ped-f-num-ini" min="0"></label>
+                        <label>Numeración final<input type="number" id="ped-f-num-fin" min="0"></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Proveedor<input type="text" id="ped-f-proveedor"></label>
+                        <label>Estado
+                            <select id="ped-f-estado">
+                                <option value="borrador">Borrador</option>
+                                <option value="pedido_hecho">Pedido hecho</option>
+                                <option value="en_almacen_proveedor">En almacén proveedor</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label>Fecha pedido<input type="date" id="ped-f-fecha"></label>
+                        <label>Fecha prevista entrega<input type="date" id="ped-f-prevista"></label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Comentarios<textarea id="ped-f-comentarios" rows="2"></textarea></label>
+                    </div>
+                    <p class="form-error" id="ped-error" style="display:none"></p>
+                    <div class="form-actions">
+                        <button type="button" class="btn-modal-cancel" id="ped-cancel">Cancelar</button>
+                        <button type="submit" class="btn-modal-save">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============ ALBARANES TAB ============ -->
+        <div class="tab-panel tab-panel--active" id="tab-albaranes">
+            <section class="dash-stats" id="alb-stats"></section>
+
+            <section class="filter-bar">
+                <button class="btn-action btn-primary" id="btn-alb-new">+ Nuevo albarán</button>
+                <input type="date" id="alb-desde" title="Desde">
+                <input type="date" id="alb-hasta" title="Hasta">
+                <select id="alb-pagado">
+                    <option value="">Todos</option>
+                    <option value="1">Pagados</option>
+                    <option value="0">No pagados</option>
+                </select>
+                <button class="btn-action" id="btn-alb-filter">Filtrar</button>
+                <button class="btn-action" id="btn-alb-clear">Limpiar</button>
+                <button class="btn-action" id="btn-alb-trash">Papelera</button>
+            </section>
+
+            <section class="dash-orders">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table" id="alb-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Dirección</th>
+                                <th>Marca</th>
+                                <th>Sacas</th>
+                                <th>Importe</th>
+                                <th>Pago</th>
+                                <th>Pagado</th>
+                                <th>Comercial</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alb-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="alb-empty" style="display:none">No hay albaranes</p>
+            </section>
+        </div>
+
+        <!-- Albaran modal -->
+        <div class="modal" id="alb-modal" style="display:none">
+            <div class="modal__overlay" id="alb-overlay"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="alb-modal-title">Nuevo albarán</h2>
+                    <button class="modal__close" id="alb-close">&times;</button>
+                </div>
+                <form id="alb-form" class="modal__body">
+                    <input type="hidden" id="alb-f-id">
+                    <div class="form-row">
+                        <label>Cliente *
+                            <div class="client-search-wrap" style="position:relative">
+                                <input type="text" id="alb-f-cliente" required autocomplete="off" placeholder="Buscar cliente...">
+                                <input type="hidden" id="alb-f-cliente-id">
+                                <div id="alb-client-dropdown" class="client-dropdown" style="display:none"></div>
+                            </div>
+                        </label>
+                        <label>Fecha entrega *<input type="date" id="alb-f-fecha" required></label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Dirección de envío<input type="text" id="alb-f-direccion" placeholder="Calle, número, ciudad..."></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Marca
+                            <select id="alb-f-marca">
+                                <option value="BF10">BF10</option>
+                                <option value="SERVISACO">Servisaco</option>
+                                <option value="ATUSACO">Atusaco</option>
+                                <option value="ATUSACO_LUISFER">Atusaco Luisfer</option>
+                                <option value="ATUSACO_HERREROCON">Atusaco Herrerocon</option>
+                                <option value="ATUSACO_COSASCASA">Atusaco Cosas Casa</option>
+                                <option value="ECOSACO">Eco Saco</option>
+                                <option value="SACAS_BLANCAS">Sacas Blancas</option>
+                            </select>
+                        </label>
+                        <label>Nº sacas *<input type="number" id="alb-f-sacas" min="1" required></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Numeración inicial<input type="number" id="alb-f-num-ini" min="0"></label>
+                        <label>Numeración final<input type="number" id="alb-f-num-fin" min="0"></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Precio por saca (EUR)<input type="number" id="alb-f-precio" min="0" step="0.01"></label>
+                        <label>Importe total (EUR)<input type="number" id="alb-f-importe" min="0" step="0.01" readonly></label>
+                    </div>
+                    <hr class="form-divider">
+                    <div class="form-row">
+                        <label>Forma de pago
+                            <select id="alb-f-pago">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta">Tarjeta</option>
+                                <option value="transferencia">Transferencia</option>
+                            </select>
+                        </label>
+                        <label class="toggle-check" style="align-self:end">
+                            <input type="checkbox" id="alb-f-pagado"> Pagado
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Comentarios<textarea id="alb-f-comentarios" rows="2"></textarea></label>
+                    </div>
+                    <p class="form-error" id="alb-error" style="display:none"></p>
+                    <div class="form-actions">
+                        <button type="button" class="btn-modal-cancel" id="alb-cancel">Cancelar</button>
+                        <button type="submit" class="btn-modal-save">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Albaran detail modal -->
+        <div class="modal" id="alb-detail-modal" style="display:none">
+            <div class="modal__overlay" id="alb-detail-overlay"></div>
+            <div class="modal__content modal__content--wide">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="alb-detail-title">Detalle del albarán</h2>
+                    <button class="modal__close" id="alb-detail-close">&times;</button>
+                </div>
+                <div id="alb-detail-body" class="modal__body"></div>
+            </div>
+        </div>
+
+        <!-- Stock movement modal -->
+        <div class="modal" id="stock-modal" style="display:none">
+            <div class="modal__overlay" id="stock-overlay"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="stock-modal-title">Registrar movimiento de stock</h2>
+                    <button class="modal__close" id="stock-close">&times;</button>
+                </div>
+                <form id="stock-form" class="modal__body">
+                    <div class="form-row">
+                        <label>Marca *
+                            <select name="marca" id="stock-f-marca" required>
+                                <option value="BF10">BF10</option>
+                                <option value="SERVISACO">SERVISACO</option>
+                                <option value="ATUSACO">ATUSACO</option>
+                                <option value="ATUSACO_LUISFER">ATUSACO LUISFER</option>
+                                <option value="ATUSACO_HERREROCON">ATUSACO HERREROCON</option>
+                                <option value="ATUSACO_COSASCASA">ATUSACO COSAS CASA</option>
+                                <option value="ECOSACO">ECOSACO</option>
+                            </select>
+                        </label>
+                        <label>Tipo *
+                            <select name="tipo" id="stock-f-tipo" required>
+                                <option value="entrada">Entrada</option>
+                                <option value="salida">Salida</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label>Cantidad de sacas *<input type="number" name="cantidad" id="stock-f-cantidad" min="1" required></label>
+                        <label>Motivo *
+                            <select name="motivo" id="stock-f-motivo" required>
+                                <option value="compra">Compra</option>
+                                <option value="devolucion">Devolución</option>
+                                <option value="ajuste">Ajuste</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label>Numeración inicial<input type="number" name="numeracion_inicial" id="stock-f-num-ini"></label>
+                        <label>Numeración final<input type="number" name="numeracion_final" id="stock-f-num-fin"></label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Comentarios<textarea name="comentarios" id="stock-f-comentarios" rows="2"></textarea></label>
+                    </div>
+                    <p class="form-error" id="stock-error" style="display:none"></p>
+                    <div class="form-actions">
+                        <button type="button" class="btn-modal-cancel" id="stock-cancel">Cancelar</button>
+                        <button type="submit" class="btn-modal-save">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Order detail modal -->
         <div class="modal" id="order-modal" style="display:none">
             <div class="modal__overlay" id="modal-overlay"></div>
             <div class="modal__content modal__content--wide">
-                <button class="modal__close" id="modal-close">&times;</button>
-                <h2 class="modal__title">Detalle del pedido</h2>
-                <div id="modal-body"></div>
+                <div class="modal__header">
+                    <h2 class="modal__title">Detalle del pedido</h2>
+                    <button class="modal__close" id="modal-close">&times;</button>
+                </div>
+                <div id="modal-body" class="modal__body"></div>
             </div>
         </div>
 
@@ -213,17 +739,234 @@
         <div class="modal" id="issue-modal" style="display:none">
             <div class="modal__overlay" id="issue-overlay"></div>
             <div class="modal__content">
-                <button class="modal__close" id="issue-close">&times;</button>
-                <h2 class="modal__title">Emitir factura</h2>
-                <p>Vas a emitir una factura fiscal para el pedido <strong id="issue-code"></strong>.</p>
-                <p style="color:#888;font-size:13px">Una vez emitida tendrá un número correlativo definitivo y no podrá borrarse.</p>
-                <label class="checkbox-label" style="display:flex;align-items:center;gap:10px;margin:20px 0">
-                    <input type="checkbox" id="issue-send"> Enviar por email al cliente al emitirla
-                </label>
-                <div style="display:flex;gap:10px;justify-content:flex-end">
-                    <button class="btn-action" id="issue-cancel">Cancelar</button>
-                    <button class="btn-action btn-primary" id="issue-confirm">Emitir factura</button>
+                <div class="modal__header">
+                    <h2 class="modal__title">Emitir factura</h2>
+                    <button class="modal__close" id="issue-close">&times;</button>
                 </div>
+                <div class="modal__body">
+                    <p style="font-size:0.92rem;color:#475569;line-height:1.6">Vas a emitir una factura fiscal para el pedido <strong id="issue-code"></strong>.</p>
+                    <p style="color:#94a3b8;font-size:0.82rem;margin-top:6px">Una vez emitida tendrá un número correlativo definitivo y no podrá borrarse.</p>
+                    <label class="toggle-check" style="margin:20px 0">
+                        <input type="checkbox" id="issue-send"> Enviar por email al cliente al emitirla
+                    </label>
+                    <div class="form-actions">
+                        <button class="btn-modal-cancel" id="issue-cancel">Cancelar</button>
+                        <button class="btn-modal-save" id="issue-confirm">Emitir factura</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Create order modal -->
+        <div class="modal" id="create-modal" style="display:none">
+            <div class="modal__overlay" id="create-overlay"></div>
+            <div class="modal__content modal__content--wide">
+                <div class="modal__header">
+                    <h2 class="modal__title">Crear pedido</h2>
+                    <button class="modal__close" id="create-close">&times;</button>
+                </div>
+                <form id="create-form" class="create-form modal__body">
+                    <div class="form-row">
+                        <label>Marca *
+                            <select name="brand" id="create-brand" required>
+                                <option value="BF10">BF10 Sacos de Escombro</option>
+                                <option value="SERVISACO">Servisaco</option>
+                                <option value="ATUSACO">Atusaco</option>
+                                <option value="ATUSACO_LUISFER">Atusaco Luisfer</option>
+                                <option value="ATUSACO_HERREROCON">Atusaco Herrerocon</option>
+                                <option value="ATUSACO_COSASCASA">Atusaco Cosas Casa</option>
+                                <option value="ECOSACO">Eco Saco</option>
+                                <option value="SACAS_BLANCAS">Sacas Blancas</option>
+                            </select>
+                        </label>
+                        <label>Pack *
+                            <select name="package_qty" required>
+                                <option value="10">10 sacas — 450,00 €</option>
+                                <option value="25">25 sacas — 1.012,50 €</option>
+                                <option value="50">50 sacas — 1.912,50 €</option>
+                            </select>
+                        </label>
+                        <label>Forma de pago *
+                            <select name="payment_method" required>
+                                <option value="cash">Efectivo</option>
+                                <option value="transfer">Transferencia</option>
+                                <option value="card">Tarjeta (Stripe)</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <h3 class="form-section">Datos del cliente</h3>
+                    <div class="form-row">
+                        <label>Nombre *<input type="text" name="name" required></label>
+                        <label>NIF/CIF<input type="text" name="nif"></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Email<input type="email" name="email"></label>
+                        <label>Teléfono *<input type="tel" name="phone" required></label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Dirección<input type="text" name="address"></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Código postal<input type="text" name="postal_code"></label>
+                        <label>Ciudad<input type="text" name="city"></label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Observaciones<textarea name="observations" rows="2"></textarea></label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Notas internas (no las ve el cliente)<textarea name="internal_notes" rows="2"></textarea></label>
+                    </div>
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:10px;margin:10px 0">
+                        <input type="checkbox" name="request_invoice" value="1"> Emitir factura fiscal con NIF
+                    </label>
+
+                    <p class="form-error" id="create-error" style="display:none"></p>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-modal-cancel" id="create-cancel">Cancelar</button>
+                        <button type="submit" class="btn-modal-save" id="create-submit">Crear pedido</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Customer detail modal -->
+        <div class="modal" id="customer-modal" style="display:none">
+            <div class="modal__overlay" id="customer-overlay"></div>
+            <div class="modal__content modal__content--wide">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="customer-modal-title">Ficha del cliente</h2>
+                    <button class="modal__close" id="customer-close">&times;</button>
+                </div>
+                <div id="customer-body" class="modal__body"></div>
+            </div>
+        </div>
+        <!-- Camion modal -->
+        <div class="modal" id="camion-modal" style="display:none">
+            <div class="modal__overlay" onclick="document.getElementById('camion-modal').style.display='none'"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="camion-modal-title">Nuevo Camion</h2>
+                    <button class="modal__close" onclick="document.getElementById('camion-modal').style.display='none'">&times;</button>
+                </div>
+                <form id="camion-form" class="modal__body">
+                    <input type="hidden" id="camion-f-id">
+                    <div class="form-row">
+                        <label>Matricula *<input type="text" id="camion-f-matricula" required placeholder="1234ABC"></label>
+                        <label>Modelo<input type="text" id="camion-f-modelo" placeholder="IVECO ML130521K..."></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Conductor habitual
+                            <select id="camion-f-conductor"><option value="">— Sin conductor —</option></select>
+                        </label>
+                        <label>Capacidad m3<input type="number" id="camion-f-m3" step="0.01" min="0"></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Capacidad sacas<input type="number" id="camion-f-sacas" min="0"></label>
+                    </div>
+                    <button type="submit" class="btn btn--primary" style="width:100%;margin-top:8px">Guardar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Assign conductor-camion modal -->
+        <div class="modal" id="assign-modal" style="display:none">
+            <div class="modal__overlay" onclick="document.getElementById('assign-modal').style.display='none'"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title">Asignar Conductor a Camion</h2>
+                    <button class="modal__close" onclick="document.getElementById('assign-modal').style.display='none'">&times;</button>
+                </div>
+                <form id="assign-form" class="modal__body">
+                    <div class="form-row">
+                        <label>Camion *
+                            <select id="assign-f-camion" required></select>
+                        </label>
+                        <label>Conductor *
+                            <select id="assign-f-conductor" required></select>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label>Fecha *<input type="date" id="assign-f-fecha" required></label>
+                    </div>
+                    <button type="submit" class="btn btn--primary" style="width:100%;margin-top:8px">Asignar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Camion history modal -->
+        <div class="modal" id="camion-history-modal" style="display:none">
+            <div class="modal__overlay" onclick="document.getElementById('camion-history-modal').style.display='none'"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="camion-history-title">Historial</h2>
+                    <button class="modal__close" onclick="document.getElementById('camion-history-modal').style.display='none'">&times;</button>
+                </div>
+                <div id="camion-history-body" class="modal__body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&libraries=places&language=es"></script>
+    <script>
+    function initAddressAutocomplete(input, opts) {
+        if (!input || !window.google || !google.maps || !google.maps.places) return null;
+        var options = Object.assign({ componentRestrictions: { country: 'es' }, fields: ['formatted_address','geometry'] }, opts || {});
+        var ac = new google.maps.places.Autocomplete(input, options);
+        ac.addListener('place_changed', function() {
+            var place = ac.getPlace();
+            if (place && place.formatted_address) input.value = place.formatted_address;
+        });
+        // Prevent form submit on Enter when selecting from dropdown
+        input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { var pac = document.querySelector('.pac-container:not([style*="display: none"])'); if (pac) e.preventDefault(); } });
+        return ac;
+    }
+    // Static address fields
+    document.addEventListener('DOMContentLoaded', function() {
+        initAddressAutocomplete(document.getElementById('alb-f-direccion'));
+        initAddressAutocomplete(document.querySelector('#create-form input[name="address"]'));
+    });
+    </script>
+    <style>.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2000;justify-content:center;align-items:center}.modal-overlay .modal{position:relative;z-index:2001}</style>
+
+    <!-- Conductor Modal -->
+    <div class="modal-overlay" id="conductor-modal">
+        <div class="modal" style="max-width:440px">
+            <div class="modal-header">
+                <h3 id="conductor-modal-title">Nuevo Conductor</h3>
+                <button class="modal-close" onclick="document.getElementById('conductor-modal').style.display='none'">&times;</button>
+            </div>
+            <form id="conductor-form">
+                <input type="hidden" id="conductor-f-id">
+                <div class="form-row">
+                    <label>Nombre<input type="text" id="conductor-f-nombre" required placeholder="Nombre del conductor"></label>
+                </div>
+                <div class="form-row">
+                    <label>PIN<input type="text" id="conductor-f-pin" placeholder="PIN de acceso"></label>
+                    <label>Camión habitual
+                        <select id="conductor-f-camion"><option value="">— Sin camión —</option></select>
+                    </label>
+                </div>
+                <div class="form-row">
+                    <label style="flex-direction:row;align-items:center;gap:8px">
+                        <input type="checkbox" id="conductor-f-activo" checked> Activo
+                    </label>
+                </div>
+                <button class="btn btn--primary" type="submit" style="width:100%;margin-top:8px">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Zonas Habituales Modal -->
+    <div class="modal-overlay" id="zonas-modal">
+        <div class="modal" style="max-width:560px">
+            <div class="modal-header">
+                <h3 id="zonas-modal-title">Zonas habituales</h3>
+                <button class="modal-close" onclick="document.getElementById('zonas-modal').style.display='none'">&times;</button>
+            </div>
+            <div id="zonas-body" style="padding:16px;max-height:60vh;overflow-y:auto">
             </div>
         </div>
     </div>

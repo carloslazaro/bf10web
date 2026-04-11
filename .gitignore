@@ -1,5 +1,7 @@
 # Secrets / credentials
 api/secrets.php
+api/secrets_prod.php
+api/google_service_account.json
 api/dbtest.php
 deploy_ftp.py
 
@@ -22,5 +24,17 @@ Thumbs.db
 *.ai
 LT-*.pdf
 
-# Test/scratch
+# Test/scratch/debug
 comparativa_logos.html
+pwa-demo.html
+api/debug_*.php
+api/test_*.php
+api/fix_*.php
+api/sample_*.php
+api/load_stock_inicial.php
+
+# Binary docs
+*.docx
+*.xlsx
+*.pdf
+certificados residuos/

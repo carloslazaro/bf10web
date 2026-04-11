@@ -1,4 +1,5 @@
 <?php
+ob_start(); // Capture all output so we can clean it before sending PDF headers
 /**
  * Invoice + Receipt endpoints.
  *
@@ -36,11 +37,66 @@ if ($method === 'GET' && $action === 'download') {
     $code = sanitize($_GET['code'] ?? '');
     if (!$code) { http_response_code(400); exit('Código requerido'); }
 
+    // Check if this is an albaran code (ALB-XXXX-XXXX)
+    $isAlbaran = (strpos($code, 'ALB-') === 0);
+
+    if ($isAlbaran) {
+        // Albaran invoice
+        if (!isManager() && !isComercial()) { http_response_code(403); exit('Acceso denegado'); }
+        $pdo = getDB();
+        $stmt = $pdo->prepare("SELECT id FROM albaranes WHERE albaran_code = ?");
+        $stmt->execute([$code]);
+        $alb = $stmt->fetch();
+        if (!$alb) { http_response_code(404); exit('Albarán no encontrado'); }
+
+        try {
+            $result = renderAlbaranInvoicePdf($alb['id'], 'S');
+            if (!$result || empty($result['pdf'])) {
+                http_response_code(500); exit('Error generando factura (sin factura emitida para este albarán)');
+            }
+            while (ob_get_level()) ob_end_clean();
+            header_remove();
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: inline; filename="' . ($result['invoice']['invoice_number'] ?? 'factura') . '.pdf"');
+            header('Content-Length: ' . strlen($result['pdf']));
+            header('Cache-Control: private, max-age=0, must-revalidate');
+            header('Pragma: public');
+            echo $result['pdf'];
+        } catch (Throwable $e) {
+            while (ob_get_level()) ob_end_clean();
+            header_remove();
+            http_response_code(500);
+            header('Content-Type: text/plain');
+            echo "PDF ERROR: " . $e->getMessage() . "\n" . $e->getFile() . ":" . $e->getLine();
+        }
+        exit;
+    }
+
+    // Order invoice
     $order = findOrderByCode($code);
     if (!$order) { http_response_code(404); exit('Pedido no encontrado'); }
     if (!canAccessOrder($order)) { http_response_code(403); exit('Acceso denegado'); }
 
-    renderInvoicePdf($code, 'I');
+    try {
+        $result = renderInvoicePdf($code, 'S');
+        if (!$result || empty($result['pdf'])) {
+            http_response_code(500); exit('Error generando factura');
+        }
+        while (ob_get_level()) ob_end_clean();
+        header_remove();
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="' . ($result['invoice']['invoice_number'] ?? 'factura') . '.pdf"');
+        header('Content-Length: ' . strlen($result['pdf']));
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Pragma: public');
+        echo $result['pdf'];
+    } catch (Throwable $e) {
+        while (ob_get_level()) ob_end_clean();
+        header_remove();
+        http_response_code(500);
+        header('Content-Type: text/plain');
+        echo "PDF ERROR: " . $e->getMessage() . "\n" . $e->getFile() . ":" . $e->getLine();
+    }
     exit;
 }
 
@@ -53,7 +109,26 @@ if ($method === 'GET' && $action === 'download-receipt') {
     if (!$order) { http_response_code(404); exit('Pedido no encontrado'); }
     if (!canAccessOrder($order)) { http_response_code(403); exit('Acceso denegado'); }
 
-    renderReceiptPdf($code, 'I');
+    try {
+        $result = renderReceiptPdf($code, 'S');
+        if (!$result || empty($result['pdf'])) {
+            http_response_code(500); exit('Error generando recibo');
+        }
+        while (ob_get_level()) ob_end_clean();
+        header_remove();
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="recibo_' . $code . '.pdf"');
+        header('Content-Length: ' . strlen($result['pdf']));
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Pragma: public');
+        echo $result['pdf'];
+    } catch (Throwable $e) {
+        while (ob_get_level()) ob_end_clean();
+        header_remove();
+        http_response_code(500);
+        header('Content-Type: text/plain');
+        echo "PDF ERROR: " . $e->getMessage() . "\n" . $e->getFile() . ":" . $e->getLine();
+    }
     exit;
 }
 

@@ -2,6 +2,8 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/stripe_helper.php';
 require_once __DIR__ . '/mail_helper.php';
+require_once __DIR__ . '/certificate_generator.php';
+require_once __DIR__ . '/events_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -210,6 +212,9 @@ if ($method === 'GET' && $action === 'my-orders') {
         SELECT o.id, o.order_code, o.package_name, o.package_qty, o.package_price,
                o.status, o.payment_method, o.address, o.city, o.postal_code,
                o.nif, o.request_invoice, o.observations, o.created_at, o.paid_at,
+               o.picked_up_at,
+               o.certificate_requested, o.certificate_requested_at,
+               o.certificate_issued_at, o.certificate_number,
                i.id AS invoice_id, i.invoice_number, i.issued_at AS invoice_issued_at
         FROM orders o
         LEFT JOIN invoices i ON i.order_id = o.id
@@ -256,6 +261,10 @@ if ($method === 'GET' && $action === 'my-stats') {
             $stats['enviados']     += (int)$r['c'];
             $stats['pagados']      += (int)$r['c'];
             $stats['gasto_pagado'] += (float)$r['total'];
+        } elseif ($r['status'] === 'recogida') {
+            $stats['enviados']     += (int)$r['c'];
+            $stats['pagados']      += (int)$r['c'];
+            $stats['gasto_pagado'] += (float)$r['total'];
         }
     }
 
@@ -273,7 +282,10 @@ if ($method === 'GET' && $action === 'detail') {
     $stmt = $pdo->prepare("
         SELECT id, user_id, order_code, package_name, package_qty, package_price,
                name, nif, email, phone, address, city, postal_code, observations,
-               request_invoice, payment_method, status, paid_at, created_at
+               internal_notes, request_invoice, payment_method, status, brand,
+               paid_at, picked_up_at, created_at,
+               certificate_requested, certificate_requested_at,
+               certificate_issued_at, certificate_number
         FROM orders
         WHERE order_code = ?
     ");
@@ -305,6 +317,111 @@ if ($method === 'GET' && $action === 'packages') {
         ];
     }
     jsonResponse(['packages' => $packages]);
+}
+
+// ====================================================================
+// POST /api/orders.php?action=request-certificate
+// Body: { code }
+// Owner of the order requests the waste-management certificate.
+// If the order is already 'recogida', the certificate is issued
+// immediately and the email is sent. Otherwise it is just flagged
+// for auto-issue when the admin marks the order as 'recogida'.
+// ====================================================================
+if ($method === 'POST' && $action === 'request-certificate') {
+    if (!isLoggedIn()) jsonResponse(['error' => 'Debes iniciar sesión'], 401);
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $code = sanitize($data['code'] ?? '');
+    if (!$code) jsonResponse(['error' => 'Código de pedido requerido'], 400);
+
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT * FROM orders WHERE order_code = ?");
+    $stmt->execute([$code]);
+    $order = $stmt->fetch();
+    if (!$order) jsonResponse(['error' => 'Pedido no encontrado'], 404);
+
+    // Access control: owner or manager
+    $isOwner = (int)$order['user_id'] === (int)$_SESSION['user_id'];
+    if (!$isOwner && !isManager()) {
+        jsonResponse(['error' => 'Acceso denegado'], 403);
+    }
+
+    // Mark request (idempotent)
+    if (empty($order['certificate_requested'])) {
+        $upd = $pdo->prepare("
+            UPDATE orders
+            SET certificate_requested = 1,
+                certificate_requested_at = NOW()
+            WHERE id = ?
+        ");
+        $upd->execute([$order['id']]);
+        logEvent($order['id'], 'certificate_requested',
+            'Cliente ha solicitado el certificado de gestión de residuos',
+            'user');
+    }
+
+    // If order already picked up, issue certificate immediately
+    $issuedNow = false;
+    $certNumber = $order['certificate_number'] ?? null;
+    if ($order['status'] === 'recogida') {
+        $result = issueCertificate($code);
+        if ($result && empty($result['error'])) {
+            $issuedNow = !empty($result['newly_issued']);
+            $certNumber = $result['order']['certificate_number'] ?? $certNumber;
+            if ($issuedNow) {
+                logEvent($order['id'], 'certificate_issued',
+                    'Certificado RCD emitido automáticamente al solicitarlo (saca ya recogida)',
+                    'system',
+                    ['number' => $certNumber]);
+                if (function_exists('sendCertificateEmail')) {
+                    @sendCertificateEmail($result['order'], $result['path']);
+                }
+            }
+        }
+    }
+
+    jsonResponse([
+        'success' => true,
+        'message' => $order['status'] === 'recogida'
+            ? '✓ Certificado emitido. Lo recibirás por email en breve.'
+            : '✓ Solicitud registrada. Emitiremos el certificado cuando recojamos las sacas.',
+        'issued_now' => $issuedNow,
+        'certificate_number' => $certNumber,
+        'status' => $order['status'],
+    ]);
+}
+
+// ====================================================================
+// GET /api/orders.php?action=download-certificate&code=...
+// Customer-facing download of their own certificate.
+// ====================================================================
+if ($method === 'GET' && $action === 'download-certificate') {
+    if (!isLoggedIn()) jsonResponse(['error' => 'Debes iniciar sesión'], 401);
+    $code = sanitize($_GET['code'] ?? '');
+    if (!$code) jsonResponse(['error' => 'Código requerido'], 400);
+
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT * FROM orders WHERE order_code = ?");
+    $stmt->execute([$code]);
+    $order = $stmt->fetch();
+    if (!$order) jsonResponse(['error' => 'Pedido no encontrado'], 404);
+
+    $isOwner = (int)$order['user_id'] === (int)$_SESSION['user_id'];
+    if (!$isOwner && !isManager()) jsonResponse(['error' => 'Acceso denegado'], 403);
+
+    if ($order['status'] !== 'recogida') {
+        jsonResponse(['error' => 'El certificado no está disponible aún. Te avisaremos cuando recojamos las sacas.'], 400);
+    }
+
+    if (empty($order['certificate_issued_at'])) {
+        $issued = issueCertificate($code);
+        if (!$issued || isset($issued['error'])) {
+            jsonResponse(['error' => $issued['error'] ?? 'Certificado no disponible'], 400);
+        }
+    }
+
+    renderCertificatePdf($code, 'I');
+    exit;
 }
 
 jsonResponse(['error' => 'Acción no válida'], 400);

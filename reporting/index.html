@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporting — Servisaco</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Inter,system-ui,sans-serif;background:#f5f5f5;color:#333}
+        .header{background:#111;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px}
+        .header h1{font-size:18px;font-weight:800}
+        .header a{color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:color .2s}
+        .header a:hover{color:#fff}
+        .header .nav-links{display:flex;gap:4px;margin-left:auto}
+        .header .nav-link{color:#fff;text-decoration:none;background:rgba(255,255,255,.12);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;transition:background .2s;border:1px solid rgba(255,255,255,.1)}
+        .header .nav-link:hover{background:rgba(255,255,255,.25)}
+        .container{max-width:1200px;margin:0 auto;padding:16px}
+
+        .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+        .kpi{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);position:relative;overflow:hidden;transition:transform .15s}
+        .kpi:hover{transform:translateY(-2px)}
+        .kpi::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:#111}
+        .kpi .value{font-size:28px;font-weight:800;color:#111;line-height:1}
+        .kpi .label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+        .kpi .sub{font-size:12px;color:#666;margin-top:2px}
+        .kpi--green::before{background:#00A651}
+        .kpi--green .value{color:#00A651}
+        .kpi--orange::before{background:#F59E0B}
+        .kpi--orange .value{color:#E65100}
+        .kpi--red::before{background:#DA291C}
+        .kpi--red .value{color:#c62828}
+        .kpi--purple::before{background:#7B1FA2}
+        .kpi--purple .value{color:#7B1FA2}
+
+        .section{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
+        .section h3{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+        .alert{padding:12px 16px;border-radius:8px;margin-bottom:8px;font-size:13px;display:flex;align-items:center;gap:8px}
+        .alert--warn{background:#FFF3E0;color:#E65100;border-left:4px solid #F59E0B}
+        .alert--danger{background:#FFEBEE;color:#c62828;border-left:4px solid #DA291C}
+
+        table{width:100%;border-collapse:collapse;font-size:12px}
+        th{background:#fafafa;padding:10px 8px;text-align:left;font-weight:600;border-bottom:2px solid #eee;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#666}
+        td{padding:8px;border-bottom:1px solid #f0f0f0}
+        tr:hover{background:#f9f9f9}
+
+        .bar{height:20px;border-radius:4px;display:inline-block;vertical-align:middle}
+        .progress-wrap{background:#f0f0f0;border-radius:4px;height:20px;width:100%;position:relative}
+        .progress-bar{height:100%;border-radius:4px;transition:width .3s}
+
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.header{flex-wrap:wrap}.header .nav-links{width:100%;justify-content:center}.filters{flex-wrap:wrap}}
+
+        .filters{display:flex;gap:8px;align-items:center;margin-bottom:16px}
+        .filters input{padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;transition:border-color .2s}
+        .filters input:focus{outline:none;border-color:#00A651;box-shadow:0 0 0 3px rgba(0,166,81,.1)}
+        .filters button{padding:7px 14px;background:#111;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s}
+        .filters button:hover{opacity:.85}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Reporting</h1>
+        <div class="filters" style="margin-left:auto;margin-bottom:0">
+            <input type="date" id="r-from">
+            <input type="date" id="r-to">
+            <button onclick="loadAll()">Actualizar</button>
+        </div>
+        <div class="nav-links">
+            <a href="../admin/" class="nav-link">📋 Admin</a>
+            <a href="../facturacion/" class="nav-link">💰 Facturación</a>
+            <a href="../rutas/" class="nav-link">🗺️ Rutas</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Alerts -->
+        <div id="alerts"></div>
+
+        <!-- KPIs today -->
+        <div class="kpi-grid" id="kpis"></div>
+
+        <div class="grid-2">
+            <!-- Conductor Performance -->
+            <div class="section">
+                <h3>Rendimiento por conductor</h3>
+                <table>
+                    <thead><tr><th>Conductor</th><th style="text-align:center">Paradas</th><th style="text-align:center">Sacas</th><th style="text-align:center">Completadas</th><th>Progreso</th></tr></thead>
+                    <tbody id="perf-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Barrio demand -->
+            <div class="section">
+                <h3>Demanda por zona</h3>
+                <table>
+                    <thead><tr><th>Barrio</th><th style="text-align:center">Paradas</th><th style="text-align:center">Sacas</th><th style="text-align:center">Pendientes</th><th>Volumen</th></tr></thead>
+                    <tbody id="barrio-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Facturación -->
+        <div class="section">
+            <h3>Facturación</h3>
+            <div id="fact-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px"></div>
+        </div>
+    </div>
+
+    <script>
+    var API = '../api/';
+    var now = new Date();
+    var thirtyAgo = new Date(now.getTime() - 30*86400000);
+    document.getElementById('r-from').value = thirtyAgo.toISOString().slice(0,10);
+    document.getElementById('r-to').value = now.toISOString().slice(0,10);
+
+    function esc(s){var d=document.createElement('div');d.appendChild(document.createTextNode(s||''));return d.innerHTML;}
+    function fmt(n){return parseFloat(n||0).toFixed(2).replace('.',',')+' €';}
+
+    function loadAll() {
+        loadKPIs();
+        loadPerformance();
+        loadBarrios();
+        loadFacturacion();
+    }
+
+    function loadKPIs() {
+        fetch(API + 'reporting.php?action=kpi-today')
+            .then(function(r){return r.json();})
+            .then(function(d) {
+                var r = d.rutas;
+                var html = '';
+                html += '<div class="kpi"><div class="value">' + r.total_paradas + '</div><div class="label">Paradas totales</div><div class="sub">' + r.total_sacas + ' sacas</div></div>';
+                html += '<div class="kpi kpi--green"><div class="value">' + r.pct_completado + '%</div><div class="label">Completado</div><div class="sub">' + r.recogidas + ' recogidas</div></div>';
+                html += '<div class="kpi kpi--orange"><div class="value">' + r.pendientes + '</div><div class="label">Pendientes</div></div>';
+                html += '<div class="kpi kpi--purple"><div class="value">' + r.conductores_activos + '</div><div class="label">Conductores</div></div>';
+                html += '<div class="kpi kpi--red"><div class="value">' + r.sin_conductor + '</div><div class="label">Sin conductor</div></div>';
+
+                if (d.pedidos_hoy) html += '<div class="kpi"><div class="value">' + d.pedidos_hoy.count + '</div><div class="label">Pedidos hoy</div><div class="sub">' + fmt(d.pedidos_hoy.total) + '</div></div>';
+                if (d.albaranes_hoy) html += '<div class="kpi"><div class="value">' + d.albaranes_hoy.count + '</div><div class="label">Albaranes hoy</div><div class="sub">' + fmt(d.albaranes_hoy.total) + '</div></div>';
+
+                document.getElementById('kpis').innerHTML = html;
+
+                // Alerts
+                var alertHtml = '';
+                if (d.alertas.paradas_48h > 0) {
+                    alertHtml += '<div class="alert alert--danger"><strong>' + d.alertas.paradas_48h + ' paradas</strong> llevan más de 48h pendientes</div>';
+                }
+                if (d.alertas.solicitudes_pendientes > 0) {
+                    alertHtml += '<div class="alert alert--warn"><strong>' + d.alertas.solicitudes_pendientes + ' solicitudes</strong> de recogida pendientes de aprobar</div>';
+                }
+                if (r.sin_conductor > 5) {
+                    alertHtml += '<div class="alert alert--warn"><strong>' + r.sin_conductor + ' paradas</strong> sin conductor asignado</div>';
+                }
+                document.getElementById('alerts').innerHTML = alertHtml;
+            });
+    }
+
+    function loadPerformance() {
+        var from = document.getElementById('r-from').value;
+        var to = document.getElementById('r-to').value;
+        fetch(API + 'reporting.php?action=conductor-perf&from=' + from + '&to=' + to)
+            .then(function(r){return r.json();})
+            .then(function(d) {
+                var rows = d.performance || [];
+                var maxSacas = Math.max.apply(null, rows.map(function(r){return parseInt(r.total_sacas)||1;}));
+                var COLORS = ['#1565C0','#43A047','#E65100','#7B1FA2','#00838F','#C62828','#6A1B9A','#EF6C00'];
+
+                document.getElementById('perf-body').innerHTML = rows.map(function(r, i) {
+                    var pct = r.total_paradas > 0 ? Math.round((r.completadas / r.total_paradas)*100) : 0;
+                    var barW = Math.max(5, Math.round((r.total_sacas / maxSacas)*100));
+                    var color = COLORS[i % COLORS.length];
+                    return '<tr>' +
+                        '<td><strong style="color:' + color + '">' + esc(r.conductor) + '</strong></td>' +
+                        '<td style="text-align:center">' + r.total_paradas + '</td>' +
+                        '<td style="text-align:center;font-weight:700">' + r.total_sacas + '</td>' +
+                        '<td style="text-align:center;color:#43A047;font-weight:600">' + r.completadas + '</td>' +
+                        '<td><div class="progress-wrap"><div class="progress-bar" style="width:' + pct + '%;background:' + color + '"></div></div><span style="font-size:11px;color:#888;margin-left:4px">' + pct + '%</span></td>' +
+                        '</tr>';
+                }).join('');
+            });
+    }
+
+    function loadBarrios() {
+        fetch(API + 'reporting.php?action=barrio-demand')
+            .then(function(r){return r.json();})
+            .then(function(d) {
+                var rows = (d.barrios || []).slice(0, 20);
+                var maxP = Math.max.apply(null, rows.map(function(r){return parseInt(r.total_paradas)||1;}));
+
+                document.getElementById('barrio-body').innerHTML = rows.map(function(r) {
+                    var barW = Math.max(5, Math.round((r.total_paradas / maxP)*100));
+                    var hasPending = parseInt(r.pendientes) > 0;
+                    return '<tr>' +
+                        '<td><strong>' + esc(r.barrio) + '</strong></td>' +
+                        '<td style="text-align:center">' + r.total_paradas + '</td>' +
+                        '<td style="text-align:center">' + r.total_sacas + '</td>' +
+                        '<td style="text-align:center;' + (hasPending ? 'color:#E65100;font-weight:600' : '') + '">' + r.pendientes + '</td>' +
+                        '<td><div class="bar" style="width:' + barW + '%;background:' + (hasPending ? '#FF9800' : '#90CAF9') + '">&nbsp;</div></td>' +
+                        '</tr>';
+                }).join('');
+            });
+    }
+
+    function loadFacturacion() {
+        var from = document.getElementById('r-from').value;
+        var to = document.getElementById('r-to').value;
+        fetch(API + 'reporting.php?action=facturacion&from=' + from + '&to=' + to)
+            .then(function(r){return r.json();})
+            .then(function(d) {
+                var f = d.facturas || {};
+                var ab = d.abonos || {};
+                var al = d.albaranes || {};
+
+                var html = '';
+                html += '<div style="text-align:center;padding:12px;background:#E8F5E9;border-radius:8px"><div style="font-size:22px;font-weight:800;color:#1B5E20">' + fmt(f.total) + '</div><div style="font-size:11px;color:#888">Facturado</div></div>';
+                html += '<div style="text-align:center;padding:12px;background:#E8F5E9;border-radius:8px"><div style="font-size:22px;font-weight:800;color:#43A047">' + fmt(f.cobrado) + '</div><div style="font-size:11px;color:#888">Cobrado</div></div>';
+                html += '<div style="text-align:center;padding:12px;background:#FFF3E0;border-radius:8px"><div style="font-size:22px;font-weight:800;color:#E65100">' + fmt(f.pendiente) + '</div><div style="font-size:11px;color:#888">Pdte. cobro</div></div>';
+                html += '<div style="text-align:center;padding:12px;background:#FFEBEE;border-radius:8px"><div style="font-size:22px;font-weight:800;color:#c62828">' + fmt(ab.total) + '</div><div style="font-size:11px;color:#888">Abonos</div></div>';
+                html += '<div style="text-align:center;padding:12px;background:#f5f5f5;border-radius:8px"><div style="font-size:22px;font-weight:800">' + (al.cnt||0) + '</div><div style="font-size:11px;color:#888">Albaranes</div><div style="font-size:12px;color:#666">' + fmt(al.total) + '</div></div>';
+
+                document.getElementById('fact-summary').innerHTML = html;
+            });
+    }
+
+    loadAll();
+    </script>
+</body>
+</html>

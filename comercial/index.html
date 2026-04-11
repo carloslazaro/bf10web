@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servisaco Comercial — Albaranes</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="../admin/css/admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Tabs bar for comercial */
+        .tabs { max-width:1600px; margin:0 auto; padding:0 24px; display:flex; gap:0; border-bottom:1px solid var(--color-border); background:var(--color-white); }
+        .tab { padding:12px 24px; border:none; background:none; font-family:var(--font); font-size:.85rem; font-weight:600; color:var(--color-text-light); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+        .tab:hover { color:var(--color-text); }
+        .tab--active { color:var(--color-green); border-bottom-color:var(--color-green); }
+        .tab-panel { display:none; }
+        .tab-panel--active { display:block; }
+
+        /* Filter bar */
+        .filter-bar { max-width:1600px; margin:16px auto; padding:0 24px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+        .filter-bar input, .filter-bar select { padding:8px 12px; border:1px solid var(--color-border); border-radius:var(--radius); font-family:var(--font); font-size:.85rem; }
+        .filter-bar input:focus, .filter-bar select:focus { outline:none; border-color:var(--color-green); }
+
+        .btn-primary { background:var(--color-green) !important; color:#fff !important; border-color:var(--color-green) !important; }
+        .btn-primary:hover { background:#008C44 !important; }
+
+        .btn-sm { padding:4px 10px; font-size:.75rem; }
+
+        /* Badges */
+        .badge--yes { background:#D1FAE5; color:#065F46; display:inline-block; padding:3px 10px; border-radius:12px; font-size:.75rem; font-weight:600; }
+        .badge--no { background:#FEE2E2; color:#991B1B; display:inline-block; padding:3px 10px; border-radius:12px; font-size:.75rem; font-weight:600; }
+
+        /* Form rows inside modals */
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+        .form-row label { display:block; font-size:.82rem; font-weight:600; }
+        .form-row input, .form-row select, .form-row textarea {
+            width:100%; padding:9px 12px; border:1px solid var(--color-border); border-radius:var(--radius);
+            font-family:var(--font); font-size:.88rem; margin-top:4px;
+        }
+        .form-row textarea { resize:vertical; min-height:60px; }
+        .form-row input:focus, .form-row select:focus, .form-row textarea:focus { outline:none; border-color:var(--color-green); }
+        .form-row__wide { grid-column:1/-1; }
+    </style>
+</head>
+<body>
+
+    <!-- Login -->
+    <div class="login" id="login-screen">
+        <div class="login__card">
+            <h1 class="login__title">Servisaco Comercial</h1>
+            <p class="login__subtitle">Panel de albaranes</p>
+            <form id="login-form">
+                <div class="login__field">
+                    <label for="login-nombre">Comercial</label>
+                    <select id="login-nombre" required>
+                        <option value="">Selecciona tu nombre...</option>
+                    </select>
+                </div>
+                <div class="login__field">
+                    <label for="login-pin">PIN</label>
+                    <input type="password" id="login-pin" required placeholder="••••" maxlength="4" pattern="\d{4}" inputmode="numeric" style="text-align:center;font-size:1.5rem;letter-spacing:8px">
+                </div>
+                <button type="submit" class="login__btn" id="login-btn">Entrar</button>
+                <p class="login__error" id="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard" style="display:none">
+        <header class="dash-header">
+            <div class="dash-header__inner">
+                <h1 class="dash-header__title">Servisaco Comercial</h1>
+                <div class="dash-header__actions">
+                    <span id="user-name"></span>
+                    <button class="dash-header__logout" id="logout-btn">Cerrar sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <nav class="tabs">
+            <button class="tab tab--active" data-tab="albaranes">📋 Albaranes</button>
+        </nav>
+
+        <!-- ============ ALBARANES TAB ============ -->
+        <div class="tab-panel tab-panel--active" id="tab-albaranes">
+            <section class="dash-stats" id="alb-stats"></section>
+
+            <section class="filter-bar">
+                <button class="btn-action btn-primary" id="btn-alb-new">+ Nuevo albarán</button>
+                <input type="date" id="alb-desde" title="Desde">
+                <input type="date" id="alb-hasta" title="Hasta">
+                <select id="alb-pagado">
+                    <option value="">Todos</option>
+                    <option value="1">Pagados</option>
+                    <option value="0">No pagados</option>
+                </select>
+                <button class="btn-action" id="btn-alb-filter">Filtrar</button>
+                <button class="btn-action" id="btn-alb-clear">Limpiar</button>
+                <button class="btn-action" id="btn-alb-trash">Papelera</button>
+            </section>
+
+            <section class="dash-orders">
+                <div class="dash-table-wrapper">
+                    <table class="dash-table" id="alb-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Dirección</th>
+                                <th>Marca</th>
+                                <th>Sacas</th>
+                                <th>Importe</th>
+                                <th>Pago</th>
+                                <th>Pagado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alb-body"></tbody>
+                    </table>
+                </div>
+                <p class="dash-empty" id="alb-empty" style="display:none">No hay albaranes</p>
+            </section>
+        </div>
+
+        <!-- Albaran modal -->
+        <div class="modal" id="alb-modal" style="display:none">
+            <div class="modal__overlay" id="alb-overlay"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title" id="alb-modal-title">Nuevo albarán</h2>
+                    <button class="modal__close" id="alb-close">&times;</button>
+                </div>
+                <form id="alb-form" class="modal__body">
+                    <input type="hidden" id="alb-f-id">
+                    <div class="form-row">
+                        <label>Cliente *<input type="text" id="alb-f-cliente" required></label>
+                        <label>Fecha entrega *<input type="date" id="alb-f-fecha" required></label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Dirección de envío<input type="text" id="alb-f-direccion" placeholder="Calle, número, ciudad..."></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Marca
+                            <select id="alb-f-marca">
+                                <option value="BF10">BF10</option>
+                                <option value="SERVISACO">Servisaco</option>
+                                <option value="ATUSACO">Atusaco</option>
+                                <option value="ATUSACO_LUISFER">Atusaco Luisfer</option>
+                                <option value="ATUSACO_HERREROCON">Atusaco Herrerocon</option>
+                                <option value="ATUSACO_COSASCASA">Atusaco Cosas Casa</option>
+                                <option value="ECOSACO">Eco Saco</option>
+                                <option value="SACAS_BLANCAS">Sacas Blancas</option>
+                            </select>
+                        </label>
+                        <label>Nº sacas *<input type="number" id="alb-f-sacas" min="1" required></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Numeración inicial<input type="number" id="alb-f-num-ini" min="0"></label>
+                        <label>Numeración final<input type="number" id="alb-f-num-fin" min="0"></label>
+                    </div>
+                    <div class="form-row">
+                        <label>Precio por saca (EUR) *<input type="number" id="alb-f-precio" min="0" step="0.01" required></label>
+                        <label>Importe total (EUR)<input type="number" id="alb-f-importe" min="0" step="0.01" readonly></label>
+                    </div>
+                    <hr class="form-divider">
+                    <div class="form-row">
+                        <label>Forma de pago
+                            <select id="alb-f-pago">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta">Tarjeta</option>
+                                <option value="transferencia">Transferencia</option>
+                            </select>
+                        </label>
+                        <label class="toggle-check" style="align-self:end">
+                            <input type="checkbox" id="alb-f-pagado"> Pagado
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row__wide">Comentarios<textarea id="alb-f-comentarios" rows="2"></textarea></label>
+                    </div>
+                    <p class="form-error" id="alb-error" style="display:none"></p>
+                    <div class="form-actions">
+                        <button type="button" class="btn-modal-cancel" id="alb-cancel">Cancelar</button>
+                        <button type="submit" class="btn-modal-save">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+(function () {
+    'use strict';
+
+    var API = '/api/';
+    var loginScreen = document.getElementById('login-screen');
+    var dashboard = document.getElementById('dashboard');
+    var albTrashMode = false;
+    var allAlbaranes = [];
+
+    var brandColors = { BF10: '#DA291C', SERVISACO: '#1B5E20', ATUSACO: '#1565C0', ATUSACO_LUISFER: '#0D47A1', ATUSACO_HERREROCON: '#283593', ATUSACO_COSASCASA: '#4527A0', ECOSACO: '#2E7D32', SACAS_BLANCAS: '#795548' };
+
+    var currentUserId = null;
+    var currentUserName = '';
+
+    // --- Load comerciales list ---
+    fetch(API + 'comercial_app.php?action=comerciales')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var sel = document.getElementById('login-nombre');
+            (data.comerciales || []).forEach(function (name) {
+                var opt = document.createElement('option');
+                opt.value = name; opt.textContent = name;
+                sel.appendChild(opt);
+            });
+        });
+
+    // --- Check saved session ---
+    var saved = localStorage.getItem('bf10_comercial');
+    if (saved) {
+        try {
+            var s = JSON.parse(saved);
+            if (s.user_id && s.nombre) {
+                currentUserId = s.user_id;
+                currentUserName = s.nombre;
+                showDashboard();
+            }
+        } catch(e) {}
+    }
+
+    // --- Login ---
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var nombre = document.getElementById('login-nombre').value;
+        var pin = document.getElementById('login-pin').value;
+        var btn = document.getElementById('login-btn');
+        var err = document.getElementById('login-error');
+        btn.disabled = true; btn.textContent = 'Entrando...'; err.textContent = '';
+
+        fetch(API + 'comercial_app.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'login', nombre: nombre, pin: pin }),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.ok) {
+                currentUserId = data.user_id;
+                currentUserName = data.nombre;
+                localStorage.setItem('bf10_comercial', JSON.stringify({ user_id: data.user_id, nombre: data.nombre }));
+                showDashboard();
+            } else {
+                err.textContent = data.error || 'PIN incorrecto';
+            }
+        })
+        .catch(function () { err.textContent = 'Error de conexión'; })
+        .finally(function () { btn.disabled = false; btn.textContent = 'Entrar'; });
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', function () {
+        localStorage.removeItem('bf10_comercial');
+        currentUserId = null;
+        currentUserName = '';
+        location.reload();
+    });
+
+    function showDashboard() {
+        loginScreen.style.display = 'none';
+        dashboard.style.display = 'block';
+        document.getElementById('user-name').textContent = currentUserName;
+        loadAlbaranes();
+    }
+
+    // --- Albaranes ---
+    function loadAlbaranes() {
+        if (albTrashMode) {
+            fetch(API + 'comercial_app.php?action=trash')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    allAlbaranes = data.albaranes || [];
+                    renderAlbaranes();
+                    renderStats();
+                });
+            return;
+        }
+        var desde = document.getElementById('alb-desde').value;
+        var hasta = document.getElementById('alb-hasta').value;
+        var pagado = document.getElementById('alb-pagado').value;
+        var url = 'comercial_app.php?action=list&user_id=' + currentUserId;
+        if (desde) url += '&desde=' + desde;
+        if (hasta) url += '&hasta=' + hasta;
+        if (pagado !== '') url += '&pagado=' + pagado;
+        fetch(API + url)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                allAlbaranes = data.albaranes || [];
+                renderAlbaranes();
+                renderStats();
+            });
+    }
+
+    function renderAlbaranes() {
+        var tbody = document.getElementById('alb-body');
+        var empty = document.getElementById('alb-empty');
+        if (!allAlbaranes.length) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            empty.textContent = albTrashMode ? 'Papelera vacía' : 'No hay albaranes';
+            return;
+        }
+        empty.style.display = 'none';
+        var pagoLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transfer.', pendiente: 'Pendiente' };
+        tbody.innerHTML = allAlbaranes.map(function (a) {
+            var actions = '';
+            if (albTrashMode) {
+                actions = '<button class="btn-action btn-sm" data-alb-restore="' + a.id + '" style="color:#2e7d32">Restaurar</button>';
+            } else {
+                actions = '<button class="btn-action btn-sm" data-alb-edit="' + a.id + '">Editar</button> ' +
+                          '<button class="btn-action btn-sm" data-alb-del="' + a.id + '" style="color:#c00">Eliminar</button>';
+            }
+            var dir = esc(a.direccion_envio || '');
+            var dirCell = dir;
+            if (dir) {
+                var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.direccion_envio);
+                dirCell = dir + ' <a href="' + mapsUrl + '" target="_blank" title="Ver en Google Maps" style="display:inline-block;vertical-align:middle;margin-left:4px;text-decoration:none;font-size:15px">📍</a>';
+            }
+            return '<tr>' +
+                '<td><strong>' + esc(a.albaran_code) + '</strong></td>' +
+                '<td>' + (a.fecha_entrega || '') + '</td>' +
+                '<td>' + esc(a.cliente) + '</td>' +
+                '<td>' + dirCell + '</td>' +
+                '<td><span style="color:' + (brandColors[a.marca] || '#333') + ';font-weight:600">' + esc(a.marca) + '</span></td>' +
+                '<td>' + a.num_sacas + '</td>' +
+                '<td>' + Number(a.importe).toFixed(2) + ' €</td>' +
+                '<td>' + (pagoLabels[a.forma_pago] || a.forma_pago) + '</td>' +
+                '<td><span class="badge--' + (a.pagado == 1 ? 'yes' : 'no') + '">' + (a.pagado == 1 ? 'Sí' : 'No') + '</span></td>' +
+                '<td>' + actions + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    function renderStats() {
+        var total = allAlbaranes.length;
+        var totalImporte = allAlbaranes.reduce(function (s, a) { return s + Number(a.importe); }, 0);
+        var pagados = allAlbaranes.filter(function (a) { return a.pagado == 1; }).length;
+        var totalSacas = allAlbaranes.reduce(function (s, a) { return s + Number(a.num_sacas); }, 0);
+        document.getElementById('alb-stats').innerHTML =
+            '<div class="dash-stat"><span class="dash-stat__value">' + total + '</span><span class="dash-stat__label">Albaranes</span></div>' +
+            '<div class="dash-stat"><span class="dash-stat__value">' + totalSacas + '</span><span class="dash-stat__label">Total sacas</span></div>' +
+            '<div class="dash-stat"><span class="dash-stat__value">' + totalImporte.toFixed(2) + ' €</span><span class="dash-stat__label">Importe total</span></div>' +
+            '<div class="dash-stat"><span class="dash-stat__value">' + pagados + ' / ' + total + '</span><span class="dash-stat__label">Pagados</span></div>';
+    }
+
+    function esc(s) { if (s === null || s === undefined) return ''; var d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
+    // Filters
+    document.getElementById('btn-alb-filter').addEventListener('click', loadAlbaranes);
+    document.getElementById('btn-alb-clear').addEventListener('click', function () {
+        document.getElementById('alb-desde').value = '';
+        document.getElementById('alb-hasta').value = '';
+        document.getElementById('alb-pagado').value = '';
+        loadAlbaranes();
+    });
+
+    // Trash toggle
+    document.getElementById('btn-alb-trash').addEventListener('click', function () {
+        albTrashMode = !albTrashMode;
+        this.textContent = albTrashMode ? 'Volver a albaranes' : 'Papelera';
+        this.style.background = albTrashMode ? '#fce4ec' : '';
+        this.style.color = albTrashMode ? '#c00' : '';
+        document.getElementById('btn-alb-new').style.display = albTrashMode ? 'none' : '';
+        loadAlbaranes();
+    });
+
+    // Modal
+    function openAlbModal(data) {
+        document.getElementById('alb-error').style.display = 'none';
+        document.getElementById('alb-modal-title').textContent = data ? 'Editar albarán' : 'Nuevo albarán';
+        document.getElementById('alb-f-id').value = data ? data.id : '';
+        document.getElementById('alb-f-cliente').value = data ? data.cliente : '';
+        document.getElementById('alb-f-direccion').value = data ? (data.direccion_envio || '') : '';
+        document.getElementById('alb-f-fecha').value = data ? data.fecha_entrega : new Date().toISOString().split('T')[0];
+        document.getElementById('alb-f-marca').value = data ? data.marca : 'BF10';
+        document.getElementById('alb-f-sacas').value = data ? data.num_sacas : '';
+        document.getElementById('alb-f-num-ini').value = data ? (data.numeracion_inicial || '') : '';
+        document.getElementById('alb-f-num-fin').value = data ? (data.numeracion_final || '') : '';
+        document.getElementById('alb-f-precio').value = data ? (data.precio || '') : '';
+        document.getElementById('alb-f-pago').value = data ? data.forma_pago : 'pendiente';
+        document.getElementById('alb-f-importe').value = data ? data.importe : '';
+        document.getElementById('alb-f-pagado').checked = data ? data.pagado == 1 : false;
+        document.getElementById('alb-f-comentarios').value = data ? (data.comentarios || '') : '';
+        document.getElementById('alb-modal').style.display = 'flex';
+    }
+
+    function closeAlbModal() { document.getElementById('alb-modal').style.display = 'none'; }
+
+    document.getElementById('btn-alb-new').addEventListener('click', function () { openAlbModal(null); });
+    document.getElementById('alb-cancel').addEventListener('click', closeAlbModal);
+    document.getElementById('alb-close').addEventListener('click', closeAlbModal);
+    document.getElementById('alb-overlay').addEventListener('click', closeAlbModal);
+
+    // Auto-calculate importe = precio × sacas
+    function calcImporte() {
+        var precio = parseFloat(document.getElementById('alb-f-precio').value) || 0;
+        var sacas = parseInt(document.getElementById('alb-f-sacas').value) || 0;
+        document.getElementById('alb-f-importe').value = (precio * sacas).toFixed(2);
+    }
+    document.getElementById('alb-f-precio').addEventListener('input', calcImporte);
+    document.getElementById('alb-f-sacas').addEventListener('input', calcImporte);
+
+    // Save
+    document.getElementById('alb-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var errEl = document.getElementById('alb-error');
+        errEl.style.display = 'none';
+
+        var id = document.getElementById('alb-f-id').value;
+        var payload = {
+            action: id ? 'update' : 'create',
+            user_id: currentUserId,
+            cliente: document.getElementById('alb-f-cliente').value,
+            direccion_envio: document.getElementById('alb-f-direccion').value,
+            fecha_entrega: document.getElementById('alb-f-fecha').value,
+            marca: document.getElementById('alb-f-marca').value,
+            num_sacas: parseInt(document.getElementById('alb-f-sacas').value) || 0,
+            numeracion_inicial: document.getElementById('alb-f-num-ini').value || null,
+            numeracion_final: document.getElementById('alb-f-num-fin').value || null,
+            precio: parseFloat(document.getElementById('alb-f-precio').value) || 0,
+            forma_pago: document.getElementById('alb-f-pago').value,
+            importe: parseFloat(document.getElementById('alb-f-importe').value) || 0,
+            pagado: document.getElementById('alb-f-pagado').checked ? 1 : 0,
+            comentarios: document.getElementById('alb-f-comentarios').value,
+        };
+        if (id) payload.id = parseInt(id);
+
+        if (!payload.cliente || !payload.fecha_entrega || !payload.num_sacas) {
+            errEl.textContent = 'Completa los campos obligatorios (cliente, fecha, sacas).';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        fetch(API + 'comercial_app.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.ok || data.success) { closeAlbModal(); loadAlbaranes(); }
+            else {
+                errEl.textContent = data.error || 'Error al guardar';
+                errEl.style.display = 'block';
+            }
+        })
+        .catch(function () {
+            errEl.textContent = 'Error de conexión';
+            errEl.style.display = 'block';
+        });
+    });
+
+    // Table actions (delegated)
+    document.getElementById('alb-body').addEventListener('click', function (e) {
+        var editBtn = e.target.closest('[data-alb-edit]');
+        if (editBtn) {
+            var id = parseInt(editBtn.dataset.albEdit);
+            var row = allAlbaranes.find(function (a) { return a.id == id; });
+            if (row) openAlbModal(row);
+            return;
+        }
+
+        var delBtn = e.target.closest('[data-alb-del]');
+        if (delBtn) {
+            if (!confirm('¿Mover este albarán a la papelera?')) return;
+            fetch(API + 'albaranes.php?action=delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: parseInt(delBtn.dataset.albDel) }),
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success) loadAlbaranes();
+                else alert(data.error || 'Error al eliminar');
+            });
+            return;
+        }
+
+        var restBtn = e.target.closest('[data-alb-restore]');
+        if (restBtn) {
+            if (!confirm('¿Restaurar este albarán?')) return;
+            fetch(API + 'albaranes.php?action=restore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: parseInt(restBtn.dataset.albRestore) }),
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success) loadAlbaranes();
+                else alert(data.error || 'Error al restaurar');
+            });
+            return;
+        }
+    });
+
+})();
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&libraries=places&language=es"></script>
+<script>
+function initAddressAutocomplete(input, opts) {
+    if (!input || !window.google || !google.maps || !google.maps.places) return null;
+    var options = Object.assign({ componentRestrictions: { country: 'es' }, fields: ['formatted_address','geometry'] }, opts || {});
+    var ac = new google.maps.places.Autocomplete(input, options);
+    ac.addListener('place_changed', function() {
+        var place = ac.getPlace();
+        if (place && place.formatted_address) input.value = place.formatted_address;
+    });
+    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { var pac = document.querySelector('.pac-container:not([style*="display: none"])'); if (pac) e.preventDefault(); } });
+    return ac;
+}
+document.addEventListener('DOMContentLoaded', function() {
+    initAddressAutocomplete(document.getElementById('alb-f-direccion'));
+});
+</script>
+</body>
+</html>

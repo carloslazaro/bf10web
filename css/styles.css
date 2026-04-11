@@ -170,6 +170,36 @@ img {
     letter-spacing: -0.02em;
 }
 
+/* Servicios section title — fits on max 2 lines on desktop */
+.section-title--servicios {
+    font-size: 2rem;
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.18;
+}
+@media (min-width: 1100px) {
+    .section-title--servicios {
+        font-size: 2.15rem;
+        max-width: 960px;
+    }
+}
+
+/* WhatsApp button (CTA) */
+.btn--whatsapp {
+    background: #25D366;
+    color: #fff;
+    border: 2px solid #25D366;
+}
+.btn--whatsapp:hover {
+    background: #1ebe5d;
+    border-color: #1ebe5d;
+    color: #fff;
+}
+.btn--whatsapp .btn__icon {
+    margin-right: 6px;
+}
+
 .section-subtitle {
     font-size: 1.1rem;
     color: var(--color-text-light);
@@ -436,6 +466,42 @@ img {
     font-size: 1.4rem;
     font-weight: 800;
     color: var(--color-accent);
+}
+
+.servicio-card__price-old {
+    display: inline-block;
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-right: 6px;
+}
+
+.servicio-card__discount {
+    display: inline-block;
+    background: #2d8f3a;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(45,143,58,0.25);
+    animation: pulse-discount 2.4s ease-in-out infinite;
+}
+
+.servicio-card__discount--big {
+    background: #DA291C;
+    box-shadow: 0 2px 10px rgba(218,41,28,0.3);
+    font-size: 0.85rem;
+    padding: 6px 14px;
+}
+
+@keyframes pulse-discount {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
 }
 
 .servicio-card__text {

@@ -18,11 +18,157 @@ define('BANK_IBAN', 'ES00 0000 0000 0000 0000 0000'); // TODO: poner IBAN real
 define('BANK_BENEFICIARY', 'SERVISACO Recuperación y Logística SL');
 define('BANK_CONCEPT_PREFIX', 'BF10-');
 
+// ========================================
+// Brands (multi-marca CRM)
+// All four brands invoice under the same legal entity (SERVISACO SL, B26764688)
+// — only the trade name / colour / domain shown to the customer changes.
+// To change the fiscal entity per brand: edit `legal_name` / `cif` / `address` keys.
+// ========================================
+define('BRANDS', [
+    'BF10' => [
+        'code'         => 'BF10',
+        'trade_name'   => 'BF10 Sacos de Escombro',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B26764688',
+        'address'      => 'Calle Totana, 8 - Puerta Dcha',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => 'sacosescombromadridbf10.es',
+        'invoice_prefix' => 'BF10',
+        'order_prefix'   => 'BF10',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#DA291C',
+    ],
+    'SERVISACO' => [
+        'code'         => 'SERVISACO',
+        'trade_name'   => 'Servisaco',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B26764688',
+        'address'      => 'Calle Totana, 8 - Puerta Dcha',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => 'servisaco.es',
+        'invoice_prefix' => 'SVC',
+        'order_prefix'   => 'SVC',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#1B5E20',
+    ],
+    'ATUSACO' => [
+        'code'         => 'ATUSACO',
+        'trade_name'   => 'Atusaco',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B26764688',
+        'address'      => 'Calle Totana, 8 - Puerta Dcha',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => 'atusaco.es',
+        'invoice_prefix' => 'ATU',
+        'order_prefix'   => 'ATU',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#1565C0',
+    ],
+    'ATUSACO_LUISFER' => [
+        'code'         => 'ATUSACO_LUISFER',
+        'trade_name'   => 'Atusaco Luisfer',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B26764688',
+        'address'      => 'Calle Totana, 8 - Puerta Dcha',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => 'atusaco.es',
+        'invoice_prefix' => 'ATU',
+        'order_prefix'   => 'ATU',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#0D47A1',
+    ],
+    'ATUSACO_HERREROCON' => [
+        'code'         => 'ATUSACO_HERREROCON',
+        'trade_name'   => 'Atusaco Herrerocon',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B26764688',
+        'address'      => 'Calle Totana, 8 - Puerta Dcha',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => 'atusaco.es',
+        'invoice_prefix' => 'ATU',
+        'order_prefix'   => 'ATU',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#283593',
+    ],
+    'ATUSACO_COSASCASA' => [
+        'code'         => 'ATUSACO_COSASCASA',
+        'trade_name'   => 'Atusaco Cosas Casa',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B26764688',
+        'address'      => 'Calle Totana, 8 - Puerta Dcha',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => 'atusaco.es',
+        'invoice_prefix' => 'ATU',
+        'order_prefix'   => 'ATU',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#4527A0',
+    ],
+    'ECOSACO' => [
+        'code'         => 'ECOSACO',
+        'trade_name'   => 'Eco Saco',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B26764688',
+        'address'      => 'Calle Totana, 8 - Puerta Dcha',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => 'ecosaco.es',
+        'invoice_prefix' => 'ECO',
+        'order_prefix'   => 'ECO',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#2E7D32',
+    ],
+    'SACAS_BLANCAS' => [
+        'code'         => 'SACAS_BLANCAS',
+        'trade_name'   => 'Sacas Blancas',
+        'legal_name'   => 'SERVISACO Recuperación y Logística SL',
+        'cif'          => 'B56789012',
+        'address'      => 'Por definir',
+        'city'         => '28033 Madrid',
+        'country'      => 'España',
+        'phone'        => '674 78 34 79',
+        'email'        => 'pedidos@sacosescombromadridbf10.es',
+        'web'          => '',
+        'invoice_prefix' => 'SB',
+        'order_prefix'   => 'SB',
+        'cert_prefix'    => 'CERT',
+        'color'        => '#795548',
+    ],
+]);
+
+function getBrand($code) {
+    $code = strtoupper($code ?: 'BF10');
+    $brands = BRANDS;
+    return $brands[$code] ?? $brands['BF10'];
+}
+
 // Packages
+// Base price: 45€/saca. Volume discounts: 10% off (25), 15% off (50).
+// 25: 25 * 45 * 0.90 = 1012.50  (40,50€/saca)
+// 50: 50 * 45 * 0.85 = 1912.50  (38,25€/saca)
 define('PACKAGES', [
-    10 => ['name' => '10 sacos', 'price' => 450.00,  'description' => 'Pedido mínimo — 10 sacos de 1m³ a 45€/saco'],
-    25 => ['name' => '25 sacos', 'price' => 1050.00, 'description' => 'Pack estándar — 25 sacos de 1m³ a 42€/saco'],
-    50 => ['name' => '50 sacos', 'price' => 2000.00, 'description' => 'Pack profesional — 50 sacos de 1m³ a 40€/saco'],
+    10 => ['name' => '10 sacas', 'price' => 450.00,  'unit' => 45.00,  'discount' => 0,  'description' => 'Pedido mínimo — 10 sacas a 45€/saca'],
+    25 => ['name' => '25 sacas', 'price' => 1012.50, 'unit' => 40.50,  'discount' => 10, 'description' => 'Pack estándar — 25 sacas con 10% de descuento (40,50€/saca)'],
+    50 => ['name' => '50 sacas', 'price' => 1912.50, 'unit' => 38.25,  'discount' => 15, 'description' => 'Pack profesional — 50 sacas con 15% de descuento (38,25€/saca)'],
 ]);
 
 // Load secrets (API keys). File is gitignored.
@@ -90,11 +236,31 @@ function isLoggedIn() {
 
 // Check if user is manager
 function isManager() {
-    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'manager';
+    return isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['manager', 'ceo']);
 }
 
 function requireManager() {
     if (!isLoggedIn() || !isManager()) {
+        jsonResponse(['error' => 'Acceso denegado'], 403);
+    }
+}
+
+function isComercial() {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'comercial';
+}
+
+function requireComercial() {
+    if (!isLoggedIn() || !isComercial()) {
+        jsonResponse(['error' => 'Acceso denegado'], 403);
+    }
+}
+
+function isRutas() {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'rutas';
+}
+
+function requireRutas() {
+    if (!isLoggedIn() || (!isRutas() && !isManager())) {
         jsonResponse(['error' => 'Acceso denegado'], 403);
     }
 }

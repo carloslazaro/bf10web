@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servisaco Rutas — Gestión de rutas</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a1a1a; }
+
+        .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1565C0, #0D47A1); }
+        .login__card { background: #fff; border-radius: 12px; padding: 40px; width: 360px; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+        .login__title { text-align: center; font-size: 24px; color: #1565C0; margin-bottom: 4px; }
+        .login__subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
+        .login__field { margin-bottom: 16px; }
+        .login__field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: #555; }
+        .login__field input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .login__btn { width: 100%; padding: 12px; background: #1565C0; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .login__btn:hover { background: #0D47A1; }
+        .login__error { color: #c00; text-align: center; margin-top: 12px; font-size: 13px; min-height: 18px; }
+
+        .header { background: #111; color: #fff; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .header__title { font-size: 18px; font-weight: 800; }
+        .header__actions { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .header__actions button { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.1); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background .2s; }
+        .header__actions button:hover { background: rgba(255,255,255,.25); }
+        .header__nav { display: flex; gap: 4px; margin-left: 16px; }
+        .header__nav a { color: #fff; text-decoration: none; background: rgba(255,255,255,.12); padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; transition: background .2s; border: 1px solid rgba(255,255,255,.1); }
+        .header__nav a:hover { background: rgba(255,255,255,.25); }
+
+        .toolbar { padding: 12px 24px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .toolbar button { padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
+        .toolbar button:hover { background: #f5f5f5; }
+        .toolbar .btn-primary { background: #1565C0; color: #fff; border-color: #1565C0; }
+        .toolbar .btn-primary:hover { background: #0D47A1; }
+        .toolbar .btn-success { background: #2E7D32; color: #fff; border-color: #2E7D32; }
+        .toolbar .btn-success:hover { background: #1B5E20; }
+        .toolbar .btn-warning { background: #E65100; color: #fff; border-color: #E65100; }
+        .toolbar .btn-warning:hover { background: #BF360C; }
+        .toolbar .status { font-size: 12px; color: #888; margin-left: auto; }
+        .toolbar .status.saving { color: #E65100; }
+        .toolbar .status.saved { color: #2E7D32; }
+        .toolbar .status.error { color: #c00; }
+        .toolbar .sep { width: 1px; height: 24px; background: #ddd; }
+
+        .sheet-wrapper { overflow: auto; max-height: calc(100vh - 120px); }
+        .sheet-table { border-collapse: collapse; font-size: 12px; min-width: 100%; }
+        .sheet-table th, .sheet-table td { border: 1px solid #d0d0d0; padding: 0; position: relative; white-space: nowrap; }
+        .sheet-table th { background: #e8eaed; color: #555; font-weight: 600; font-size: 11px; text-align: center; padding: 6px 8px; position: sticky; top: 0; z-index: 10; user-select: none; }
+        .row-header { background: #e8eaed; color: #888; font-size: 10px; text-align: center; min-width: 72px; padding: 4px 2px; font-weight: 500; position: sticky; left: 0; z-index: 5; user-select: none; white-space: nowrap; }
+        .filter-btn { font-weight: 600; background: #fff !important; color: #333 !important; border-color: #ddd !important; }
+        .filter-btn.active { background: #1565C0 !important; color: #fff !important; border-color: #1565C0 !important; }
+        .row-header .row-drag { display: inline-block; width: 14px; cursor: grab; color: #aaa; font-size: 11px; vertical-align: middle; }
+        .row-header .row-drag:hover { color: #1565C0; }
+        .row-header .row-drag:active { cursor: grabbing; }
+        .row-header .row-num { display: inline; vertical-align: middle; margin: 0 1px; }
+        .row-header .row-move { display: inline-block; width: 12px; cursor: pointer; color: #aaa; font-size: 10px; vertical-align: middle; opacity: 0.4; }
+        .row-header:hover .row-move { opacity: 1; }
+        .row-header .row-move:hover { color: #1565C0; }
+        .row-header .row-add { display: inline-block; width: 16px; height: 16px; line-height: 14px; text-align: center; font-size: 14px; font-weight: 700; color: #1565C0; background: transparent; border: 1px solid transparent; border-radius: 3px; cursor: pointer; margin-left: 1px; vertical-align: middle; opacity: 0.3; }
+        .row-header:hover .row-add { opacity: 1; border-color: #1565C0; }
+        .row-header .row-add:hover { background: #1565C0; color: #fff; }
+        .sheet-table tr.day-row td { background: #1565C0 !important; }
+        .sheet-table tr.day-row td .cell-view { color: #fff; font-weight: 700; }
+        .sheet-table tr.day-row td.row-header { background: #0D47A1 !important; color: #fff; }
+        .sheet-table tr.drag-over td { border-top: 3px solid #1565C0 !important; }
+        .sheet-table tr.dragging { opacity: 0.4; }
+        .sheet-table th:first-child { z-index: 15; left: 0; }
+
+        .sheet-table td { min-width: 90px; max-width: 300px; height: 28px; cursor: cell; }
+        .cell-view { padding: 4px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 20px; line-height: 20px; }
+        .sheet-table td.selected { outline: 2px solid #1565C0; outline-offset: -2px; z-index: 2; background: #EBF2FF !important; }
+        .sheet-table td.editing { padding: 0; background: transparent !important; }
+        .cell-input { width: 100%; height: 100%; border: 2px solid #1565C0; outline: none; padding: 3px 5px; font-size: 12px; font-family: inherit; background: #E3F2FD; box-sizing: border-box; min-height: 28px; }
+        .sheet-table td.dirty .cell-view { background: #FFF8E1; }
+        .sheet-table td.saved-flash .cell-view { background: #E8F5E9; transition: background 0.5s; }
+        .sheet-table tr:hover td:not(.row-header) { background: #f5f8ff; }
+
+        .ctx-menu { display: none; position: fixed; background: #fff; border: 1px solid #d0d0d0; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,.15); z-index: 1000; min-width: 200px; padding: 4px 0; font-size: 13px; }
+        .ctx-menu.visible { display: block; }
+        .ctx-menu div { padding: 8px 16px; cursor: pointer; }
+        .ctx-menu div:hover { background: #e3f2fd; }
+        .ctx-menu .ctx-danger { color: #c00; }
+        .ctx-menu .ctx-danger:hover { background: #fce4ec; }
+
+        .loading { display: flex; align-items: center; justify-content: center; padding: 60px; color: #888; font-size: 15px; }
+        .loading::before { content: ''; display: inline-block; width: 20px; height: 20px; border: 2px solid #1565C0; border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; margin-right: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Aviso modal */
+        .aviso-modal { display:none; position:fixed; inset:0; z-index:300; align-items:center; justify-content:center; }
+        .aviso-modal[style*="flex"], .aviso-modal:not([style*="none"]) { display:flex; }
+        .aviso-modal__overlay { position:absolute; inset:0; background:rgba(0,0,0,.5); }
+        .aviso-modal__content { position:relative; background:#fff; border-radius:12px; padding:28px 32px; width:560px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 12px 40px rgba(0,0,0,.25); }
+        .aviso-modal__close { position:absolute; top:12px; right:16px; background:none; border:none; font-size:24px; cursor:pointer; color:#888; }
+        .aviso-modal__close:hover { color:#333; }
+        .aviso-modal__title { font-size:18px; font-weight:700; color:#1565C0; margin-bottom:20px; }
+        .aviso-row { display:flex; gap:14px; margin-bottom:12px; }
+        .aviso-row label { flex:1; display:flex; flex-direction:column; font-size:13px; font-weight:600; color:#555; gap:4px; }
+        .aviso-row label.aviso-wide { flex:1 1 100%; }
+        .aviso-row input, .aviso-row select, .aviso-row textarea { padding:8px 10px; border:1px solid #ddd; border-radius:6px; font-size:14px; font-family:inherit; color:#222; font-weight:400; }
+        .aviso-row textarea { resize:vertical; }
+        .aviso-error { color:#c00; font-size:13px; margin:8px 0; }
+        .aviso-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+        .aviso-btn { padding:10px 20px; border:1px solid #ddd; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; background:#fff; }
+        .aviso-btn:hover { background:#f5f5f5; }
+        .aviso-btn--primary { background:#1565C0; color:#fff; border-color:#1565C0; }
+        .aviso-btn--primary:hover { background:#0D47A1; }
+
+        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; align-items:center; justify-content:center; }
+        .overlay.active { display:flex; }
+        .overlay__box { background:#fff; border-radius:12px; padding:32px; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,.2); }
+        .overlay__box p { margin-bottom:16px; font-size:15px; }
+
+        /* Print route panel */
+        .print-panel { display:none; }
+        .print-panel.active { display:block; }
+        .print-bar { padding:16px 24px; background:#fff; border-bottom:1px solid #e0e0e0; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+        .print-bar select { padding:8px 14px; border:1px solid #ddd; border-radius:6px; font-size:14px; font-family:inherit; min-width:200px; }
+        .print-bar .btn-back { padding:8px 16px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:13px; font-weight:500; }
+        .print-bar .btn-back:hover { background:#f5f5f5; }
+        .print-bar .btn-print { padding:8px 20px; border:none; border-radius:6px; background:#1565C0; color:#fff; cursor:pointer; font-size:13px; font-weight:600; }
+        .print-bar .btn-print:hover { background:#0D47A1; }
+        .print-bar .print-count { font-size:13px; color:#888; margin-left:auto; }
+
+        .print-table-wrap { padding:0 24px 24px; overflow:auto; max-height:calc(100vh - 160px); }
+        .print-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:16px; table-layout:fixed; }
+        .print-table th { background:#1565C0; color:#fff; padding:6px 6px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; position:sticky; top:0; z-index:2; white-space:nowrap; overflow:hidden; }
+        .print-table td { padding:5px 6px; border-bottom:1px solid #e8e8e8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .print-table tr:nth-child(even) { background:#f8fafc; }
+        .print-table tr:hover { background:#eef3ff; }
+        .print-table .urgent { color:#c62828; font-weight:700; }
+        /* Column widths */
+        .print-table .col-n { width:30px; }
+        .print-table .col-dir { width:22%; white-space:normal; word-break:break-word; }
+        .print-table .col-barrio { width:12%; }
+        .print-table .col-sacos { width:42px; text-align:center; }
+        .print-table .col-urgen { width:42px; text-align:center; }
+        .print-table .col-tlf { width:9%; }
+        .print-table .col-cond { width:9%; }
+        .print-table .col-etiq { width:8%; }
+        .print-table .col-marca { width:7%; }
+        .print-table .col-obs { width:13%; white-space:normal; word-break:break-word; }
+        .print-table .col-avis { width:8%; }
+        .print-table .col-hora { width:6%; }
+        .print-table .col-fecha { width:9%; }
+
+        .print-bar .btn-excel { padding:8px 20px; border:none; border-radius:6px; background:#2E7D32; color:#fff; cursor:pointer; font-size:13px; font-weight:600; }
+        .print-bar .btn-excel:hover { background:#1B5E20; }
+
+        /* Print media query */
+        @media print {
+            body > * { display:none !important; }
+            #dashboard { display:block !important; }
+            #dashboard > .header,
+            #dashboard > .toolbar,
+            #dashboard > .sheet-wrapper,
+            .print-bar { display:none !important; }
+            .print-panel { display:block !important; }
+            .print-table-wrap { max-height:none; padding:0; overflow:visible; }
+            .print-table { font-size:10px; }
+            .print-table th { background:#333 !important; color:#fff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; padding:4px 4px; }
+            .print-table td { padding:4px 4px; white-space:normal; word-break:break-word; }
+            @page { margin:10mm; size:landscape; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login" id="login-screen">
+        <div class="login__card">
+            <h1 class="login__title">Servisaco Rutas</h1>
+            <p class="login__subtitle">Gestión de rutas de recogida</p>
+            <form id="login-form">
+                <div class="login__field">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="rutas@bf10.local">
+                </div>
+                <div class="login__field">
+                    <label for="login-pass">Contraseña</label>
+                    <input type="password" id="login-pass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="login__btn" id="login-btn">Entrar</button>
+                <p class="login__error" id="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard" style="display:none">
+        <div class="header">
+            <span class="header__title">🗺️ Rutas</span>
+            <div class="header__nav">
+                <a href="../admin/">📋 Admin</a>
+                <a href="../facturacion/">💰 Facturación</a>
+                <a href="../reporting/">📊 Reporting</a>
+            </div>
+            <div class="header__actions">
+                <span id="user-name"></span>
+                <button id="logout-btn">Cerrar sesión</button>
+            </div>
+        </div>
+        <div class="toolbar">
+            <button class="filter-btn active" id="btn-pendientes">Por recoger</button>
+            <button class="filter-btn" id="btn-recogidas">Recogidas</button>
+            <button class="filter-btn" id="btn-todas">Todas</button>
+            <div class="sep"></div>
+            <button class="filter-btn zone-btn" id="btn-madrid">Madrid</button>
+            <button class="filter-btn zone-btn" id="btn-pueblos">Pueblos</button>
+            <div class="sep"></div>
+            <button class="btn-primary" id="btn-add-aviso">+ Aviso recogida</button>
+            <button id="btn-last-row">Ir a última fila</button>
+            <div class="sep"></div>
+            <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
+            <button id="btn-print-route" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500">🖨️ Imprimir ruta</button>
+            <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
+            <button style="background:#7B1FA2;color:#fff;border-color:#7B1FA2;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500" id="btn-crear-rutas" onclick="openCrearRutas()">🚛 Crear Rutas</button>
+            <button style="background:#455A64;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500" onclick="openHistorico()">📊 Histórico</button>
+            <span class="status" id="status-msg"></span>
+            <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
+        </div>
+        <div class="sheet-wrapper" id="sheet-wrapper">
+            <div class="loading" id="loading">Cargando datos...</div>
+            <table class="sheet-table" id="sheet-table" style="display:none">
+                <thead id="sheet-head"></thead>
+                <tbody id="sheet-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Print route panel -->
+        <div class="print-panel" id="print-panel">
+            <div class="print-bar">
+                <button class="btn-back" id="btn-print-back">← Volver</button>
+                <select id="print-conductor">
+                    <option value="">— Seleccionar conductor —</option>
+                </select>
+                <button class="btn-print" id="btn-do-print">🖨️ Imprimir</button>
+                <button class="btn-excel" id="btn-do-excel">📥 Descargar Excel</button>
+                <span class="print-count" id="print-count"></span>
+            </div>
+            <div class="print-table-wrap">
+                <table class="print-table" id="print-table">
+                    <thead>
+                        <tr>
+                            <th class="col-n">#</th>
+                            <th class="col-dir">Dirección</th>
+                            <th class="col-barrio">Barrio / CP</th>
+                            <th class="col-sacos">Sacos</th>
+                            <th class="col-urgen">Urgen</th>
+                            <th class="col-tlf">Tlf aviso</th>
+                            <th class="col-cond">Conductor</th>
+                            <th class="col-etiq">Etiquetas</th>
+                            <th class="col-marca">Marca</th>
+                            <th class="col-obs">Observaciones</th>
+                            <th class="col-avis">Avisador</th>
+                            <th class="col-hora">Hora</th>
+                            <th class="col-fecha">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="print-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="ctx-menu" id="ctx-menu">
+        <div id="ctx-insert-above">Insertar fila arriba</div>
+        <div id="ctx-insert-below">Insertar fila abajo</div>
+        <div id="ctx-delete" class="ctx-danger">Eliminar fila</div>
+    </div>
+
+    <!-- Modal aviso recogida -->
+    <div class="aviso-modal" id="aviso-modal" style="display:none">
+        <div class="aviso-modal__overlay" id="aviso-overlay"></div>
+        <div class="aviso-modal__content">
+            <button class="aviso-modal__close" id="aviso-close">&times;</button>
+            <h2 class="aviso-modal__title">Nuevo aviso de recogida</h2>
+            <form id="aviso-form">
+                <div class="aviso-row">
+                    <label>Dirección *<input type="text" id="av-direccion" required></label>
+                    <label>Barrio / CP
+                        <select id="av-barrio">
+                            <option value="">— Seleccionar —</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="aviso-row">
+                    <label>Nº Sacos<input type="text" id="av-sacos"></label>
+                    <label>¿Urgen?
+                        <select id="av-urgen">
+                            <option value="">No</option>
+                            <option value="SI">Sí</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="aviso-row">
+                    <label>Teléfono aviso<input type="text" id="av-tlf"></label>
+                    <label>Marca
+                        <select id="av-marca">
+                            <option value="">—</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="aviso-row">
+                    <label>Etiquetas<input type="text" id="av-etiquetas"></label>
+                </div>
+                <div class="aviso-row">
+                    <label class="aviso-wide">Observaciones<textarea id="av-observaciones" rows="2"></textarea></label>
+                </div>
+                <div class="aviso-row">
+                    <label>Fecha aviso<input type="date" id="av-fecha-aviso"></label>
+                    <label>Avisador<input type="text" id="av-avisador"></label>
+                </div>
+                <p class="aviso-error" id="aviso-error" style="display:none"></p>
+                <div class="aviso-actions">
+                    <button type="button" class="aviso-btn" id="aviso-cancel">Cancelar</button>
+                    <button type="submit" class="aviso-btn aviso-btn--primary">Guardar aviso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay-sync">
+        <div class="overlay__box">
+            <div class="loading" id="sync-msg">Sincronizando...</div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        var API = '../api/rutas_data.php';
+        var AUTH = '../api/auth.php';
+        var rows = [];       // array of DB row objects
+        var editingCell = null;
+        var selectedTd = null;
+        var ctxRowId = -1;
+        var currentFilter = 'pendientes'; // 'pendientes' or ''
+        var currentZone = ''; // '' | 'madrid' | 'pueblos'
+        var allRows = [];    // unfiltered rows from API
+        var conductoresList = [];
+        var marcasList = ['BF10','SERVISACO','ATUSACO','ATUSACO_LUISFER','ATUSACO_HERREROCON','ATUSACO_COSASCASA','ECOSACO','SACAS_BLANCAS','UTE-EXTRAMAD'];
+
+        var barriosMadrid = [
+            'Arganzuela','Carabanchel','Carabanchel Alto-Aguillas-4 Vientos','Centro',
+            'Chamartin','Chamberi','Ciudad Lineal','El Pardo','Fuencarral-Mirasierra',
+            'Hortaleza-Sanchinarro','Las Tablas','Moncloa-Argüelles','Moratalaz',
+            'Pta Angel-Batan-Aluche-Camp.','Retiro','S Blas-Canillejas-Barajas',
+            'Salamanca','Tetuan','Usera','Vallecas','Vicalvaro','Villaverde',
+            'Madrid - Otros barrios'
+        ];
+        var barriosPueblos = [
+            'Alcobendas','Alcorcon','Aravaca','Arganda del Rey','Arroyomolinos',
+            'Boadilla del Monte','Cobeña','Collado Villalba','Coslada',
+            'Encinar de los Reyes','Fuenlabrada','Getafe','Getafe-Perales del Rio',
+            'Humanes de Madrid','La Poveda-Arganda del Rey','Las Rozas de Madrid',
+            'Leganes','Leganes-Alcorcon','Loeches','Majadahonda',
+            'Mejorada del Campo','Mostoles','Mostoles - Parque Coimbra',
+            'Mostoles- Parque Coimbra','Paracuellos de Jarama','Parla',
+            'Parque Coimbra','Pinto','Pozuelo de Alarcon','Rivas-Vaciamadrid',
+            'San Agustin de Guadalix','San Agustín del Guadalix',
+            'San Fernando de Henares','San Martin de la Vega',
+            'San Sebastian de los Reyes','Tres Cantos','Valdemoro',
+            'Velilla de San Antonio','Villalbilla','Villaviciosa de Odon'
+        ];
+        var barriosMadridSet = {};
+        barriosMadrid.forEach(function(b) { barriosMadridSet[b.toLowerCase()] = true; });
+        var barriosPueblosSet = {};
+        barriosPueblos.forEach(function(b) { barriosPueblosSet[b.toLowerCase()] = true; });
+
+        // Load conductores list
+        fetch('../api/driver.php?action=conductores').then(function(r) { return r.json(); }).then(function(d) {
+            conductoresList = d.conductores || [];
+        }).catch(function() {});
+
+        var FIELDS = [
+            'direccion', 'barrio_cp', 'sacos', 'urgen', 'tlf_aviso',
+            'conductor', 'etiquetas', 'marca', 'observaciones',
+            'avisador', 'hora_aviso', 'fecha_aviso', 'fecha_recogida', 'fecha_de_ruta',
+            'estado', 'orden', 'swap_pending', 'swap_orden',
+            'etiqueta_1', 'etiqueta_2', 'etiqueta_3', 'etiqueta_4', 'etiqueta_5', 'etiqueta_6'
+        ];
+        var HEADERS = [
+            'DIRECCION', 'BARRIO/CP', 'SACOS', 'URGEN', 'TLF AVISO',
+            'CONDUCTOR', 'ETIQUETAS', 'MARCA', 'OBSERVACIONES',
+            'AVISADOR', 'HORA AVISO', 'FECHA AVISO', 'FECHA RECOGIDA', 'FECHA_DE_RUTA',
+            'ESTADO', 'ORDEN', 'SWAP_PENDING', 'SWAP_ORDEN',
+            'ETIQUETA_1', 'ETIQUETA_2', 'ETIQUETA_3', 'ETIQUETA_4', 'ETIQUETA_5', 'ETIQUETA_6'
+        ];
+
+        // ---------- Auth ----------
+        fetch(AUTH + '?action=me').then(function(r) { return r.json(); }).then(function(d) {
+            if (d.user && (d.user.role === 'rutas' || d.user.role === 'manager' || d.user.role === 'ceo')) showDashboard(d.user);
+        }).catch(function() {});
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var email = document.getElementById('login-email').value;
+            var pass = document.getElementById('login-pass').value;
+            var btn = document.getElementById('login-btn');
+            var err = document.getElementById('login-error');
+            btn.disabled = true; btn.textContent = 'Entrando...'; err.textContent = '';
+            fetch(AUTH + '?action=login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: pass }),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success && (d.user.role === 'rutas' || d.user.role === 'manager')) showDashboard(d.user);
+                else err.textContent = d.error || 'Acceso denegado.';
+            }).catch(function() { err.textContent = 'Error de conexión'; })
+            .finally(function() { btn.disabled = false; btn.textContent = 'Entrar'; });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            fetch(AUTH + '?action=logout', { method: 'POST' }).then(function() {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+            });
+        });
+
+        var currentUserName = '';
+        function showDashboard(user) {
+            currentUserName = user.name || '';
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('user-name').textContent = user.name;
+            loadData();
+        }
+
+        // ---------- Status ----------
+        function setStatus(msg, cls) {
+            var el = document.getElementById('status-msg');
+            el.textContent = msg;
+            el.className = 'status' + (cls ? ' ' + cls : '');
+        }
+
+        function showSync(msg) {
+            document.getElementById('sync-msg').textContent = msg || 'Sincronizando...';
+            document.getElementById('overlay-sync').classList.add('active');
+        }
+        function hideSync() {
+            document.getElementById('overlay-sync').classList.remove('active');
+        }
+
+        // ---------- Geocode batches ----------
+        function runGeocodeBatches(remaining) {
+            if (remaining <= 0) {
+                hideSync();
+                setStatus('Importación y geocoding completados', 'saved');
+                loadData();
+                return;
+            }
+            showSync('Geocodificando coordenadas (bloque ' + (3 - remaining) + '/2)...');
+            fetch(API + '?action=geocode-batch', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.success) {
+                        var msg = 'Bloque ' + (3 - remaining) + ': ' + d.geocoded + ' geocodificados, ' + d.skipped + ' sin precisión';
+                        if (d.remaining > 0) msg += ' (' + d.remaining + ' pendientes)';
+                        setStatus(msg, 'saved');
+                        if (d.remaining > 0 && remaining > 1) {
+                            runGeocodeBatches(remaining - 1);
+                        } else {
+                            hideSync();
+                            setStatus('Importación completa. ' + d.geocoded + ' direcciones geolocalizadas.', 'saved');
+                            loadData();
+                        }
+                    } else {
+                        hideSync();
+                        setStatus('Error geocoding: ' + (d.error || 'fallo'), 'error');
+                    }
+                }).catch(function() {
+                    hideSync();
+                    setStatus('Error de conexión en geocoding', 'error');
+                });
+        }
+
+        // ---------- Load from DB ----------
+        function loadData() {
+            setStatus('Cargando...', '');
+            var url = API + '?action=list';
+            if (currentFilter) url += '&filter=' + currentFilter;
+            fetch(url).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.error) { setStatus('Error: ' + d.error, 'error'); return; }
+                allRows = d.rows || [];
+                applyZoneFilter();
+            }).catch(function() { setStatus('Error de conexión', 'error'); });
+        }
+
+        function isDayRow(r) {
+            return (r.direccion || '').trim().toLowerCase().indexOf('dia') === 0 && !(r.barrio_cp || '').trim();
+        }
+
+        function applyZoneFilter() {
+            var filtered = allRows;
+
+            // In "recogidas" mode, exclude day-header rows
+            if (currentFilter === 'recogidas') {
+                filtered = filtered.filter(function(r) { return !isDayRow(r); });
+            }
+
+            if (currentZone) {
+                var set = currentZone === 'madrid' ? barriosMadridSet : barriosPueblosSet;
+                filtered = filtered.filter(function(r) {
+                    var b = (r.barrio_cp || '').trim().toLowerCase();
+                    return !b || set[b];
+                });
+            }
+
+            rows = filtered;
+            renderTable();
+            var labels = { 'pendientes': 'por recoger', 'recogidas': 'recogidas', '': 'todas' };
+            var label = labels[currentFilter] || 'todas';
+            if (currentZone) label += ' · ' + (currentZone === 'madrid' ? 'Madrid' : 'Pueblos');
+            setStatus(rows.length + ' filas (' + label + ') — ' + new Date().toLocaleTimeString(), 'saved');
+        }
+
+        // ---------- Render ----------
+        function renderTable() {
+            var thead = document.getElementById('sheet-head');
+            var hhtml = '<tr><th class="row-header">#</th>';
+            for (var c = 0; c < HEADERS.length; c++) {
+                hhtml += '<th>' + HEADERS[c] + '</th>';
+            }
+            hhtml += '</tr>';
+            thead.innerHTML = hhtml;
+
+            var tbody = document.getElementById('sheet-body');
+            var bhtml = '';
+            for (var i = 0; i < rows.length; i++) {
+                var r = rows[i];
+                var dayRow = isDayRow(r);
+                bhtml += '<tr data-id="' + r.id + '"' + (dayRow ? ' class="day-row"' : '') + '>';
+                bhtml += '<td class="row-header" data-id="' + r.id + '"><span class="row-drag" draggable="true" title="Arrastrar fila">⠿</span><span class="row-move row-up" data-id="' + r.id + '" title="Subir">▲</span><span class="row-num">' + (i + 1) + '</span><span class="row-move row-down" data-id="' + r.id + '" title="Bajar">▼</span><span class="row-add" data-addafter="' + r.id + '" title="Insertar fila debajo">+</span></td>';
+                for (var c = 0; c < FIELDS.length; c++) {
+                    var val = r[FIELDS[c]] || '';
+                    bhtml += '<td data-idx="' + i + '" data-col="' + c + '"><div class="cell-view">' + esc(val) + '</div></td>';
+                }
+                bhtml += '</tr>';
+            }
+            tbody.innerHTML = bhtml;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('sheet-table').style.display = '';
+            selectedTd = null;
+            editingCell = null;
+        }
+
+        // ---------- Cell editing: single click = edit directly ----------
+        document.getElementById('sheet-body').addEventListener('click', function(e) {
+            var td = e.target.closest('td[data-idx]');
+            if (!td || td.classList.contains('editing')) return;
+            if (editingCell) commitEdit();
+            startEdit(td);
+        });
+
+        function editCellAt(idx, col) {
+            if (idx < 0) idx = 0;
+            if (idx >= rows.length) idx = rows.length - 1;
+            if (col < 0) col = 0;
+            if (col >= FIELDS.length) col = FIELDS.length - 1;
+            var td = document.querySelector('td[data-idx="' + idx + '"][data-col="' + col + '"]');
+            if (td) startEdit(td);
+        }
+
+        function startEdit(td, initialValue) {
+            if (editingCell) commitEdit();
+            var idx = parseInt(td.dataset.idx);
+            var col = parseInt(td.dataset.col);
+            var field = FIELDS[col];
+            var val = rows[idx][field] || '';
+
+            td.classList.add('editing');
+
+            var el;
+            if (field === 'barrio_cp' && currentZone) {
+                el = document.createElement('select');
+                el.className = 'cell-input';
+                var list = currentZone === 'madrid' ? barriosMadrid : barriosPueblos;
+                var opts = '<option value="">—</option>';
+                if (currentZone === 'pueblos') {
+                    opts += '<option value="__nuevo__">+ Otro pueblo...</option>';
+                }
+                opts += list.map(function(b) {
+                    return '<option value="' + esc(b) + '"' + (b === val ? ' selected' : '') + '>' + esc(b) + '</option>';
+                }).join('');
+                el.innerHTML = opts;
+                el.value = val;
+            } else if (field === 'conductor' && conductoresList.length) {
+                el = document.createElement('select');
+                el.className = 'cell-input';
+                el.innerHTML = '<option value="">—</option>' + conductoresList.map(function(c) {
+                    return '<option value="' + esc(c) + '"' + (c === val ? ' selected' : '') + '>' + esc(c) + '</option>';
+                }).join('');
+                el.value = val;
+            } else if (field === 'marca') {
+                el = document.createElement('select');
+                el.className = 'cell-input';
+                el.innerHTML = '<option value="">—</option>' + marcasList.map(function(m) {
+                    return '<option value="' + esc(m) + '"' + (m === val ? ' selected' : '') + '>' + esc(m) + '</option>';
+                }).join('');
+                el.value = val;
+            } else {
+                el = document.createElement('input');
+                el.className = 'cell-input';
+                el.type = 'text';
+                el.value = (initialValue !== undefined) ? initialValue : val;
+            }
+
+            td.innerHTML = '';
+            td.appendChild(el);
+            el.focus();
+            if (el.tagName === 'INPUT' && initialValue === undefined) el.select();
+
+            editingCell = { idx: idx, col: col, field: field, input: el, td: td, original: val };
+
+            el.addEventListener('keydown', function(ev) {
+                if (ev.key === 'Enter') { ev.preventDefault(); commitEdit(); editCellAt(idx + 1, col); }
+                else if (ev.key === 'Tab') { ev.preventDefault(); commitEdit(); editCellAt(idx, col + (ev.shiftKey ? -1 : 1)); }
+                else if (ev.key === 'Escape') { cancelEdit(); }
+            });
+
+            // For selects, commit on change (handle "otro pueblo" prompt)
+            if (el.tagName === 'SELECT') {
+                el.addEventListener('change', function() {
+                    if (this.value === '__nuevo__') {
+                        var nombre = prompt('Nombre del pueblo:');
+                        if (nombre && nombre.trim()) {
+                            this.value = '';
+                            editingCell.input = { value: nombre.trim(), tagName: 'INPUT' };
+                        } else {
+                            this.value = editingCell.original;
+                            cancelEdit();
+                            return;
+                        }
+                    }
+                    commitEdit();
+                });
+            }
+        }
+
+        function commitEdit() {
+            if (!editingCell) return;
+            var idx = editingCell.idx;
+            var field = editingCell.field;
+            var newVal = editingCell.input.value;
+            var td = editingCell.td;
+            var original = editingCell.original;
+            var rowId = rows[idx].id;
+            editingCell = null;
+
+            td.classList.remove('editing');
+            td.innerHTML = '<div class="cell-view">' + esc(newVal) + '</div>';
+            rows[idx][field] = newVal;
+
+            if (newVal !== original) {
+                td.classList.add('dirty');
+                saveCell(rowId, field, newVal, td);
+            }
+        }
+
+        function cancelEdit() {
+            if (!editingCell) return;
+            var td = editingCell.td;
+            var val = editingCell.original;
+            editingCell = null;
+            td.classList.remove('editing');
+            td.innerHTML = '<div class="cell-view">' + esc(val) + '</div>';
+        }
+
+        // ---------- Save cell to DB ----------
+        function saveCell(id, field, value, td) {
+            setStatus('Guardando...', 'saving');
+            fetch(API + '?action=update-cell', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, field: field, value: value }),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                td.classList.remove('dirty');
+                if (d.success) {
+                    td.classList.add('saved-flash');
+                    setTimeout(function() { td.classList.remove('saved-flash'); }, 1500);
+                    setStatus('Guardado', 'saved');
+                } else {
+                    setStatus('Error: ' + (d.error || 'fallo'), 'error');
+                }
+            }).catch(function() { setStatus('Error de conexión', 'error'); });
+        }
+
+        // ---------- Context menu ----------
+        var ctxMenu = document.getElementById('ctx-menu');
+
+        document.getElementById('sheet-body').addEventListener('contextmenu', function(e) {
+            var rh = e.target.closest('.row-header[data-id]');
+            var td = e.target.closest('td[data-idx]');
+            var id = rh ? parseInt(rh.dataset.id) : (td ? rows[parseInt(td.dataset.idx)].id : -1);
+            if (id < 0) return;
+            e.preventDefault();
+            ctxRowId = id;
+            ctxMenu.style.left = e.clientX + 'px';
+            ctxMenu.style.top = e.clientY + 'px';
+            ctxMenu.classList.add('visible');
+        });
+
+        document.addEventListener('click', function() { ctxMenu.classList.remove('visible'); });
+
+        document.getElementById('ctx-insert-above').addEventListener('click', function() {
+            if (ctxRowId < 0) return;
+            var idx = rows.findIndex(function(r) { return r.id == ctxRowId; });
+            var afterId = idx > 0 ? rows[idx - 1].id : 0;
+            insertRow(afterId);
+        });
+
+        document.getElementById('ctx-insert-below').addEventListener('click', function() {
+            if (ctxRowId < 0) return;
+            insertRow(ctxRowId);
+        });
+
+        document.getElementById('ctx-delete').addEventListener('click', function() {
+            if (ctxRowId < 0) return;
+            if (!confirm('¿Eliminar esta fila?')) return;
+            deleteRow(ctxRowId);
+        });
+
+        function insertRow(afterId) {
+            setStatus('Insertando...', 'saving');
+            if (editingCell) commitEdit();
+            fetch(API + '?action=insert-row', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ after_id: afterId }),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) { loadData(); }
+                else setStatus('Error: ' + (d.error || 'fallo'), 'error');
+            }).catch(function() { setStatus('Error de conexión', 'error'); });
+        }
+
+        function deleteRow(id) {
+            setStatus('Eliminando...', 'saving');
+            fetch(API + '?action=delete-row', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id }),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) { loadData(); }
+                else setStatus('Error: ' + (d.error || 'fallo'), 'error');
+            }).catch(function() { setStatus('Error de conexión', 'error'); });
+        }
+
+        // ---------- Add row / Move row: buttons per row ----------
+        document.getElementById('sheet-body').addEventListener('click', function(e) {
+            var addBtn = e.target.closest('.row-add');
+            if (addBtn) {
+                e.stopPropagation();
+                var afterId = parseInt(addBtn.dataset.addafter);
+                insertRow(afterId);
+                return;
+            }
+            var moveUp = e.target.closest('.row-up');
+            if (moveUp) {
+                e.stopPropagation();
+                var id = parseInt(moveUp.dataset.id);
+                var idx = rows.findIndex(function(r) { return r.id == id; });
+                if (idx <= 0) return;
+                var afterId = idx >= 2 ? parseInt(rows[idx - 2].id) : 0;
+                moveRow(id, afterId);
+                return;
+            }
+            var moveDown = e.target.closest('.row-down');
+            if (moveDown) {
+                e.stopPropagation();
+                var id = parseInt(moveDown.dataset.id);
+                var idx = rows.findIndex(function(r) { return r.id == id; });
+                if (idx < 0 || idx >= rows.length - 1) return;
+                var afterId = parseInt(rows[idx + 1].id);
+                moveRow(id, afterId);
+                return;
+            }
+        }, true);
+
+        function moveRow(id, afterId) {
+            setStatus('Moviendo...', 'saving');
+            fetch(API + '?action=reorder', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, after_id: afterId }),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) loadData();
+                else setStatus('Error: ' + (d.error || 'fallo'), 'error');
+            }).catch(function() { setStatus('Error de conexión', 'error'); });
+        }
+
+        // ---------- Filter buttons ----------
+        function setStatusFilter(filter) {
+            currentFilter = filter;
+            document.getElementById('btn-pendientes').classList.toggle('active', filter === 'pendientes');
+            document.getElementById('btn-recogidas').classList.toggle('active', filter === 'recogidas');
+            document.getElementById('btn-todas').classList.toggle('active', filter === '');
+            loadData();
+        }
+        document.getElementById('btn-pendientes').addEventListener('click', function() { setStatusFilter('pendientes'); });
+        document.getElementById('btn-recogidas').addEventListener('click', function() { setStatusFilter('recogidas'); });
+        document.getElementById('btn-todas').addEventListener('click', function() { setStatusFilter(''); });
+
+        // ---------- Zone filter buttons ----------
+        document.getElementById('btn-madrid').addEventListener('click', function() {
+            if (currentZone === 'madrid') {
+                currentZone = '';
+                this.classList.remove('active');
+            } else {
+                currentZone = 'madrid';
+                this.classList.add('active');
+                document.getElementById('btn-pueblos').classList.remove('active');
+            }
+            applyZoneFilter();
+        });
+        document.getElementById('btn-pueblos').addEventListener('click', function() {
+            if (currentZone === 'pueblos') {
+                currentZone = '';
+                this.classList.remove('active');
+            } else {
+                currentZone = 'pueblos';
+                this.classList.add('active');
+                document.getElementById('btn-madrid').classList.remove('active');
+            }
+            applyZoneFilter();
+        });
+
+        // ---------- Add day ----------
+        // ---------- Go to last row ----------
+        document.getElementById('btn-last-row').addEventListener('click', function() {
+            var wrapper = document.getElementById('sheet-wrapper');
+            wrapper.scrollTop = wrapper.scrollHeight;
+        });
+
+        // ---------- Drag & Drop rows ----------
+        var dragRowId = null;
+
+        document.getElementById('sheet-body').addEventListener('dragstart', function(e) {
+            var grip = e.target.closest('.row-drag');
+            if (!grip) { e.preventDefault(); return; }
+            var rh = grip.closest('.row-header[data-id]');
+            if (!rh) { e.preventDefault(); return; }
+            if (editingCell) commitEdit();
+            dragRowId = parseInt(rh.dataset.id);
+            var tr = rh.closest('tr');
+            tr.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', dragRowId);
+        });
+
+        document.getElementById('sheet-body').addEventListener('dragover', function(e) {
+            if (dragRowId === null) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            var tr = e.target.closest('tr[data-id]');
+            // Clear all drag-over highlights
+            document.querySelectorAll('.drag-over').forEach(function(el) { el.classList.remove('drag-over'); });
+            if (tr && parseInt(tr.dataset.id) !== dragRowId) {
+                tr.classList.add('drag-over');
+            }
+        });
+
+        document.getElementById('sheet-body').addEventListener('dragleave', function(e) {
+            var tr = e.target.closest('tr.drag-over');
+            if (tr && !tr.contains(e.relatedTarget)) tr.classList.remove('drag-over');
+        });
+
+        document.getElementById('sheet-body').addEventListener('drop', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.drag-over,.dragging').forEach(function(el) { el.classList.remove('drag-over', 'dragging'); });
+            if (dragRowId === null) return;
+
+            var tr = e.target.closest('tr[data-id]');
+            if (!tr) { dragRowId = null; return; }
+            var targetId = parseInt(tr.dataset.id);
+            if (targetId === dragRowId) { dragRowId = null; return; }
+
+            // Determine if drop is on top or bottom half of the row
+            var rect = tr.getBoundingClientRect();
+            var midY = rect.top + rect.height / 2;
+            var afterId;
+            if (e.clientY < midY) {
+                // Drop above target row: place after the row before target
+                var targetIdx = rows.findIndex(function(r) { return r.id == targetId; });
+                afterId = targetIdx > 0 ? rows[targetIdx - 1].id : 0;
+            } else {
+                // Drop below target row: place after target
+                afterId = targetId;
+            }
+
+            setStatus('Moviendo fila...', 'saving');
+            fetch(API + '?action=reorder', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: dragRowId, after_id: afterId }),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) loadData();
+                else setStatus('Error: ' + (d.error || 'fallo'), 'error');
+            }).catch(function() { setStatus('Error de conexión', 'error'); });
+
+            dragRowId = null;
+        });
+
+        document.getElementById('sheet-body').addEventListener('dragend', function() {
+            document.querySelectorAll('.drag-over,.dragging').forEach(function(el) { el.classList.remove('drag-over', 'dragging'); });
+            dragRowId = null;
+        });
+
+        // ---------- Aviso recogida modal ----------
+        var avisoModal = document.getElementById('aviso-modal');
+        var avisoBarrioSelect = document.getElementById('av-barrio');
+        var allBarrios = barriosMadrid.concat(barriosPueblos).sort();
+
+        // Populate barrio dropdown
+        allBarrios.forEach(function(b) {
+            var opt = document.createElement('option');
+            opt.value = b;
+            opt.textContent = b;
+            avisoBarrioSelect.appendChild(opt);
+        });
+        // Populate marca dropdown
+        var avisoMarcaSelect = document.getElementById('av-marca');
+        marcasList.forEach(function(m) {
+            var opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            avisoMarcaSelect.appendChild(opt);
+        });
+
+        function openAvisoModal() {
+            document.getElementById('av-direccion').value = '';
+            avisoBarrioSelect.value = '';
+            document.getElementById('av-sacos').value = '';
+            document.getElementById('av-urgen').value = '';
+            document.getElementById('av-tlf').value = '';
+            document.getElementById('av-etiquetas').value = '';
+            avisoMarcaSelect.value = '';
+            document.getElementById('av-observaciones').value = '';
+            document.getElementById('av-fecha-aviso').value = new Date().toISOString().split('T')[0];
+            document.getElementById('av-avisador').value = currentUserName;
+            document.getElementById('aviso-error').style.display = 'none';
+            avisoModal.style.display = 'flex';
+        }
+        function closeAvisoModal() { avisoModal.style.display = 'none'; }
+
+        document.getElementById('btn-add-aviso').addEventListener('click', openAvisoModal);
+        document.getElementById('aviso-cancel').addEventListener('click', closeAvisoModal);
+        document.getElementById('aviso-close').addEventListener('click', closeAvisoModal);
+        document.getElementById('aviso-overlay').addEventListener('click', closeAvisoModal);
+
+        document.getElementById('aviso-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var errEl = document.getElementById('aviso-error');
+            errEl.style.display = 'none';
+
+            var payload = {
+                direccion: document.getElementById('av-direccion').value.trim(),
+                barrio_cp: avisoBarrioSelect.value,
+                sacos: document.getElementById('av-sacos').value.trim(),
+                urgen: document.getElementById('av-urgen').value,
+                tlf_aviso: document.getElementById('av-tlf').value.trim(),
+                etiquetas: document.getElementById('av-etiquetas').value.trim(),
+                marca: avisoMarcaSelect.value,
+                observaciones: document.getElementById('av-observaciones').value.trim(),
+                fecha_aviso: document.getElementById('av-fecha-aviso').value,
+                avisador: document.getElementById('av-avisador').value.trim(),
+            };
+
+            if (!payload.direccion && !payload.barrio_cp) {
+                errEl.textContent = 'Dirección o barrio son obligatorios';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            fetch(API + '?action=create-aviso', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) {
+                    closeAvisoModal();
+                    loadData();
+                    setStatus('Aviso de recogida creado', 'saved');
+                } else {
+                    errEl.textContent = d.error || 'Error al crear aviso';
+                    errEl.style.display = 'block';
+                }
+            })
+            .catch(function() {
+                errEl.textContent = 'Error de conexión';
+                errEl.style.display = 'block';
+            });
+        });
+
+        // ---------- Hidden command input ----------
+        document.getElementById('cmd-input').addEventListener('keydown', function(e) {
+            if (e.key !== 'Enter') return;
+            var code = this.value.trim();
+            this.value = '';
+            if (code === '7662') {
+                if (!confirm('Esto leerá el Excel y REEMPLAZARÁ todos los datos de la tabla. Solo se importarán filas con dirección o barrio. ¿Continuar?')) return;
+                showSync('Importando desde Google Sheets...');
+                fetch(API + '?action=import-from-sheets', { method: 'POST' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        if (d.success) {
+                            loadData();
+                            var msg = 'Importadas ' + d.imported + ' filas desde Excel';
+                            if (d.skipped) msg += ' (' + d.skipped + ' vacías omitidas)';
+                            setStatus(msg + '. Geocodificando...', 'saved');
+                            // Geocode in 2 batches
+                            runGeocodeBatches(2);
+                        } else {
+                            hideSync();
+                            setStatus('Error: ' + (d.error || 'fallo'), 'error');
+                        }
+                    }).catch(function() { hideSync(); setStatus('Error de conexión', 'error'); });
+            } else if (code === '4459') {
+                if (!confirm('Esto escribirá los datos actuales en el Excel, REEMPLAZANDO todo su contenido. ¿Continuar?')) return;
+                showSync('Guardando en Google Sheets...');
+                fetch(API + '?action=export-to-sheets', { method: 'POST' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        hideSync();
+                        if (d.success) {
+                            setStatus('Exportadas ' + d.exported + ' filas al Excel', 'saved');
+                        } else {
+                            setStatus('Error: ' + (d.error || 'fallo'), 'error');
+                        }
+                    }).catch(function() { hideSync(); setStatus('Error de conexión', 'error'); });
+            }
+        });
+
+        // ---------- Print route ----------
+        document.getElementById('btn-print-route').addEventListener('click', function() {
+            // Populate conductor select
+            var sel = document.getElementById('print-conductor');
+            sel.innerHTML = '<option value="">— Seleccionar conductor —</option>';
+            conductoresList.forEach(function(c) {
+                sel.innerHTML += '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+            });
+            // Show print panel, hide main view
+            document.getElementById('sheet-wrapper').style.display = 'none';
+            document.querySelector('.toolbar').style.display = 'none';
+            document.getElementById('print-panel').classList.add('active');
+            renderPrintTable();
+        });
+
+        document.getElementById('btn-print-back').addEventListener('click', function() {
+            document.getElementById('print-panel').classList.remove('active');
+            document.getElementById('sheet-wrapper').style.display = '';
+            document.querySelector('.toolbar').style.display = '';
+        });
+
+        document.getElementById('print-conductor').addEventListener('change', function() {
+            renderPrintTable();
+        });
+
+        document.getElementById('btn-do-print').addEventListener('click', function() {
+            var condName = (document.getElementById('print-conductor').value || 'todos').replace(/\s+/g, '_');
+            var d = new Date(); var fecha = ('0'+d.getDate()).slice(-2) + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + String(d.getFullYear()).slice(-2);
+            var origTitle = document.title;
+            document.title = condName + '-' + fecha;
+            window.print();
+            document.title = origTitle;
+        });
+
+        document.getElementById('btn-do-excel').addEventListener('click', function() {
+            var conductor = document.getElementById('print-conductor').value.toLowerCase();
+            var filtered = allRows.filter(function(r) {
+                if (isDayRow(r)) return false;
+                if ((r.fecha_recogida || '').trim()) return false;
+                if (conductor && (r.conductor || '').toLowerCase() !== conductor) return false;
+                return true;
+            });
+            if (!filtered.length) { alert('No hay datos para exportar'); return; }
+
+            function csvVal(v) {
+                var s = String(v == null ? '' : v).replace(/\r?\n/g, ' ');
+                if (s.indexOf(';') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
+                    return '"' + s.replace(/"/g, '""') + '"';
+                }
+                return s;
+            }
+            var sep = ';';
+            var headers = ['#','Dirección','Barrio/CP','Sacos','Urgen','Tlf aviso','Conductor','Etiquetas','Marca','Observaciones','Avisador','Hora aviso','Fecha aviso'];
+            var lines = [headers.map(csvVal).join(sep)];
+            for (var i = 0; i < filtered.length; i++) {
+                var r = filtered[i];
+                lines.push([
+                    i + 1,
+                    r.direccion || '',
+                    r.barrio_cp || '',
+                    r.sacos || '',
+                    r.urgen || '',
+                    r.tlf_aviso || '',
+                    r.conductor || '',
+                    r.etiquetas || '',
+                    r.marca || '',
+                    r.observaciones || '',
+                    r.avisador || '',
+                    r.hora_aviso || '',
+                    r.fecha_aviso || ''
+                ].map(csvVal).join(sep));
+            }
+            var bom = '\uFEFF';
+            var blob = new Blob([bom + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            var condName = document.getElementById('print-conductor').value || 'todos';
+            a.href = url;
+            var dd = new Date(); var fechaFile = ('0'+dd.getDate()).slice(-2) + '-' + ('0'+(dd.getMonth()+1)).slice(-2) + '-' + String(dd.getFullYear()).slice(-2);
+            a.download = condName.replace(/\s+/g, '_') + '-' + fechaFile + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        function renderPrintTable() {
+            var conductor = document.getElementById('print-conductor').value.toLowerCase();
+            var tbody = document.getElementById('print-body');
+            var countEl = document.getElementById('print-count');
+
+            // Filter: only pending (no fecha_recogida), not day rows, matching conductor if selected
+            var filtered = allRows.filter(function(r) {
+                if (isDayRow(r)) return false;
+                if ((r.fecha_recogida || '').trim()) return false;
+                if (conductor && (r.conductor || '').toLowerCase() !== conductor) return false;
+                return true;
+            });
+
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:24px;color:#888">No hay paradas pendientes' + (conductor ? ' para este conductor' : '') + '</td></tr>';
+                countEl.textContent = '0 paradas';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var r = filtered[i];
+                var urgentClass = (r.urgen || '').toUpperCase() === 'SI' ? ' class="urgent"' : '';
+                html += '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td><strong>' + esc(r.direccion) + '</strong></td>' +
+                    '<td>' + esc(r.barrio_cp) + '</td>' +
+                    '<td>' + esc(r.sacos) + '</td>' +
+                    '<td' + urgentClass + '>' + esc(r.urgen) + '</td>' +
+                    '<td>' + esc(r.tlf_aviso) + '</td>' +
+                    '<td>' + esc(r.conductor) + '</td>' +
+                    '<td>' + esc(r.etiquetas) + '</td>' +
+                    '<td>' + esc(r.marca) + '</td>' +
+                    '<td>' + esc(r.observaciones) + '</td>' +
+                    '<td>' + esc(r.avisador) + '</td>' +
+                    '<td>' + esc(r.hora_aviso) + '</td>' +
+                    '<td>' + esc(r.fecha_aviso) + '</td>' +
+                '</tr>';
+            }
+            tbody.innerHTML = html;
+            countEl.textContent = filtered.length + ' parada' + (filtered.length !== 1 ? 's' : '') + ' pendiente' + (filtered.length !== 1 ? 's' : '');
+        }
+
+        // ---------- Helpers ----------
+        function esc(str) {
+            if (str === null || str === undefined) return '';
+            var div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+    })();
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&libraries=places&language=es"></script>
+    <script>
+    function initAddressAutocomplete(input, opts) {
+        if (!input || !window.google || !google.maps || !google.maps.places) return null;
+        var options = Object.assign({ componentRestrictions: { country: 'es' }, fields: ['formatted_address','geometry'] }, opts || {});
+        var ac = new google.maps.places.Autocomplete(input, options);
+        ac.addListener('place_changed', function() {
+            var place = ac.getPlace();
+            if (place && place.formatted_address) input.value = place.formatted_address;
+        });
+        input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { var pac = document.querySelector('.pac-container:not([style*="display: none"])'); if (pac) e.preventDefault(); } });
+        return ac;
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        initAddressAutocomplete(document.getElementById('av-direccion'));
+    });
+    </script>
+    <!-- Borrador View Overlay -->
+    <div id="borrador-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:#fff;">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 20px;background:#7B1FA2;color:#fff;">
+            <button onclick="closeBorradorView()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600">&larr; Volver a rutas</button>
+            <strong style="font-size:16px">Borrador de Rutas</strong>
+            <span id="bv-stats" style="font-size:13px;opacity:.8;margin-left:8px"></span>
+            <div style="margin-left:auto;display:flex;gap:8px">
+                <button onclick="bvConfirm()" style="padding:8px 18px;background:#43A047;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px">✓ Confirmar Rutas</button>
+                <button onclick="bvClear()" style="padding:8px 14px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">Limpiar</button>
+            </div>
+        </div>
+        <div style="overflow:auto;max-height:calc(100vh - 52px);padding:16px 20px" id="bv-content">
+            <p style="color:#888;text-align:center;padding:40px">Cargando borrador...</p>
+        </div>
+    </div>
+
+    <style>
+    .bv-row{transition:background .15s}
+    .bv-row:hover{background:#f0f0f0!important}
+    .bv-row.dragging{opacity:.4;background:#E3F2FD!important}
+    .bv-dropzone{min-height:28px;transition:background .15s,border .15s}
+    .bv-dropzone.drag-over{background:#E3F2FD!important;outline:2px dashed #1565C0;outline-offset:-2px}
+    .bv-drag-handle{cursor:grab;padding:0 6px;color:#aaa;font-size:16px;user-select:none}
+    .bv-drag-handle:active{cursor:grabbing}
+    </style>
+    <script>
+    (function() {
+        var bvAPI = '../api/';
+        var bvConductores = [];
+        var bvDragId = null; // id of row being dragged
+
+        window.openBorradorView = function() {
+            document.getElementById('borrador-overlay').style.display = 'block';
+            loadBorradorView();
+        };
+
+        window.closeBorradorView = function() {
+            document.getElementById('borrador-overlay').style.display = 'none';
+        };
+
+        function checkDraftExists() {
+            fetch(bvAPI + 'borrador_rutas.php?action=draft')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    var btn = document.getElementById('btn-ver-borrador');
+                    if (d.draft && d.draft.length > 0) {
+                        btn.style.display = '';
+                    } else {
+                        btn.style.display = 'none';
+                    }
+                }).catch(function(){});
+        }
+        setTimeout(checkDraftExists, 2000);
+
+        function esc(s) { var d = document.createElement('div'); d.appendChild(document.createTextNode(s || '')); return d.innerHTML; }
+
+        function loadBorradorView() {
+            fetch(bvAPI + 'borrador_rutas.php?action=draft')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    bvConductores = d.conductores || [];
+                    var rows = d.draft || [];
+                    var content = document.getElementById('bv-content');
+                    var statsEl = document.getElementById('bv-stats');
+                    var btnVer = document.getElementById('btn-ver-borrador');
+
+                    if (!rows.length) {
+                        content.innerHTML = '<p style="color:#888;text-align:center;padding:40px">No hay borrador. Usa "Crear Rutas" para generar uno.</p>';
+                        statsEl.textContent = '';
+                        btnVer.style.display = 'none';
+                        return;
+                    }
+
+                    btnVer.style.display = '';
+
+                    // Group by conductor, then by viaje
+                    var byDriver = {};
+                    var totalParadas = rows.length;
+                    var totalNew = 0;
+                    rows.forEach(function(r) {
+                        var c = r.conductor || '(Sin conductor)';
+                        if (!byDriver[c]) byDriver[c] = {};
+                        var v = parseInt(r.viaje) || 0;
+                        var vKey = v > 0 ? v : 'sin';
+                        if (!byDriver[c][vKey]) byDriver[c][vKey] = [];
+                        byDriver[c][vKey].push(r);
+                        if (parseInt(r.is_new)) totalNew++;
+                    });
+
+                    statsEl.textContent = totalParadas + ' paradas' + (totalNew > 0 ? ' (' + totalNew + ' nuevas asignaciones)' : '') + ' — Arrastra filas entre viajes/conductores';
+
+                    var VCOLORS = ['#1565C0', '#43A047', '#E65100', '#7B1FA2'];
+                    var html = '';
+
+                    Object.keys(byDriver).sort().forEach(function(driver) {
+                        var driverViajes = byDriver[driver];
+                        var driverTotal = 0;
+                        for (var vk in driverViajes) driverTotal += driverViajes[vk].length;
+
+                        html += '<div style="border:1px solid #ddd;border-radius:8px;margin-bottom:14px;overflow:hidden">';
+                        html += '<div style="background:#f5f5f5;padding:10px 14px;font-weight:700;font-size:14px">' + esc(driver) + ' <span style="font-weight:400;font-size:12px;color:#666">(' + driverTotal + ' paradas)</span></div>';
+
+                        var viajeKeys = Object.keys(driverViajes).sort(function(a,b) {
+                            if (a === 'sin') return 1;
+                            if (b === 'sin') return -1;
+                            return parseInt(a) - parseInt(b);
+                        });
+
+                        viajeKeys.forEach(function(vk) {
+                            var stops = driverViajes[vk];
+                            var vLabel = vk === 'sin' ? 'Sin viaje asignado' : 'Viaje ' + vk;
+                            var vColor = vk === 'sin' ? '#c00' : VCOLORS[(parseInt(vk) - 1) % VCOLORS.length];
+                            var totalSacas = 0;
+                            stops.forEach(function(s) { totalSacas += parseInt(s.sacos) || 1; });
+                            var viajeNum = vk === 'sin' ? 0 : parseInt(vk);
+
+                            html += '<div class="bv-dropzone" data-conductor="' + esc(driver) + '" data-viaje="' + viajeNum + '" style="border-top:1px solid #eee;padding:6px 14px">';
+                            html += '<div style="font-weight:600;font-size:13px;color:' + vColor + ';margin-bottom:4px">' + vLabel + ' — ' + totalSacas + ' sacas (' + stops.length + ' paradas)</div>';
+                            html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+                            html += '<thead><tr style="background:#fafafa"><th style="padding:4px 4px;width:24px"></th><th style="padding:4px 8px;text-align:left">Dirección</th><th style="padding:4px 8px;text-align:left;width:110px">Barrio</th><th style="padding:4px 8px;text-align:center;width:55px">Sacas</th><th style="padding:4px 8px;width:100px">Marca</th><th style="padding:4px 8px;width:140px">Conductor</th><th style="padding:4px 8px;width:60px">Viaje</th></tr></thead><tbody>';
+                            stops.forEach(function(s) {
+                                var isNew = parseInt(s.is_new);
+                                var bgColor = isNew ? '#F3E5F5' : '#fff';
+                                var newBadge = isNew ? ' <span style="color:#7B1FA2;font-size:10px;font-weight:600">NUEVA</span>' : '';
+
+                                var cOpts = '<option value="">—</option>';
+                                bvConductores.forEach(function(c) {
+                                    cOpts += '<option value="' + esc(c) + '"' + (c === s.conductor ? ' selected' : '') + '>' + esc(c) + '</option>';
+                                });
+
+                                var mList = ['BF10','SERVISACO','ATUSACO','ATUSACO_LUISFER','ATUSACO_HERREROCON','ATUSACO_COSASCASA','ECOSACO','SACAS_BLANCAS','UTE-EXTRAMAD'];
+                                var mOpts = '<option value="">—</option>';
+                                mList.forEach(function(m) {
+                                    mOpts += '<option value="' + m + '"' + (m === s.marca ? ' selected' : '') + '>' + m + '</option>';
+                                });
+
+                                html += '<tr class="bv-row" draggable="true" data-id="' + s.id + '" style="background:' + bgColor + '">' +
+                                    '<td class="bv-drag-handle" style="padding:4px 4px;border-bottom:1px solid #f0f0f0;text-align:center">⠿</td>' +
+                                    '<td style="padding:4px 8px;border-bottom:1px solid #f0f0f0">' + esc(s.direccion || '-') + newBadge + '</td>' +
+                                    '<td style="padding:4px 8px;border-bottom:1px solid #f0f0f0;color:#666">' + esc(s.barrio_cp || '-') + '</td>' +
+                                    '<td style="padding:4px 8px;border-bottom:1px solid #f0f0f0;text-align:center"><input type="number" value="' + (s.sacos || 1) + '" min="1" max="99" style="width:40px;padding:2px;border:1px solid #ccc;border-radius:3px;text-align:center;font-size:12px" onchange="bvUpdateCell(' + s.id + ',\'sacos\',this.value)"></td>' +
+                                    '<td style="padding:4px 8px;border-bottom:1px solid #f0f0f0"><select style="width:100%;padding:2px;border:1px solid #ccc;border-radius:3px;font-size:11px" onchange="bvUpdateCell(' + s.id + ',\'marca\',this.value)">' + mOpts + '</select></td>' +
+                                    '<td style="padding:4px 8px;border-bottom:1px solid #f0f0f0"><select style="width:100%;padding:2px;border:1px solid #ccc;border-radius:3px;font-size:11px" onchange="bvUpdateConductorViaje(' + s.id + ',this.value)">' + cOpts + '</select></td>' +
+                                    '<td style="padding:4px 8px;border-bottom:1px solid #f0f0f0;text-align:center"><input type="number" value="' + (s.viaje || 0) + '" min="0" max="4" style="width:35px;padding:2px;border:1px solid #ccc;border-radius:3px;text-align:center;font-size:12px" onchange="bvUpdateCell(' + s.id + ',\'viaje\',this.value);setTimeout(loadBorradorView,300)"></td>' +
+                                '</tr>';
+                            });
+                            html += '</tbody></table></div>';
+                        });
+
+                        html += '</div>';
+                    });
+
+                    content.innerHTML = html;
+
+                    // Attach drag & drop events
+                    initBvDragDrop();
+                });
+        }
+
+        // Update conductor via dropdown and reload to regroup
+        window.bvUpdateConductorViaje = function(id, newConductor) {
+            fetch(bvAPI + 'borrador_rutas.php?action=update-cell', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, field: 'conductor', value: newConductor })
+            }).then(function() {
+                setTimeout(loadBorradorView, 300);
+            });
+        };
+
+        // ── Drag & Drop logic ──
+        function initBvDragDrop() {
+            var rows = document.querySelectorAll('.bv-row');
+            var zones = document.querySelectorAll('.bv-dropzone');
+
+            rows.forEach(function(row) {
+                row.addEventListener('dragstart', function(e) {
+                    bvDragId = row.dataset.id;
+                    row.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', row.dataset.id);
+                });
+                row.addEventListener('dragend', function() {
+                    row.classList.remove('dragging');
+                    bvDragId = null;
+                    zones.forEach(function(z) { z.classList.remove('drag-over'); });
+                });
+            });
+
+            zones.forEach(function(zone) {
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    zone.classList.add('drag-over');
+                });
+                zone.addEventListener('dragleave', function(e) {
+                    // Only remove if actually leaving the zone (not entering a child)
+                    if (!zone.contains(e.relatedTarget)) {
+                        zone.classList.remove('drag-over');
+                    }
+                });
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    var draggedId = e.dataTransfer.getData('text/plain') || bvDragId;
+                    if (!draggedId) return;
+
+                    var targetConductor = zone.dataset.conductor;
+                    var targetViaje = zone.dataset.viaje;
+
+                    // Update both conductor and viaje
+                    var p1 = fetch(bvAPI + 'borrador_rutas.php?action=update-cell', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: parseInt(draggedId), field: 'conductor', value: targetConductor })
+                    });
+                    var p2 = fetch(bvAPI + 'borrador_rutas.php?action=update-cell', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: parseInt(draggedId), field: 'viaje', value: targetViaje })
+                    });
+
+                    Promise.all([p1, p2]).then(function() {
+                        loadBorradorView();
+                    });
+                });
+            });
+        }
+
+        window.bvUpdateCell = function(id, field, value) {
+            fetch(bvAPI + 'borrador_rutas.php?action=update-cell', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, field: field, value: value })
+            });
+        };
+
+        window.bvConfirm = function() {
+            if (!confirm('¿Confirmar rutas? Se aplicarán los cambios del borrador a la tabla principal (conductor + viaje).')) return;
+            fetch(bvAPI + 'borrador_rutas.php?action=confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) {
+                    alert('Rutas confirmadas: ' + d.updated + ' paradas actualizadas');
+                    closeBorradorView();
+                    document.getElementById('btn-ver-borrador').style.display = 'none';
+                    if (typeof loadData === 'function') loadData();
+                } else {
+                    alert(d.error || 'Error');
+                }
+            });
+        };
+
+        window.bvClear = function() {
+            if (!confirm('¿Limpiar borrador? Se perderán los cambios no confirmados.')) return;
+            fetch(bvAPI + 'borrador_rutas.php?action=clear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).then(function(r) { return r.json(); }).then(function() {
+                closeBorradorView();
+                document.getElementById('btn-ver-borrador').style.display = 'none';
+            });
+        };
+
+        window.showBorradorAfterGenerate = function() {
+            document.getElementById('btn-ver-borrador').style.display = '';
+            openBorradorView();
+        };
+    })();
+    </script>
+
+    <!-- ============ CREAR RUTAS MODAL ============ -->
+    <div id="crear-rutas-modal" class="aviso-modal" style="display:none">
+        <div class="aviso-modal__overlay" onclick="closeCrearRutas()"></div>
+        <div class="aviso-modal__content" style="width:960px;max-width:95vw;max-height:90vh;overflow-y:auto">
+            <button class="aviso-modal__close" onclick="closeCrearRutas()">&times;</button>
+            <h2 class="aviso-modal__title">Crear Rutas — Asignar viajes</h2>
+
+            <!-- Step 1: Select conductores -->
+            <div id="cr-step1">
+                <div id="cr-unassigned-banner" style="background:#FFF3E0;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;display:none">
+                    <strong style="color:#E65100" id="cr-unassigned-text"></strong> — se repartirán entre los conductores seleccionados
+                </div>
+                <p style="font-size:13px;color:#666;margin-bottom:12px">Selecciona los conductores que trabajan hoy y el máximo de viajes de cada uno:</p>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px" id="cr-conductores-table">
+                    <thead>
+                        <tr style="background:#f5f5f5">
+                            <th style="padding:8px;text-align:left;border-bottom:1px solid #ddd"><input type="checkbox" id="cr-select-all" onchange="crToggleAll(this.checked)"></th>
+                            <th style="padding:8px;text-align:left;border-bottom:1px solid #ddd">Conductor</th>
+                            <th style="padding:8px;text-align:center;border-bottom:1px solid #ddd">Paradas pend.</th>
+                            <th style="padding:8px;text-align:center;border-bottom:1px solid #ddd">Sacas pend.</th>
+                            <th style="padding:8px;text-align:center;border-bottom:1px solid #ddd">Camión</th>
+                            <th style="padding:8px;text-align:center;border-bottom:1px solid #ddd">Capacidad</th>
+                            <th style="padding:8px;text-align:center;border-bottom:1px solid #ddd">Máx viajes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cr-conductores-body"></tbody>
+                </table>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                    <button class="aviso-btn" onclick="closeCrearRutas()">Cancelar</button>
+                    <button class="aviso-btn aviso-btn--primary" onclick="crGenerate()">Generar rutas</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Review assignments -->
+            <div id="cr-step2" style="display:none">
+                <div id="cr-results"></div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+                    <button class="aviso-btn" onclick="crBackToStep1()">Volver</button>
+                    <button class="aviso-btn aviso-btn--primary" onclick="crConfirm()">Guardar borrador</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var crData = null; // store generate results for confirm
+
+        window.openCrearRutas = function() {
+            document.getElementById('cr-step1').style.display = '';
+            document.getElementById('cr-step2').style.display = 'none';
+            document.getElementById('crear-rutas-modal').style.display = 'flex';
+            // Load conductor preview
+            fetch('../api/crear_rutas.php?action=preview')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    // Show unassigned banner
+                    var sc = d.sin_conductor || {paradas:0,sacas:0};
+                    var banner = document.getElementById('cr-unassigned-banner');
+                    if (sc.paradas > 0) {
+                        document.getElementById('cr-unassigned-text').textContent = sc.paradas + ' paradas sin conductor (' + sc.sacas + ' sacas)';
+                        banner.style.display = '';
+                    } else {
+                        banner.style.display = 'none';
+                    }
+                    var body = document.getElementById('cr-conductores-body');
+                    var rows = d.conductores || [];
+                    if (!rows.length) { body.innerHTML = '<tr><td colspan="7" style="padding:12px;color:#888">No hay conductores activos</td></tr>'; return; }
+                    body.innerHTML = rows.map(function(c) {
+                        return '<tr>' +
+                            '<td style="padding:6px 8px"><input type="checkbox" class="cr-check" data-nombre="' + c.nombre + '" checked></td>' +
+                            '<td style="padding:6px 8px"><strong>' + c.nombre + '</strong></td>' +
+                            '<td style="padding:6px 8px;text-align:center">' + c.paradas_asignadas + '</td>' +
+                            '<td style="padding:6px 8px;text-align:center">' + c.sacas_asignadas + '</td>' +
+                            '<td style="padding:6px 8px;text-align:center">' + c.camion + '</td>' +
+                            '<td style="padding:6px 8px;text-align:center">' + c.capacidad + '</td>' +
+                            '<td style="padding:6px 8px;text-align:center"><select class="cr-viajes" data-nombre="' + c.nombre + '" style="padding:4px;border-radius:4px;border:1px solid #ddd">' +
+                                '<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option>' +
+                            '</select></td>' +
+                        '</tr>';
+                    }).join('');
+                });
+        };
+
+        window.closeCrearRutas = function() {
+            document.getElementById('crear-rutas-modal').style.display = 'none';
+        };
+
+        window.crToggleAll = function(checked) {
+            document.querySelectorAll('.cr-check').forEach(function(cb) { cb.checked = checked; });
+        };
+
+        window.crBackToStep1 = function() {
+            document.getElementById('cr-step1').style.display = '';
+            document.getElementById('cr-step2').style.display = 'none';
+        };
+
+        window.crGenerate = function() {
+            var selected = [];
+            document.querySelectorAll('.cr-check:checked').forEach(function(cb) {
+                var nombre = cb.getAttribute('data-nombre');
+                var sel = document.querySelector('.cr-viajes[data-nombre="' + nombre + '"]');
+                selected.push({ nombre: nombre, max_viajes: parseInt(sel.value) });
+            });
+            if (!selected.length) { alert('Selecciona al menos un conductor'); return; }
+
+            fetch('../api/crear_rutas.php?action=generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conductores: selected })
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.error) { alert(d.error); return; }
+                crData = d;
+                renderCrResults(d);
+                document.getElementById('cr-step1').style.display = 'none';
+                document.getElementById('cr-step2').style.display = '';
+            });
+        };
+
+        function renderCrResults(d) {
+            var html = '';
+            var result = d.result || {};
+            var stats = d.stats || {};
+
+            html += '<div style="background:#E3F2FD;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px">' +
+                '<strong>' + stats.total_paradas + '</strong> paradas totales | ' +
+                '<strong style="color:#7B1FA2">' + (stats.nuevas_asignaciones || 0) + '</strong> nuevas asignaciones conductor | ' +
+                '<strong style="color:#43A047">' + (stats.asignadas_viaje || 0) + '</strong> en viajes | ' +
+                '<strong style="color:#c00">' + (stats.sin_viaje || 0) + '</strong> sin espacio' +
+                '</div>';
+
+            var COLORS = ['#1565C0', '#43A047', '#E65100', '#7B1FA2'];
+
+            for (var conductor in result) {
+                var cd = result[conductor];
+                var viajes = cd.viajes || {};
+                var numViajes = Object.keys(viajes).length;
+
+                html += '<div style="border:1px solid #ddd;border-radius:8px;margin-bottom:12px;overflow:hidden">';
+                var nuevasTag = cd.nuevas ? ' <span style="background:#7B1FA2;color:#fff;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:400">+' + cd.nuevas + ' nuevas</span>' : '';
+                html += '<div style="background:#f5f5f5;padding:10px 14px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:12px">' +
+                    conductor + nuevasTag +
+                    '<span style="font-weight:400;font-size:12px;color:#666">Capacidad: ' + cd.capacidad + ' sacas/viaje | ' + numViajes + ' viaje(s)</span>' +
+                    '</div>';
+
+                if (numViajes === 0) {
+                    html += '<div style="padding:12px 14px;color:#888;font-size:13px">Sin paradas pendientes</div>';
+                } else {
+                    for (var v in viajes) {
+                        var vd = viajes[v];
+                        var color = COLORS[(parseInt(v) - 1) % COLORS.length];
+                        html += '<div style="border-top:1px solid #eee;padding:8px 14px">';
+                        html += '<div style="font-weight:600;font-size:13px;color:' + color + ';margin-bottom:6px">Viaje ' + v + ' — ' + vd.sacas + '/' + cd.capacidad + ' sacas (' + vd.paradas.length + ' paradas)</div>';
+                        html += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
+                        vd.paradas.forEach(function(p) {
+                            var isNew = p._new ? ' style="background:#F3E5F5"' : '';
+                            var newBadge = p._new ? ' <span style="color:#7B1FA2;font-size:10px;font-weight:600">NUEVA</span>' : '';
+                            html += '<tr' + isNew + '><td style="padding:3px 6px;border-bottom:1px solid #f0f0f0">' + p.direccion + newBadge + '</td>' +
+                                '<td style="padding:3px 6px;border-bottom:1px solid #f0f0f0;color:#666;width:120px">' + (p.barrio_cp || '') + '</td>' +
+                                '<td style="padding:3px 6px;border-bottom:1px solid #f0f0f0;text-align:center;width:50px">' + p.sacos + ' s</td>' +
+                                '<td style="padding:3px 6px;border-bottom:1px solid #f0f0f0;width:80px">' + (p.marca || '') + '</td></tr>';
+                        });
+                        html += '</table></div>';
+                    }
+                }
+                // Show overflow
+                if (cd.overflow && cd.overflow.length) {
+                    html += '<div style="border-top:1px solid #eee;padding:8px 14px;background:#FFF3E0">';
+                    html += '<div style="font-weight:600;font-size:13px;color:#c00;margin-bottom:4px">Sin espacio (' + cd.overflow.length + ' paradas)</div>';
+                    cd.overflow.forEach(function(p) {
+                        html += '<div style="font-size:12px;color:#666">' + p.direccion + ' — ' + p.sacos + ' sacas</div>';
+                    });
+                    html += '</div>';
+                }
+                html += '</div>';
+            }
+
+            document.getElementById('cr-results').innerHTML = html;
+        }
+
+        window.crConfirm = function() {
+            if (!crData || !crData.result) return;
+            if (!confirm('¿Guardar borrador? Podrás revisarlo y editarlo antes de confirmar.')) return;
+
+            // Save to borrador_rutas via save-draft
+            var payload = {
+                result: crData.result,
+                conductor_assignments: crData.conductor_assignments || {}
+            };
+            console.log('save-draft payload:', JSON.stringify(payload).length, 'bytes');
+            fetch('../api/borrador_rutas.php?action=save-draft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(function(r) {
+                console.log('save-draft response status:', r.status);
+                return r.json();
+            }).then(function(d) {
+                console.log('save-draft response:', d);
+                if (d.success) {
+                    closeCrearRutas();
+                    if (typeof showBorradorAfterGenerate === 'function') {
+                        showBorradorAfterGenerate();
+                    }
+                } else {
+                    alert('Error: ' + JSON.stringify(d));
+                }
+            }).catch(function(err) {
+                console.error('save-draft fetch error:', err);
+                alert('Error de red: ' + err.message);
+            });
+        };
+    })();
+    </script>
+
+    <!-- ============ MAP OVERLAY ============ -->
+    <div id="map-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:#fff;">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 20px;background:#1565C0;color:#fff;">
+            <button onclick="closeMap()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600">&larr; Volver</button>
+            <strong style="font-size:16px">Mapa de paradas</strong>
+            <div style="display:flex;gap:8px;margin-left:16px;">
+                <select id="map-filter-estado" onchange="applyMapFilters()" style="padding:6px 10px;border-radius:6px;border:none;font-size:13px">
+                    <option value="all">Todas</option>
+                    <option value="pendiente" selected>Sin recoger</option>
+                    <option value="recogida">Recogidas</option>
+                </select>
+                <select id="map-filter-conductor" onchange="applyMapFilters()" style="padding:6px 10px;border-radius:6px;border:none;font-size:13px">
+                    <option value="all">Todos los conductores</option>
+                </select>
+            </div>
+            <span id="map-count" style="margin-left:auto;font-size:13px;opacity:.8"></span>
+        </div>
+        <div id="map-canvas" style="width:100%;height:calc(100vh - 48px);"></div>
+    </div>
+
+    <script>
+    (function() {
+        var mapInstance = null;
+        var mapMarkers = [];
+        var mapStops = [];
+        var mapConductores = [];
+        var infoWindow = null;
+        var mapSelectedStop = null;
+        var mapSelectedMarker = null;
+        var mapSelectedColor = null;
+        var CONDUCTOR_COLORS = ['#E53935','#1E88E5','#43A047','#FB8C00','#8E24AA','#00ACC1','#6D4C41','#546E7A','#D81B60','#FFD600','#00E676','#3D5AFE'];
+        var conductorColorMap = {};
+
+        window.openMap = function() {
+            document.getElementById('map-overlay').style.display = 'block';
+            if (!mapInstance) {
+                loadGoogleMaps();
+            } else {
+                loadMapData();
+            }
+        };
+
+        window.closeMap = function() {
+            document.getElementById('map-overlay').style.display = 'none';
+        };
+
+        function loadGoogleMaps() {
+            if (window.google && window.google.maps) {
+                initMap();
+                return;
+            }
+            var script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&callback=_initMapCb';
+            script.async = true;
+            document.head.appendChild(script);
+        }
+
+        window._initMapCb = function() { initMap(); };
+
+        function initMap() {
+            mapInstance = new google.maps.Map(document.getElementById('map-canvas'), {
+                center: { lat: 40.4168, lng: -3.7038 },
+                zoom: 11,
+                mapTypeControl: true,
+                streetViewControl: false
+            });
+            infoWindow = new google.maps.InfoWindow();
+            loadMapData();
+        }
+
+        function loadMapData() {
+            fetch('../api/rutas_data.php?action=map-data')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    mapStops = d.stops || [];
+                    mapConductores = d.conductores || [];
+                    // Populate conductor filter
+                    var sel = document.getElementById('map-filter-conductor');
+                    var current = sel.value;
+                    sel.innerHTML = '<option value="all">Todos los conductores</option>';
+                    mapConductores.forEach(function(c) {
+                        sel.innerHTML += '<option value="' + c + '">' + c + '</option>';
+                    });
+                    sel.value = current || 'all';
+                    // Build color map
+                    conductorColorMap = {};
+                    (d.conductores || []).forEach(function(c, i) {
+                        conductorColorMap[c] = CONDUCTOR_COLORS[i % CONDUCTOR_COLORS.length];
+                    });
+                    applyMapFilters();
+                });
+        }
+
+        window.applyMapFilters = function() {
+            // Clear markers
+            mapMarkers.forEach(function(m) { m.setMap(null); });
+            mapMarkers = [];
+
+            var estado = document.getElementById('map-filter-estado').value;
+            var conductor = document.getElementById('map-filter-conductor').value;
+
+            var filtered = mapStops.filter(function(s) {
+                if (estado === 'pendiente' && s.estado && s.estado !== '' && s.estado !== 'por_recoger') return false;
+                if (estado === 'recogida' && s.estado !== 'recogida') return false;
+                if (conductor !== 'all' && s.conductor !== conductor) return false;
+                return true;
+            });
+
+            document.getElementById('map-count').textContent = filtered.length + ' paradas';
+
+            var bounds = new google.maps.LatLngBounds();
+            var hasPoints = false;
+
+            filtered.forEach(function(s) {
+                var lat = parseFloat(s.lat);
+                var lng = parseFloat(s.lng);
+                if (!lat || !lng) return;
+
+                var isPendiente = !s.estado || s.estado === '' || s.estado === 'por_recoger';
+                var color = conductorColorMap[s.conductor] || '#999';
+                var opacity = isPendiente ? 1.0 : 0.5;
+
+                var marker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: mapInstance,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: color,
+                        fillOpacity: opacity,
+                        strokeColor: isPendiente ? '#333' : '#999',
+                        strokeWeight: isPendiente ? 2 : 1,
+                        scale: isPendiente ? 9 : 6
+                    },
+                    title: s.direccion
+                });
+
+                (function(stop, mkr, clr) {
+                    mkr.addListener('click', function() {
+                        mapSelectedStop = stop;
+                        mapSelectedMarker = mkr;
+                        mapSelectedColor = clr;
+                        showMapInfo(stop, mkr, clr);
+                    });
+                })(s, marker, color);
+
+                mapMarkers.push(marker);
+                bounds.extend(marker.getPosition());
+                hasPoints = true;
+            });
+
+            if (hasPoints) {
+                mapInstance.fitBounds(bounds);
+                if (filtered.length === 1) mapInstance.setZoom(15);
+            }
+        };
+
+        function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+        function showMapInfo(s, mkr, color) {
+            var isPendiente = !s.estado || s.estado === '' || s.estado === 'por_recoger';
+            var estadoTxt = isPendiente ? '<span style="color:#E65100;font-weight:600">Sin recoger</span>' : '<span style="color:#43A047;font-weight:600">Recogida</span>';
+            var viajeInfo = s.viaje ? ' | Viaje ' + s.viaje : '';
+            infoWindow.setContent(
+                '<div style="font-family:Inter,sans-serif;max-width:300px;font-size:13px;line-height:1.6">' +
+                '<strong>' + esc(s.direccion || '') + '</strong><br>' +
+                '<span style="color:#666">' + esc(s.barrio_cp || '') + '</span><br>' +
+                estadoTxt + ' | ' + (s.sacos || 0) + ' sacas' + viajeInfo + '<br>' +
+                '<span style="color:' + color + ';font-weight:600">' + esc(s.conductor || 'Sin conductor') + '</span>' +
+                (s.marca ? ' | ' + s.marca : '') + '<br>' +
+                '<button onclick="showMapEdit()" style="margin-top:6px;padding:5px 14px;background:#1565C0;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600">Editar</button>' +
+                '</div>'
+            );
+            infoWindow.open(mapInstance, mkr);
+        }
+
+        window.showMapEdit = function() {
+            var s = mapSelectedStop;
+            if (!s) return;
+            var conductorOpts = '<option value="">— Sin conductor —</option>';
+            mapConductores.forEach(function(c) {
+                conductorOpts += '<option value="' + esc(c) + '"' + (c === s.conductor ? ' selected' : '') + '>' + esc(c) + '</option>';
+            });
+            var estadoOpts = ['por_recoger', 'recogida', 'no_estan'];
+            var estadoLabels = ['Por recoger', 'Recogida', 'No están'];
+            var currentEstado = s.estado || 'por_recoger';
+            var estadoHtml = '';
+            for (var i = 0; i < estadoOpts.length; i++) {
+                estadoHtml += '<option value="' + estadoOpts[i] + '"' + (currentEstado === estadoOpts[i] ? ' selected' : '') + '>' + estadoLabels[i] + '</option>';
+            }
+            var marcasOpts = '';
+            var ml = ['BF10','SERVISACO','ATUSACO','ATUSACO_LUISFER','ATUSACO_HERREROCON','ATUSACO_COSASCASA','ECOSACO','SACAS_BLANCAS','UTE-EXTRAMAD'];
+            ml.forEach(function(m) {
+                marcasOpts += '<option value="' + m + '"' + (m === s.marca ? ' selected' : '') + '>' + m + '</option>';
+            });
+
+            infoWindow.setContent(
+                '<div style="font-family:Inter,sans-serif;max-width:320px;font-size:12px">' +
+                '<strong style="font-size:13px">' + esc(s.direccion || '') + '</strong>' +
+                '<div style="color:#666;margin-bottom:8px">' + esc(s.barrio_cp || '') + '</div>' +
+                '<div style="display:flex;flex-direction:column;gap:6px">' +
+                '<label style="display:flex;align-items:center;gap:6px">Estado <select id="me-estado" style="flex:1;padding:4px;border:1px solid #ccc;border-radius:4px;font-size:12px">' + estadoHtml + '</select></label>' +
+                '<label style="display:flex;align-items:center;gap:6px">Conductor <select id="me-conductor" style="flex:1;padding:4px;border:1px solid #ccc;border-radius:4px;font-size:12px">' + conductorOpts + '</select></label>' +
+                '<label style="display:flex;align-items:center;gap:6px">Sacas <input id="me-sacos" type="number" min="1" max="99" value="' + (s.sacos || 1) + '" style="width:50px;padding:4px;border:1px solid #ccc;border-radius:4px;font-size:12px"></label>' +
+                '<label style="display:flex;align-items:center;gap:6px">Marca <select id="me-marca" style="flex:1;padding:4px;border:1px solid #ccc;border-radius:4px;font-size:12px"><option value="">—</option>' + marcasOpts + '</select></label>' +
+                '<label style="display:flex;align-items:center;gap:6px">Viaje <input id="me-viaje" type="number" min="0" max="4" value="' + (s.viaje || 0) + '" style="width:50px;padding:4px;border:1px solid #ccc;border-radius:4px;font-size:12px"></label>' +
+                '</div>' +
+                '<div style="display:flex;gap:6px;margin-top:8px">' +
+                '<button onclick="saveMapEdit()" style="padding:5px 14px;background:#43A047;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600">Guardar</button>' +
+                '<button onclick="showMapInfo(mapSelectedStop,mapSelectedMarker,mapSelectedColor)" style="padding:5px 14px;background:#888;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px">Cancelar</button>' +
+                '</div></div>'
+            );
+        };
+
+        window.saveMapEdit = function() {
+            var s = mapSelectedStop;
+            if (!s) return;
+            var fields = {
+                estado: document.getElementById('me-estado').value,
+                conductor: document.getElementById('me-conductor').value,
+                sacos: document.getElementById('me-sacos').value,
+                marca: document.getElementById('me-marca').value,
+                viaje: document.getElementById('me-viaje').value
+            };
+
+            // Save each field individually via rutas_data update-cell
+            var promises = [];
+            for (var field in fields) {
+                promises.push(
+                    fetch('../api/rutas_data.php?action=update-cell', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: parseInt(s.id), field: field, value: fields[field] })
+                    })
+                );
+            }
+            Promise.all(promises).then(function() {
+                // Update local data
+                s.estado = fields.estado;
+                s.conductor = fields.conductor;
+                s.sacos = fields.sacos;
+                s.marca = fields.marca;
+                s.viaje = fields.viaje;
+                infoWindow.close();
+                // Reload to update markers
+                loadMapData();
+            });
+        };
+    })();
+    </script>
+
+    <!-- ============ HISTORICO OVERLAY ============ -->
+    <div id="historico-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:#fff;">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 20px;background:#455A64;color:#fff;">
+            <button onclick="closeHistorico()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600">&larr; Volver</button>
+            <strong style="font-size:16px">Histórico de Rutas</strong>
+            <div style="display:flex;gap:8px;margin-left:16px;align-items:center">
+                <label style="font-size:12px">Desde</label>
+                <input type="date" id="hist-from" style="padding:4px 8px;border:none;border-radius:4px;font-size:12px">
+                <label style="font-size:12px">Hasta</label>
+                <input type="date" id="hist-to" style="padding:4px 8px;border:none;border-radius:4px;font-size:12px">
+                <button onclick="loadHistorico()" style="padding:6px 14px;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Filtrar</button>
+                <button onclick="generateSnapshot()" style="padding:6px 14px;background:#43A047;border:none;color:#fff;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Guardar snapshot hoy</button>
+            </div>
+            <span id="hist-stats" style="margin-left:auto;font-size:13px;opacity:.8"></span>
+        </div>
+        <div style="overflow:auto;max-height:calc(100vh - 52px);padding:16px 20px" id="hist-content">
+            <p style="color:#888;text-align:center;padding:40px">Cargando...</p>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var COLORS = ['#1565C0','#43A047','#E65100','#7B1FA2','#00838F','#C62828','#6A1B9A','#EF6C00'];
+
+        window.openHistorico = function() {
+            document.getElementById('historico-overlay').style.display = 'block';
+            var now = new Date();
+            var from = new Date(now.getTime() - 30*24*60*60*1000);
+            document.getElementById('hist-to').value = now.toISOString().slice(0,10);
+            document.getElementById('hist-from').value = from.toISOString().slice(0,10);
+            loadHistorico();
+        };
+
+        window.closeHistorico = function() {
+            document.getElementById('historico-overlay').style.display = 'none';
+        };
+
+        window.generateSnapshot = function() {
+            fetch('../api/historico_rutas.php?action=snapshot')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.success) {
+                        alert('Snapshot guardado: ' + d.entries + ' registros para ' + d.fecha);
+                        loadHistorico();
+                    } else { alert(d.error || 'Error'); }
+                });
+        };
+
+        window.loadHistorico = function() {
+            var from = document.getElementById('hist-from').value;
+            var to = document.getElementById('hist-to').value;
+            fetch('../api/historico_rutas.php?action=list&from=' + from + '&to=' + to)
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    var hist = d.historico || [];
+                    var content = document.getElementById('hist-content');
+                    var stats = document.getElementById('hist-stats');
+
+                    if (!hist.length) {
+                        content.innerHTML = '<p style="color:#888;text-align:center;padding:40px">No hay datos históricos. Pulsa "Guardar snapshot hoy" para empezar.</p>';
+                        stats.textContent = '';
+                        return;
+                    }
+
+                    stats.textContent = hist.length + ' días';
+                    var html = '';
+
+                    hist.forEach(function(day) {
+                        var f = day.fecha;
+                        var t = day.totals;
+                        var pct = t.paradas > 0 ? Math.round((t.completadas / t.paradas) * 100) : 0;
+                        var pctColor = pct >= 80 ? '#43A047' : (pct >= 50 ? '#FF9800' : '#c62828');
+
+                        html += '<div style="border:1px solid #ddd;border-radius:8px;margin-bottom:12px;overflow:hidden">';
+                        html += '<div style="background:#f5f5f5;padding:10px 14px;display:flex;align-items:center;gap:16px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">';
+                        html += '<strong style="font-size:14px">' + f + '</strong>';
+                        html += '<span style="font-size:12px;color:#666">' + t.paradas + ' paradas | ' + t.sacas + ' sacas</span>';
+                        html += '<span style="font-size:12px;font-weight:700;color:' + pctColor + '">' + pct + '% completado</span>';
+                        html += '<span style="font-size:12px;color:#666">' + day.conductores.length + ' conductores</span>';
+                        html += '<span style="margin-left:auto;color:#999;font-size:16px">&#9660;</span>';
+                        html += '</div>';
+
+                        html += '<div style="display:none;padding:10px 14px">';
+                        html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+                        html += '<thead><tr style="background:#fafafa"><th style="padding:6px 8px;text-align:left">Conductor</th><th style="padding:6px 8px;text-align:center">Viajes</th><th style="padding:6px 8px;text-align:center">Paradas</th><th style="padding:6px 8px;text-align:center">Sacas</th><th style="padding:6px 8px;text-align:center">Completadas</th><th style="padding:6px 8px;text-align:center">Pendientes</th><th style="padding:6px 8px;text-align:center">No están</th></tr></thead><tbody>';
+
+                        day.conductores.forEach(function(c, i) {
+                            var bg = i % 2 === 0 ? '#fff' : '#fafafa';
+                            html += '<tr style="background:' + bg + '">';
+                            html += '<td style="padding:6px 8px;font-weight:600;color:' + COLORS[i % COLORS.length] + '">' + c.conductor + '</td>';
+                            html += '<td style="padding:6px 8px;text-align:center">' + c.viajes + '</td>';
+                            html += '<td style="padding:6px 8px;text-align:center">' + c.paradas + '</td>';
+                            html += '<td style="padding:6px 8px;text-align:center;font-weight:600">' + c.sacas + '</td>';
+                            html += '<td style="padding:6px 8px;text-align:center;color:#43A047;font-weight:600">' + c.completadas + '</td>';
+                            html += '<td style="padding:6px 8px;text-align:center;color:#FF9800">' + c.pendientes + '</td>';
+                            html += '<td style="padding:6px 8px;text-align:center;color:#c62828">' + c.no_estan + '</td>';
+                            html += '</tr>';
+                        });
+
+                        html += '</tbody></table></div></div>';
+                    });
+
+                    content.innerHTML = html;
+                });
+        };
+    })();
+    </script>
+</body>
+</html>

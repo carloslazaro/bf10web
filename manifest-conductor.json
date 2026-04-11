@@ -1,0 +1,24 @@
+{
+  "name": "BF10 Conductor - Rutas",
+  "short_name": "BF10 Rutas",
+  "description": "App de rutas para conductores BF10",
+  "start_url": "/conductor.html",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#DA291C",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

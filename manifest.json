@@ -1,0 +1,24 @@
+{
+  "name": "SACOS BF10 - Sacos de Escombro Madrid",
+  "short_name": "SACOS BF10",
+  "description": "Pedidos de sacos de escombro con recogida en Madrid",
+  "start_url": "/pwa-demo.html",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#DA291C",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

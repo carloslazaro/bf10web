@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud Certificado RCD — BF10 Sacos de Escombro</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .rcd-page { padding: 40px 0 80px; background: var(--color-bg-alt); min-height: 100vh; }
+        .rcd-container { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+        .rcd-header { text-align: center; margin-bottom: 32px; }
+        .rcd-header h1 { font-size: 1.6rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px; }
+        .rcd-header p { color: var(--color-text-light); font-size: 0.95rem; }
+        .rcd-section {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        .rcd-section h2 {
+            font-size: 1.05rem; font-weight: 700; color: var(--color-primary);
+            margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--color-accent);
+        }
+        .rcd-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .rcd-row.three { grid-template-columns: 1fr 1fr 1fr; }
+        .rcd-row.full { grid-template-columns: 1fr; }
+        .rcd-field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--color-text); margin-bottom: 4px; }
+        .rcd-field input, .rcd-field select {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--color-border);
+            border-radius: var(--radius); font-size: 0.92rem; font-family: inherit;
+            transition: border-color var(--transition);
+        }
+        .rcd-field input:focus, .rcd-field select:focus { outline: none; border-color: var(--color-green); }
+        .rcd-field input.error { border-color: var(--color-accent); }
+
+        /* Materials table */
+        .rcd-materials { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .rcd-materials th { font-size: 0.78rem; font-weight: 600; text-align: left; padding: 8px; background: var(--color-bg-alt); border: 1px solid var(--color-border); }
+        .rcd-materials td { padding: 6px 8px; border: 1px solid var(--color-border); font-size: 0.88rem; }
+        .rcd-materials td:first-child { width: 60px; text-align: center; color: var(--color-text-light); font-weight: 600; }
+        .rcd-materials td:nth-child(2) { min-width: 200px; }
+        .rcd-materials input[type="number"] {
+            width: 80px; padding: 6px 8px; border: 1px solid var(--color-border);
+            border-radius: var(--radius); font-size: 0.85rem; text-align: right; font-family: inherit;
+        }
+        .rcd-materials input[type="number"]:focus { outline: none; border-color: var(--color-green); }
+
+        /* Authorization */
+        .rcd-legal { font-size: 0.82rem; color: var(--color-text-light); line-height: 1.5; margin-bottom: 16px; }
+        .rcd-checkbox { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; }
+        .rcd-checkbox input[type="checkbox"] { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--color-green); }
+        .rcd-checkbox label { font-size: 0.85rem; color: var(--color-text); cursor: pointer; }
+
+        /* Submit */
+        .rcd-submit {
+            display: block; width: 100%; padding: 14px; border: none; border-radius: var(--radius);
+            background: var(--color-green); color: white; font-size: 1rem; font-weight: 700;
+            font-family: inherit; cursor: pointer; transition: background var(--transition);
+        }
+        .rcd-submit:hover { background: var(--color-green-hover); }
+        .rcd-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Feedback */
+        .rcd-msg { padding: 14px 18px; border-radius: var(--radius); margin-bottom: 16px; font-size: 0.9rem; display: none; }
+        .rcd-msg.success { display: block; background: var(--color-green-light); color: #006633; border: 1px solid var(--color-green); }
+        .rcd-msg.error { display: block; background: rgba(218,41,28,0.08); color: #a0170e; border: 1px solid var(--color-accent); }
+
+        .rcd-back { display: inline-block; margin-bottom: 20px; font-size: 0.9rem; color: var(--color-text-light); }
+        .rcd-back:hover { color: var(--color-green); }
+
+        @media (max-width: 600px) {
+            .rcd-row, .rcd-row.three { grid-template-columns: 1fr; }
+            .rcd-section { padding: 20px 16px; }
+            .rcd-materials input[type="number"] { width: 65px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rcd-page">
+        <div class="rcd-container">
+            <a href="/" class="rcd-back">&larr; Volver a la web</a>
+            <div class="rcd-header">
+                <h1>Solicitud de Certificado RCD</h1>
+                <p>Rellena este formulario para solicitar tu certificado de gesti&oacute;n de residuos de construcci&oacute;n y demolici&oacute;n.</p>
+            </div>
+
+            <div id="rcdMsg" class="rcd-msg"></div>
+
+            <form id="rcdForm" novalidate>
+                <!-- Periodo de entrega -->
+                <div class="rcd-section">
+                    <h2>Periodo de entrega</h2>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="fecha_desde">Del (fecha inicio)</label>
+                            <input type="date" id="fecha_desde" name="fecha_desde" required>
+                        </div>
+                        <div class="rcd-field">
+                            <label for="fecha_hasta">Al (fecha fin)</label>
+                            <input type="date" id="fecha_hasta" name="fecha_hasta" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos de la obra -->
+                <div class="rcd-section">
+                    <h2>Datos de la obra</h2>
+                    <div class="rcd-row full">
+                        <div class="rcd-field">
+                            <label for="obra_denominacion">Denominaci&oacute;n de la obra</label>
+                            <input type="text" id="obra_denominacion" name="obra_denominacion" placeholder="Ej: Reforma integral vivienda" required>
+                        </div>
+                    </div>
+                    <div class="rcd-row full">
+                        <div class="rcd-field">
+                            <label for="obra_calle">Calle / Avenida</label>
+                            <input type="text" id="obra_calle" name="obra_calle" placeholder="Direcci&oacute;n de la obra" required>
+                        </div>
+                    </div>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="obra_cp_ciudad">CP / Ciudad</label>
+                            <input type="text" id="obra_cp_ciudad" name="obra_cp_ciudad" placeholder="Ej: 28001 Madrid" required>
+                        </div>
+                        <div class="rcd-field">
+                            <label for="obra_licencia">N&ordm; Licencia Municipal</label>
+                            <input type="text" id="obra_licencia" name="obra_licencia" placeholder="Si dispone de ella">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos del productor/promotor -->
+                <div class="rcd-section">
+                    <h2>Datos del productor / promotor</h2>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="productor_nombre">Nombre / Raz&oacute;n Social</label>
+                            <input type="text" id="productor_nombre" name="productor_nombre" required>
+                        </div>
+                        <div class="rcd-field">
+                            <label for="productor_cif">CIF / NIF</label>
+                            <input type="text" id="productor_cif" name="productor_cif" required>
+                        </div>
+                    </div>
+                    <div class="rcd-row full">
+                        <div class="rcd-field">
+                            <label for="productor_calle">Calle</label>
+                            <input type="text" id="productor_calle" name="productor_calle">
+                        </div>
+                    </div>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="productor_cp">CP</label>
+                            <input type="text" id="productor_cp" name="productor_cp">
+                        </div>
+                        <div class="rcd-field">
+                            <label for="productor_ciudad">Ciudad</label>
+                            <input type="text" id="productor_ciudad" name="productor_ciudad">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos del constructor/poseedor -->
+                <div class="rcd-section">
+                    <h2>Datos del constructor / poseedor</h2>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="constructor_nombre">Nombre / Raz&oacute;n Social</label>
+                            <input type="text" id="constructor_nombre" name="constructor_nombre" required>
+                        </div>
+                        <div class="rcd-field">
+                            <label for="constructor_cif">CIF / NIF</label>
+                            <input type="text" id="constructor_cif" name="constructor_cif" required>
+                        </div>
+                    </div>
+                    <div class="rcd-row full">
+                        <div class="rcd-field">
+                            <label for="constructor_calle">Calle</label>
+                            <input type="text" id="constructor_calle" name="constructor_calle">
+                        </div>
+                    </div>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="constructor_cp">CP</label>
+                            <input type="text" id="constructor_cp" name="constructor_cp">
+                        </div>
+                        <div class="rcd-field">
+                            <label for="constructor_ciudad">Ciudad</label>
+                            <input type="text" id="constructor_ciudad" name="constructor_ciudad">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desglose de materiales -->
+                <div class="rcd-section">
+                    <h2>Desglose de materiales (cantidades estimadas)</h2>
+                    <div style="overflow-x:auto">
+                    <table class="rcd-materials">
+                        <thead>
+                            <tr>
+                                <th>LER</th>
+                                <th>Material</th>
+                                <th>m&sup3;</th>
+                                <th>Toneladas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>101</td><td>Hormig&oacute;n</td><td><input type="number" name="mat_101_m3" min="0" step="0.1"></td><td><input type="number" name="mat_101_t" min="0" step="0.1"></td></tr>
+                            <tr><td>102</td><td>Ladrillos</td><td><input type="number" name="mat_102_m3" min="0" step="0.1"></td><td><input type="number" name="mat_102_t" min="0" step="0.1"></td></tr>
+                            <tr><td>103</td><td>Tejas y materiales cer&aacute;micos</td><td><input type="number" name="mat_103_m3" min="0" step="0.1"></td><td><input type="number" name="mat_103_t" min="0" step="0.1"></td></tr>
+                            <tr><td>107</td><td>Mezclas de hormig&oacute;n, ladrillos, tejas y mat. cer&aacute;micos</td><td><input type="number" name="mat_107_m3" min="0" step="0.1"></td><td><input type="number" name="mat_107_t" min="0" step="0.1"></td></tr>
+                            <tr><td>201</td><td>Madera</td><td><input type="number" name="mat_201_m3" min="0" step="0.1"></td><td><input type="number" name="mat_201_t" min="0" step="0.1"></td></tr>
+                            <tr><td>202</td><td>Vidrio</td><td><input type="number" name="mat_202_m3" min="0" step="0.1"></td><td><input type="number" name="mat_202_t" min="0" step="0.1"></td></tr>
+                            <tr><td>203</td><td>Pl&aacute;stico</td><td><input type="number" name="mat_203_m3" min="0" step="0.1"></td><td><input type="number" name="mat_203_t" min="0" step="0.1"></td></tr>
+                            <tr><td>302</td><td>Mezclas bituminosas</td><td><input type="number" name="mat_302_m3" min="0" step="0.1"></td><td><input type="number" name="mat_302_t" min="0" step="0.1"></td></tr>
+                            <tr><td>411</td><td>Cables</td><td><input type="number" name="mat_411_m3" min="0" step="0.1"></td><td><input type="number" name="mat_411_t" min="0" step="0.1"></td></tr>
+                            <tr><td>504</td><td>Tierras y piedras</td><td><input type="number" name="mat_504_m3" min="0" step="0.1"></td><td><input type="number" name="mat_504_t" min="0" step="0.1"></td></tr>
+                            <tr><td>604</td><td>Materiales de aislamiento</td><td><input type="number" name="mat_604_m3" min="0" step="0.1"></td><td><input type="number" name="mat_604_t" min="0" step="0.1"></td></tr>
+                            <tr><td>802</td><td>Materiales de construcci&oacute;n a base de yeso</td><td><input type="number" name="mat_802_m3" min="0" step="0.1"></td><td><input type="number" name="mat_802_t" min="0" step="0.1"></td></tr>
+                            <tr><td>904</td><td>Residuos mezclados de construcci&oacute;n y demolici&oacute;n</td><td><input type="number" name="mat_904_m3" min="0" step="0.1"></td><td><input type="number" name="mat_904_t" min="0" step="0.1"></td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+
+                <!-- Declaracion y firma -->
+                <div class="rcd-section">
+                    <h2>Declaraci&oacute;n y firma</h2>
+                    <p class="rcd-legal">
+                        El firmante declara que los datos facilitados son correctos y autoriza a
+                        <strong>SERVISACO RECOGIDA DE ESCOMBROS 2014 S.L.</strong> (CIF B86906351),
+                        como transportista autorizado (N&ordm; Autorizaci&oacute;n: 13T02A1800025531Z),
+                        a la gesti&oacute;n de los residuos descritos conforme a la normativa vigente.
+                    </p>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="firmante_nombre">Nombre y DNI del firmante</label>
+                            <input type="text" id="firmante_nombre" name="firmante_nombre" placeholder="Ej: Juan P&eacute;rez Garc&iacute;a, 12345678A" required>
+                        </div>
+                        <div class="rcd-field">
+                            <label for="firmante_calidad">En calidad de</label>
+                            <input type="text" id="firmante_calidad" name="firmante_calidad" placeholder="Ej: Promotor, Constructor, Administrador">
+                        </div>
+                    </div>
+                    <div class="rcd-row">
+                        <div class="rcd-field">
+                            <label for="firmante_fecha">Fecha</label>
+                            <input type="date" id="firmante_fecha" name="firmante_fecha" required>
+                        </div>
+                        <div class="rcd-field">
+                            <label for="firmante_email">Email de contacto</label>
+                            <input type="email" id="firmante_email" name="firmante_email" placeholder="Para enviarte el certificado" required>
+                        </div>
+                    </div>
+                    <div class="rcd-row full">
+                        <div class="rcd-field">
+                            <label for="firmante_telefono">Tel&eacute;fono de contacto</label>
+                            <input type="tel" id="firmante_telefono" name="firmante_telefono" placeholder="Ej: 612345678">
+                        </div>
+                    </div>
+                    <div class="rcd-checkbox">
+                        <input type="checkbox" id="acepto" name="acepto" required>
+                        <label for="acepto">Declaro que los datos facilitados son correctos y autorizo la gesti&oacute;n de residuos conforme a la normativa vigente.</label>
+                    </div>
+                </div>
+
+                <!-- Codigo de pedido (opcional, pre-rellenado si viene de WhatsApp) -->
+                <div class="rcd-section">
+                    <h2>C&oacute;digo de pedido (si lo tienes)</h2>
+                    <div class="rcd-row full">
+                        <div class="rcd-field">
+                            <label for="order_code">C&oacute;digo BF10</label>
+                            <input type="text" id="order_code" name="order_code" placeholder="Ej: BF10-XXXXXX (opcional)">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="rcd-submit" id="rcdSubmitBtn">Enviar solicitud de certificado</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // Pre-fill order code from URL param ?code=BF10-XXXX
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        if (code) document.getElementById('order_code').value = code;
+
+        // Pre-fill phone from URL param ?phone=...
+        const phone = params.get('phone');
+        if (phone) document.getElementById('firmante_telefono').value = phone;
+
+        // Set today's date as default for firma
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('firmante_fecha').value = today;
+
+        const form = document.getElementById('rcdForm');
+        const msgEl = document.getElementById('rcdMsg');
+        const submitBtn = document.getElementById('rcdSubmitBtn');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            msgEl.className = 'rcd-msg';
+            msgEl.style.display = 'none';
+
+            // Validate required
+            const required = ['fecha_desde', 'fecha_hasta', 'obra_denominacion', 'obra_calle',
+                'obra_cp_ciudad', 'productor_nombre', 'productor_cif', 'constructor_nombre',
+                'constructor_cif', 'firmante_nombre', 'firmante_fecha', 'firmante_email'];
+            let valid = true;
+            required.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+                else el.classList.remove('error');
+            });
+            if (!document.getElementById('acepto').checked) {
+                valid = false;
+                msgEl.textContent = 'Debes aceptar la declaraci\u00f3n para continuar.';
+                msgEl.className = 'rcd-msg error';
+                return;
+            }
+            if (!valid) {
+                msgEl.textContent = 'Por favor, completa todos los campos obligatorios marcados.';
+                msgEl.className = 'rcd-msg error';
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                return;
+            }
+
+            // Collect form data
+            const fd = new FormData(form);
+            const data = {};
+            fd.forEach((v, k) => { if (v) data[k] = v; });
+
+            // Collect materials
+            const materials = {};
+            document.querySelectorAll('.rcd-materials input[type="number"]').forEach(inp => {
+                const val = parseFloat(inp.value);
+                if (val > 0) materials[inp.name] = val;
+            });
+            data.materiales = materials;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
+            try {
+                const res = await fetch('/api/rcd_request.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data),
+                });
+                const json = await res.json();
+                if (json.success) {
+                    msgEl.textContent = '\u2705 Solicitud enviada correctamente. Nos pondremos en contacto contigo para enviarte el certificado.';
+                    msgEl.className = 'rcd-msg success';
+                    form.reset();
+                } else {
+                    msgEl.textContent = json.error || 'Error al enviar la solicitud.';
+                    msgEl.className = 'rcd-msg error';
+                }
+            } catch (err) {
+                msgEl.textContent = 'Error de conexi\u00f3n. Int\u00e9ntalo de nuevo.';
+                msgEl.className = 'rcd-msg error';
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Enviar solicitud de certificado';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+    })();
+    </script>
+</body>
+</html>

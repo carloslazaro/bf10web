@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#DA291C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>BF10 Conductor</title>
+  <link rel="manifest" href="/manifest-conductor.json">
+  <link rel="apple-touch-icon" href="/img/icon-192.png">
+  <style>
+    :root {
+      --black: #111111;
+      --dark: #1a1a1a;
+      --card: #222;
+      --border: #333;
+      --red: #DA291C;
+      --green: #00A651;
+      --blue: #3B82F6;
+      --yellow: #EAB308;
+      --orange: #F97316;
+      --gray: #777;
+      --light: #ccc;
+      --white: #fff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ══ Screens ══ */
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ══ Screen 1: Login ══ */
+    #loginScreen {
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    #loginScreen img { width: 80px; margin-bottom: 20px; border-radius: 16px; }
+    #loginScreen h1 { font-size: 22px; margin-bottom: 4px; }
+    #loginScreen h1 span { color: var(--red); }
+    #loginScreen .subtitle { color: var(--gray); font-size: 13px; margin-bottom: 32px; }
+
+    .driver-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      max-width: 340px;
+    }
+    .driver-btn {
+      background: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 8px;
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .driver-btn:active { background: var(--red); border-color: var(--red); }
+
+    /* ══ Screen 2: Stops list ══ */
+    .app-header {
+      background: var(--dark);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--red);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .driver-label { font-size: 16px; font-weight: 700; color: var(--red); }
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--gray);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Camion bar */
+    .camion-bar {
+      background: var(--dark);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .camion-bar label { font-size: 13px; color: var(--gray); flex-shrink: 0; }
+    .camion-select {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .btn-camion-ok {
+      background: var(--green);
+      border: none;
+      color: var(--white);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .btn-camion-ok:active { opacity: 0.8; }
+    .btn-camion-ok.saved { background: var(--border); color: var(--gray); }
+
+    .date-bar {
+      background: var(--dark);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .date-bar label { font-size: 13px; color: var(--gray); }
+    .date-input {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .btn-today {
+      background: var(--red);
+      border: none;
+      color: var(--white);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1;
+      padding: 12px 6px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      position: relative;
+    }
+    .tab.active { color: var(--white); border-bottom-color: var(--red); }
+    .tab .count {
+      display: inline-block;
+      background: var(--card);
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: 11px;
+      margin-left: 3px;
+    }
+    .tab.active .count { background: var(--red); }
+
+    /* Submenu "Otras" */
+    .tab-otras { position: relative; }
+    .submenu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 200;
+      min-width: 140px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .submenu.open { display: block; }
+    .submenu-item {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--white);
+      cursor: pointer;
+      text-align: left;
+    }
+    .submenu-item:active { background: var(--red); }
+    .submenu-item + .submenu-item { border-top: 1px solid var(--border); }
+
+    /* Viaje subtabs */
+    .viaje-bar {
+      display: none;
+      background: var(--black);
+      padding: 6px 10px;
+      gap: 6px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+    }
+    .viaje-bar.show { display: flex; }
+    .viaje-chip {
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--dark);
+      color: var(--gray);
+      transition: background 0.15s, color 0.15s;
+    }
+    .viaje-chip.active { background: var(--red); border-color: var(--red); color: var(--white); }
+
+    /* Viaje badge on card */
+    .badge.viaje { color: var(--white); background: rgba(59,130,246,0.2); }
+
+    /* Viaje selector on card */
+    /* Ruta buttons bar */
+    .ruta-bar {
+      display: none;
+      padding: 8px 10px;
+      gap: 8px;
+      background: var(--black);
+      border-bottom: 1px solid var(--border);
+    }
+    .ruta-bar.show { display: flex; flex-direction: column; }
+    .ruta-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .ruta-info span { display: flex; align-items: center; gap: 6px; }
+    .ruta-label { color: var(--gray); font-weight: 600; min-width: 50px; }
+    .ruta-addr { color: var(--light); }
+    .ruta-buttons { display: flex; gap: 8px; }
+    .ruta-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--dark);
+      color: var(--light);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+    .ruta-btn:active { background: var(--red); border-color: var(--red); color: var(--white); }
+    .ruta-opt { color: var(--green); border-color: var(--green); }
+
+    .viaje-select {
+      background: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--light);
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: inherit;
+      cursor: pointer;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    .stops-list {
+      flex: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding-bottom: 120px;
+    }
+
+    /* Stop card */
+    .stop-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .stop-card.recogida { border-left: 4px solid var(--green); background: rgba(0,166,81,0.04); }
+    .stop-card.no_estan { border-left: 4px solid var(--red); background: rgba(218,41,28,0.04); }
+    .stop-card.por_recoger { border-left: 4px solid var(--yellow); }
+
+    .stop-address { font-size: 15px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; display: flex; align-items: flex-start; gap: 6px; }
+    .stop-address-text { flex: 1; cursor: pointer; text-decoration: underline; text-decoration-color: var(--border); }
+    .btn-maps { flex-shrink: 0; width: 28px; height: 28px; border: none; border-radius: 6px; background: rgba(59,130,246,0.15); color: var(--blue); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-maps:active { opacity: 0.7; }
+    .stop-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--gray);
+      margin-bottom: 10px;
+    }
+    .stop-meta .badge {
+      background: var(--dark);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .badge.sacas { color: var(--blue); }
+    .badge.marca { color: var(--yellow); }
+    .badge.urgente { color: var(--red); background: rgba(218,41,28,0.15); }
+    .badge.dias { color: var(--orange); }
+    .badge.dias-old { color: var(--red); background: rgba(218,41,28,0.15); }
+
+    /* Action buttons row */
+    .stop-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .act-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.1s;
+    }
+    .act-btn:active { transform: scale(0.9); }
+    .btn-obs { background: var(--gray); }
+    .btn-recogida { background: var(--green); }
+    .btn-no-estan { background: var(--red); }
+    .btn-subir, .btn-bajar { background: var(--dark); border: 1px solid var(--border) !important; }
+
+    /* Drag handle */
+    .drag-handle {
+      width: 28px;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--gray);
+      background: transparent;
+      border: none;
+      cursor: grab;
+      touch-action: none;
+      flex-shrink: 0;
+      user-select: none;
+      opacity: 0.5;
+    }
+
+    .stop-card.dragging {
+      opacity: 0.5;
+      border: 2px dashed var(--red);
+    }
+
+    .stop-card.drag-over {
+      border-top: 3px solid var(--red);
+    }
+
+    .stop-card-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .stop-card-content { flex: 1; min-width: 0; }
+    .btn-reset { background: var(--border); font-size: 11px; padding: 0 10px; height: 36px; font-weight: 600; border: none; border-radius: 8px; color: var(--light); cursor: pointer; transition: transform 0.1s; }
+    .btn-reset:active { transform: scale(0.95); }
+
+    /* ══ Screen 3: Detail / Observaciones ══ */
+    .detail-header {
+      background: var(--dark);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 3px solid var(--red);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .btn-back {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--white);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .detail-title { font-size: 14px; font-weight: 600; flex: 1; line-height: 1.3; }
+
+    .detail-form {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      padding-bottom: 120px;
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-label { font-size: 12px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .field-input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      padding: 10px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      width: 100%;
+    }
+    .field-input:focus { outline: none; border-color: var(--blue); }
+
+    select.field-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23777' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    /* Sacas +/- control */
+    .sacas-control {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .sacas-control input {
+      width: 60px;
+      text-align: center;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .sacas-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--dark);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sacas-btn:first-child { border-radius: 8px 0 0 8px; }
+    .sacas-btn:last-child { border-radius: 0 8px 8px 0; }
+    .sacas-btn:active { background: var(--border); }
+
+    .etiquetas-section { display: flex; flex-direction: column; gap: 12px; }
+    .etiquetas-title { font-size: 12px; font-weight: 600; color: var(--orange); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; }
+
+    /* Save bar */
+    .save-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--dark);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+    .btn-save {
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      border: none;
+      border-radius: 10px;
+      color: var(--white);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-save:active { opacity: 0.8; }
+    .btn-save.saving { background: var(--gray); pointer-events: none; }
+
+    /* Empty / loading */
+    .empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .empty .icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* ══ Screen 4: Summary ══ */
+    .summary-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+    }
+    .summary-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--white);
+    }
+    .summary-action .sa-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .summary-action .sa-label { font-size: 9px; font-weight: 600; text-transform: uppercase; color: var(--light); }
+    .summary-action:active .sa-icon { opacity: 0.7; }
+    .sa-obs .sa-icon { background: var(--blue); }
+    .sa-recogida .sa-icon { background: var(--green); }
+    .sa-no-estan .sa-icon { background: var(--red); }
+
+    .summary-fields {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      padding-bottom: 120px;
+    }
+    .summary-field {}
+    .summary-label { font-size: 11px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .summary-value { font-size: 17px; font-weight: 500; min-height: 24px; }
+    .summary-value a { color: var(--blue); text-decoration: none; }
+    .summary-value.empty-val { color: var(--border); font-style: italic; font-size: 14px; }
+
+    .loading {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══ PIN screen ══ */
+    .pin-dots {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .pin-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .pin-dot.filled {
+      background: var(--red);
+      border-color: var(--red);
+    }
+    .pin-error {
+      color: var(--red);
+      font-size: 13px;
+      min-height: 20px;
+      margin-bottom: 16px;
+    }
+    .pin-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 72px);
+      gap: 10px;
+    }
+    .pin-pad button {
+      width: 76px;
+      height: 58px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--dark);
+      color: var(--white);
+      font-size: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.1s;
+    }
+    .pin-pad button:active { background: var(--red); border-color: var(--red); transform: scale(0.95); }
+    .pin-empty { visibility: hidden; }
+
+    /* Install banner (auto - beforeinstallprompt) */
+    /* Stats bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 8px;
+      gap: 6px;
+    }
+    .stat-item {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 6px 2px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+    }
+    .stat-val { font-size: 20px; font-weight: 700; color: var(--green); }
+    .stat-sub { font-size: 10px; color: var(--gray); }
+    .stat-lbl { font-size: 10px; color: var(--gray); text-transform: uppercase; font-weight: 600; }
+
+    /* Km bar */
+    .km-bar {
+      display: flex;
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 16px;
+      gap: 24px;
+      justify-content: center;
+    }
+    .km-item { font-size: 12px; color: var(--gray); }
+    .km-item b { color: var(--blue); }
+
+    /* Header actions */
+    .hdr-actions { display: flex; gap: 6px; align-items: center; }
+    .btn-action-sm {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--light);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-action-sm:active { background: var(--red); border-color: var(--red); color: var(--white); }
+    .btn-crear-ruta { color: var(--green); border-color: var(--green); }
+
+    .install-banner {
+      display: none;
+      background: var(--red);
+      padding: 14px 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--white);
+    }
+    .install-banner.show { display: block; }
+
+    /* Manual install button (always visible if not installed) */
+    .install-manual {
+      display: none;
+      margin-top: 24px;
+      width: 100%;
+      max-width: 340px;
+    }
+    .install-manual.show { display: block; }
+    .btn-install {
+      width: 100%;
+      padding: 14px;
+      background: var(--red);
+      border: none;
+      border-radius: 10px;
+      color: var(--white);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-install:active { opacity: 0.8; }
+    .install-hint {
+      text-align: center;
+      color: var(--gray);
+      font-size: 11px;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Install banner -->
+  <div class="install-banner" id="installBanner" onclick="installPWA()">Instalar App BF10 Conductor</div>
+
+  <!-- ═══ SCREEN 1: PIN LOGIN ═══ -->
+  <div id="loginScreen" class="screen active">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center">
+      <img src="/img/icon-192.png" alt="BF10" style="width:80px;margin-bottom:16px;border-radius:16px" onerror="this.style.background='#DA291C';this.style.display='block'">
+      <h1 style="font-size:22px;margin-bottom:4px">SACOS <span style="color:var(--red)">BF10</span></h1>
+      <p style="color:var(--gray);font-size:13px;margin-bottom:24px">Introduce tu PIN</p>
+      <div class="pin-dots" id="pinDots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+      <p class="pin-error" id="pinError"></p>
+      <div class="pin-pad">
+        <button onclick="pinKey('1')">1</button>
+        <button onclick="pinKey('2')">2</button>
+        <button onclick="pinKey('3')">3</button>
+        <button onclick="pinKey('4')">4</button>
+        <button onclick="pinKey('5')">5</button>
+        <button onclick="pinKey('6')">6</button>
+        <button onclick="pinKey('7')">7</button>
+        <button onclick="pinKey('8')">8</button>
+        <button onclick="pinKey('9')">9</button>
+        <button class="pin-empty"></button>
+        <button onclick="pinKey('0')">0</button>
+        <button onclick="pinDelete()" style="font-size:18px">&#9003;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 2: STOPS LIST ═══ -->
+  <div id="appScreen" class="screen">
+    <div class="app-header">
+      <span class="driver-label" id="driverLabel"></span>
+      <div class="hdr-actions">
+        <button class="btn-action-sm" onclick="openNewStop()">+ Parada</button>
+        <button class="btn-action-sm btn-crear-ruta" onclick="crearRuta()">Crear ruta</button>
+        <button class="btn-logout" onclick="logout()">Salir</button>
+      </div>
+    </div>
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-item"><span class="stat-val" id="stHoy">0</span><span class="stat-sub" id="stHoyP"></span><span class="stat-lbl">Hoy</span></div>
+      <div class="stat-item"><span class="stat-val" id="stSemana">0</span><span class="stat-sub" id="stSemanaP"></span><span class="stat-lbl">Semana</span></div>
+      <div class="stat-item"><span class="stat-val" id="stMes">0</span><span class="stat-sub" id="stMesP"></span><span class="stat-lbl">Mes</span></div>
+      <div class="stat-item"><span class="stat-val" id="stAnio">0</span><span class="stat-sub" id="stAnioP"></span><span class="stat-lbl">Ano</span></div>
+    </div>
+    <div class="km-bar" id="kmBar">
+      <span class="km-item">Km hoy: <b id="stKmHoy">-</b></span>
+      <span class="km-item">Km mes: <b id="stKmMes">-</b></span>
+    </div>
+    <div class="camion-bar" id="camionBar">
+      <label>Camion:</label>
+      <select class="camion-select" id="camionSelect">
+        <option value="">Cargando...</option>
+      </select>
+      <button class="btn-camion-ok" id="btnCamionOk" onclick="saveCamion()">OK</button>
+    </div>
+    <div class="date-bar">
+      <label>Fecha:</label>
+      <input type="date" class="date-input" id="dateInput">
+      <button class="btn-today" onclick="setToday()">Hoy</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-filter="por_recoger" onclick="setFilter('por_recoger')">Por recoger <span class="count" id="cntPending">0</span></div>
+      <div class="tab" data-filter="recogida" onclick="setFilter('recogida')">Recogidas <span class="count" id="cntDone">0</span></div>
+      <div class="tab tab-otras" data-filter="otras" onclick="toggleOtras()">Otras &#9662;
+        <div class="submenu" id="submenuOtras">
+          <div class="submenu-item" onclick="event.stopPropagation();setFilter('no_estan');closeOtras()">No estan <span class="count" id="cntAbsent">0</span></div>
+          <div class="submenu-item" onclick="event.stopPropagation();setFilter('todas');closeOtras()">Todas <span class="count" id="cntAll">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="viaje-bar" id="viajeBar">
+      <span class="viaje-chip active" data-viaje="" onclick="setViaje('')">Todos</span>
+      <span class="viaje-chip" data-viaje="Viaje 1" onclick="setViaje('Viaje 1')">Viaje 1</span>
+      <span class="viaje-chip" data-viaje="Viaje 2" onclick="setViaje('Viaje 2')">Viaje 2</span>
+      <span class="viaje-chip" data-viaje="Viaje 3" onclick="setViaje('Viaje 3')">Viaje 3</span>
+      <span class="viaje-chip" data-viaje="Viaje 4" onclick="setViaje('Viaje 4')">Viaje 4</span>
+    </div>
+    <div class="ruta-bar" id="rutaBar">
+      <div class="ruta-info" id="rutaInfo"></div>
+      <div class="ruta-buttons">
+        <button class="ruta-btn" onclick="openRuta(false)">&#128663; Ruta</button>
+        <button class="ruta-btn ruta-opt" onclick="openRuta(true)">&#128663; Ruta optimizada</button>
+      </div>
+    </div>
+    <div class="stops-list" id="stopsList">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 3: DETAIL / OBSERVACIONES ═══ -->
+  <div id="detailScreen" class="screen">
+    <div class="detail-header">
+      <button class="btn-back" onclick="closeDetail()">&#8592;</button>
+      <div class="detail-title" id="detailTitle"></div>
+    </div>
+    <div class="detail-form" id="detailForm">
+      <!-- filled by JS -->
+    </div>
+    <div class="save-bar">
+      <button class="btn-save" id="btnSave" onclick="saveDetail()">Guardar</button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 4: SUMMARY ═══ -->
+  <div id="summaryScreen" class="screen">
+    <div class="detail-header">
+      <button class="btn-back" onclick="closeSummary()">&#8592;</button>
+      <div class="detail-title" id="summaryTitle"></div>
+    </div>
+    <div class="summary-actions" id="summaryActions"></div>
+    <div class="summary-fields" id="summaryFields">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+    <div class="save-bar" id="summarySaveBar" style="display:none">
+      <button class="btn-save" id="btnSummarySave" onclick="saveSummary()">Guardar</button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 5: ETIQUETAS AL RECOGER ═══ -->
+  <div id="etiquetasScreen" class="screen">
+    <div class="detail-header">
+      <button class="btn-back" onclick="cancelRecogida()">&#8592;</button>
+      <div class="detail-title" id="etiquetasTitle">Etiquetas de recogida</div>
+    </div>
+    <div class="form-body" id="etiquetasForm"></div>
+    <div class="save-bar">
+      <button class="btn-save" id="btnConfirmRecogida" onclick="confirmRecogida()">Confirmar Recogida</button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 6: NUEVA PARADA ═══ -->
+  <div id="newStopScreen" class="screen">
+    <div class="detail-header">
+      <button class="btn-back" onclick="closeNewStop()">&#8592;</button>
+      <div class="detail-title">Nueva parada</div>
+    </div>
+    <div class="form-body" id="newStopForm"></div>
+    <div class="save-bar">
+      <button class="btn-save" id="btnNewStop" onclick="saveNewStop()">Crear parada</button>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api/driver.php';
+    let currentDriver = localStorage.getItem('bf10_driver') || '';
+    let currentFilter = 'por_recoger';
+    let currentViaje = '';  // '' = all, 'Viaje 1'..'Viaje 4'
+    let stopsData = {};  // { todas:[], por_recoger:[], recogida:[], no_estan:[] }
+    let detailStopId = null;
+
+    // Marcas disponibles
+    const MARCAS = ['BF10','SERVISACO','ATUSACO','ATUSACO_LUISFER','ATUSACO_HERREROCON','ATUSACO_COSASCASA','ECOSACO','SACAS_BLANCAS','UTE-EXTRAMAD'];
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('dateInput').addEventListener('change', loadStops);
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // SCREEN 1: PIN LOGIN (direct)
+    // ══════════════════════════════════════════════════════════
+    let pinValue = '';
+
+    function pinKey(digit) {
+      if (pinValue.length >= 4) return;
+      pinValue += digit;
+      updatePinDots();
+      if (pinValue.length === 4) verifyPin();
+    }
+
+    function pinDelete() {
+      pinValue = pinValue.slice(0, -1);
+      document.getElementById('pinError').textContent = '';
+      updatePinDots();
+    }
+
+    function updatePinDots() {
+      const dots = document.querySelectorAll('#pinDots .pin-dot');
+      dots.forEach((d, i) => d.classList.toggle('filled', i < pinValue.length));
+    }
+
+    async function verifyPin() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'login_pin', pin: pinValue })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          currentDriver = data.conductor;
+          showApp();
+        } else {
+          document.getElementById('pinError').textContent = 'PIN incorrecto';
+          pinValue = '';
+          updatePinDots();
+        }
+      } catch (e) {
+        document.getElementById('pinError').textContent = 'Error de conexion';
+        pinValue = '';
+        updatePinDots();
+      }
+    }
+
+    function logout() {
+      currentDriver = '';
+      localStorage.removeItem('bf10_driver');
+      showScreen('loginScreen');
+    }
+
+    function showApp() {
+      document.getElementById('driverLabel').textContent = currentDriver;
+      showScreen('appScreen');
+      document.getElementById('viajeBar').classList.add('show');
+      loadStats();
+      loadCamion();
+      setToday();
+    }
+
+    let allCamiones = [];
+
+    async function loadCamion() {
+      try {
+        // Load all camiones if not cached
+        if (!allCamiones.length) {
+          const res = await fetch(`${API}?action=camiones`);
+          const data = await res.json();
+          allCamiones = data.camiones || [];
+        }
+
+        // Check if already selected today
+        const fecha = document.getElementById('dateInput').value || new Date().toISOString().split('T')[0];
+        const res2 = await fetch(`${API}?action=camion_dia&conductor=${enc(currentDriver)}&fecha=${fecha}`);
+        const dia = await res2.json();
+
+        const select = document.getElementById('camionSelect');
+        const btn = document.getElementById('btnCamionOk');
+
+        select.innerHTML = allCamiones.map(c =>
+          `<option value="${c.id}">${c.matricula} - ${c.modelo}</option>`
+        ).join('');
+
+        if (dia.selected) {
+          select.value = dia.camion_id;
+          btn.textContent = 'Guardado';
+          btn.classList.add('saved');
+        } else if (dia.habitual) {
+          select.value = dia.habitual.id;
+          btn.textContent = 'OK';
+          btn.classList.remove('saved');
+        } else {
+          btn.textContent = 'OK';
+          btn.classList.remove('saved');
+        }
+      } catch(e) {}
+    }
+
+    async function saveCamion() {
+      const camionId = document.getElementById('camionSelect').value;
+      if (!camionId) return;
+
+      const fecha = document.getElementById('dateInput').value || new Date().toISOString().split('T')[0];
+      try {
+        await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'set_camion', conductor: currentDriver, camion_id: parseInt(camionId), fecha })
+        });
+        const btn = document.getElementById('btnCamionOk');
+        btn.textContent = 'Guardado';
+        btn.classList.add('saved');
+      } catch(e) { alert('Error guardando camion'); }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API}?action=stats&conductor=${enc(currentDriver)}`);
+        const s = await res.json();
+        document.getElementById('stHoy').textContent = s.hoy.sacas;
+        document.getElementById('stHoyP').textContent = s.hoy.paradas + ' par.';
+        document.getElementById('stSemana').textContent = s.semana.sacas;
+        document.getElementById('stSemanaP').textContent = s.semana.paradas + ' par.';
+        document.getElementById('stMes').textContent = s.mes.sacas;
+        document.getElementById('stMesP').textContent = s.mes.paradas + ' par.';
+        document.getElementById('stAnio').textContent = s.anio.sacas;
+        document.getElementById('stAnioP').textContent = s.anio.paradas + ' par.';
+        document.getElementById('stKmHoy').textContent = s.km_hoy ? s.km_hoy + ' km' : '-';
+        document.getElementById('stKmMes').textContent = s.km_mes ? s.km_mes + ' km' : '-';
+      } catch(e) {}
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // SCREEN 2: STOPS LIST
+    // ══════════════════════════════════════════════════════════
+    function setToday() {
+      document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+      loadStops();
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.tab').forEach(t => {
+        const match = t.dataset.filter === f;
+        const isOtras = t.dataset.filter === 'otras' && (f === 'no_estan' || f === 'todas');
+        t.classList.toggle('active', match || isOtras);
+      });
+      const isPorRecoger = f === 'por_recoger';
+      document.getElementById('viajeBar').classList.toggle('show', isPorRecoger);
+      // Hide ruta bar when not in por_recoger or when no viaje selected
+      if (!isPorRecoger) {
+        document.getElementById('rutaBar').classList.remove('show');
+      } else if (currentViaje) {
+        document.getElementById('rutaBar').classList.add('show');
+      }
+      renderStops();
+    }
+
+    const RUTA_NOMBRES = {
+      'Viaje 1': { salida: 'Nave Getafe', destino: 'Vertedero Valdemingomez' },
+      'Viaje 2': { salida: 'Vertedero Valdemingomez', destino: 'Vertedero Valdemingomez' },
+      'Viaje 3': { salida: 'Vertedero Valdemingomez', destino: 'Vertedero Valdemingomez' },
+      'Viaje 4': { salida: 'Vertedero Valdemingomez', destino: 'Vertedero Valdemingomez' },
+    };
+
+    function setViaje(v) {
+      currentViaje = v;
+      document.querySelectorAll('.viaje-chip').forEach(c =>
+        c.classList.toggle('active', c.dataset.viaje === v)
+      );
+      const rutaBar = document.getElementById('rutaBar');
+      rutaBar.classList.toggle('show', v !== '');
+
+      if (v) {
+        const nombres = RUTA_NOMBRES[v] || { salida: '—', destino: '—' };
+        document.getElementById('rutaInfo').innerHTML = `
+          <span><span class="ruta-label">Salida:</span><span class="ruta-addr">${esc(nombres.salida)}</span></span>
+          <span><span class="ruta-label">Destino:</span><span class="ruta-addr">${esc(nombres.destino)}</span></span>
+        `;
+      }
+
+      renderStops();
+    }
+
+    function toggleOtras() {
+      document.getElementById('submenuOtras').classList.toggle('open');
+    }
+
+    function closeOtras() {
+      document.getElementById('submenuOtras').classList.remove('open');
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.tab-otras')) closeOtras();
+    });
+
+    async function loadStops() {
+      const fecha = document.getElementById('dateInput').value;
+      const list = document.getElementById('stopsList');
+      list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+      try {
+        const res = await fetch(`${API}?action=paradas&conductor=${enc(currentDriver)}&fecha=${fecha}`);
+        const data = await res.json();
+        stopsData = {
+          por_recoger: data.por_recoger || [],
+          recogida: data.recogida || [],
+          no_estan: data.no_estan || [],
+        };
+        // 'todas' is always computed, never a separate copy
+        Object.defineProperty(stopsData, 'todas', {
+          get() { return [...this.por_recoger, ...this.recogida, ...this.no_estan]; },
+          configurable: true
+        });
+        updateCounts(data.counts);
+        renderStops();
+      } catch (e) {
+        list.innerHTML = '<div class="empty"><div class="icon">&#9888;</div><p>Error de conexion</p></div>';
+      }
+    }
+
+    function updateCounts(c) {
+      if (!c) c = { total: stopsData.todas.length, por_recoger: stopsData.por_recoger.length, recogida: stopsData.recogida.length, no_estan: stopsData.no_estan.length };
+      document.getElementById('cntAll').textContent = c.total;
+      document.getElementById('cntPending').textContent = c.por_recoger;
+      document.getElementById('cntDone').textContent = c.recogida;
+      document.getElementById('cntAbsent').textContent = c.no_estan;
+    }
+
+    function isPending(s) {
+      return !s.estado || s.estado === '' || s.estado === 'por_recoger';
+    }
+
+    // Find a stop across all lists by id
+    function findStop(id) {
+      for (const key of ['todas', 'por_recoger', 'recogida', 'no_estan']) {
+        const s = stopsData[key].find(s => +s.id === id);
+        if (s) return s;
+      }
+      return null;
+    }
+
+    function renderStops() {
+      const list = document.getElementById('stopsList');
+      let filtered = stopsData[currentFilter] || [];
+
+      // Apply viaje filter on por_recoger
+      if (currentFilter === 'por_recoger' && currentViaje) {
+        filtered = filtered.filter(s => s.viaje === currentViaje);
+      }
+
+      if (filtered.length === 0) {
+        const msgs = {
+          todas: 'No hay paradas para esta fecha',
+          por_recoger: currentViaje ? `No hay paradas en ${currentViaje}` : 'Todas recogidas',
+          recogida: 'Ninguna recogida todavia',
+          no_estan: 'Ninguna marcada como "no estan"'
+        };
+        list.innerHTML = `<div class="empty"><div class="icon">&#128666;</div><p>${msgs[currentFilter]}</p></div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map((s, idx) => {
+        const estado = s.estado || 'por_recoger';
+        const pending = isPending(s);
+
+        let buttons = '';
+        if (pending) {
+          // 5 buttons: Observaciones, Recogida, No esta, Subir, Bajar
+          buttons = `
+            <button class="act-btn btn-obs" onclick="openDetail(${s.id})" title="Observaciones">&#128172;</button>
+            <button class="act-btn btn-recogida" onclick="setEstado(${s.id},'recogida')" title="Recogida">&#10004;</button>
+            <button class="act-btn btn-no-estan" onclick="setEstado(${s.id},'no_estan')" title="No esta">&#10008;</button>
+            <button class="act-btn btn-subir" onclick="reorder(${s.id},'up')" title="Subir">&#8593;</button>
+            <button class="act-btn btn-bajar" onclick="reorder(${s.id},'down')" title="Bajar">&#8595;</button>
+          `;
+        } else if (estado === 'recogida') {
+          buttons = `
+            <button class="act-btn btn-obs" onclick="openDetail(${s.id})" title="Observaciones">&#128172;</button>
+            <button class="btn-reset" onclick="setEstado(${s.id},'')">Por recoger</button>
+            <button class="act-btn btn-no-estan" onclick="setEstado(${s.id},'no_estan')" title="No esta">&#10008;</button>
+          `;
+        } else if (estado === 'no_estan') {
+          buttons = `
+            <button class="act-btn btn-obs" onclick="openDetail(${s.id})" title="Observaciones">&#128172;</button>
+            <button class="act-btn btn-recogida" onclick="setEstado(${s.id},'recogida')" title="Recogida">&#10004;</button>
+            <button class="btn-reset" onclick="setEstado(${s.id},'')">Por recoger</button>
+          `;
+        }
+
+        const dragHandle = pending ? `<div class="drag-handle" data-id="${s.id}">&#9776;</div>` : '';
+
+        // Calculate days waiting
+        let diasBadge = '';
+        if (s.fecha_aviso && pending) {
+          const dias = calcDias(s.fecha_aviso);
+          if (dias > 0) {
+            const cls = dias >= 7 ? 'dias-old' : 'dias';
+            diasBadge = `<span class="badge ${cls}">${dias}d</span>`;
+          }
+        }
+
+        return `
+          <div class="stop-card ${estado}" data-id="${s.id}">
+            <div class="stop-card-row">
+              ${dragHandle}
+              <div class="stop-card-content">
+                <div class="stop-address">
+                  <span class="stop-address-text" onclick="openSummary(${s.id})">${esc(s.direccion)}</span>
+                  ${s.lat && s.lng ? `<button class="btn-maps" onclick="openMapsCoords(${s.lat},${s.lng})" title="Ver en Maps">&#128205;</button>` : ''}
+                </div>
+                <div class="stop-meta">
+                  <span class="badge sacas">Sacas: ${s.sacos || '?'}</span>
+                  ${s.marca ? `<span class="badge marca">${esc(s.marca)}</span>` : ''}
+                  ${s.viaje ? `<span class="badge viaje">${esc(s.viaje)}</span>` : ''}
+                  ${diasBadge}
+                  ${s.urgen ? '<span class="badge urgente">URGENTE</span>' : ''}
+                  ${s.barrio_cp ? `<span>${esc(s.barrio_cp)}</span>` : ''}
+                  ${s.tlf_aviso ? `<span><a href="tel:${s.tlf_aviso}" style="color:var(--blue);text-decoration:none">${s.tlf_aviso}</a></span>` : ''}
+                </div>
+                <div class="stop-actions">
+                  ${pending ? `<select class="viaje-select" data-stop-id="${s.id}">
+                    <option value="" ${!s.viaje?'selected':''}>SN</option>
+                    <option value="Viaje 1" ${s.viaje==='Viaje 1'?'selected':''}>V1</option>
+                    <option value="Viaje 2" ${s.viaje==='Viaje 2'?'selected':''}>V2</option>
+                    <option value="Viaje 3" ${s.viaje==='Viaje 3'?'selected':''}>V3</option>
+                    <option value="Viaje 4" ${s.viaje==='Viaje 4'?'selected':''}>V4</option>
+                  </select>` : ''}
+                  ${buttons}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── Recogida flow: open etiquetas screen first ──
+    let recogidaStopId = null;
+
+    async function openRecogidaScreen(id) {
+      recogidaStopId = id;
+      const stop = findStop(id);
+      document.getElementById('etiquetasTitle').textContent = stop ? stop.direccion : 'Etiquetas';
+      showScreen('etiquetasScreen');
+
+      const form = document.getElementById('etiquetasForm');
+      form.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+      try {
+        const res = await fetch(`${API}?action=detalle&id=${id}`);
+        const data = await res.json();
+        const p = data.parada;
+        const numSacos = parseInt(p.sacos) || 1;
+
+        const recMarcaOpts = ['ATS','SERV','BF10','ECO','ATU'].map(m =>
+          `<option value="${m}" ${m===p.marca?'selected':''}>${m}</option>`
+        ).join('');
+
+        let html = `<div class="fg" style="margin-bottom:8px"><label>Direccion</label><div class="summary-value">${esc(p.direccion)}</div></div>`;
+        html += `<div class="fg"><label>Sacas</label>
+          <div class="sacas-control">
+            <button class="sacas-btn" onclick="recChangeSacos(-1)">-</button>
+            <input type="number" class="field-input" id="rec_sacos" value="${numSacos}" min="1" max="99" readonly>
+            <button class="sacas-btn" onclick="recChangeSacos(1)">+</button>
+          </div>
+        </div>`;
+        html += `<div class="fg"><label>Marca</label><select class="field-input" id="rec_marca">${recMarcaOpts}</select></div>`;
+
+        for (let i = 1; i <= Math.max(numSacos, 1); i++) {
+          if (i > 15) break;
+          const val = p[`etiqueta_${i}`] || '';
+          html += `<div class="fg fg-etiqueta-rec"><label>Etiqueta ${i}</label><input type="text" class="field-input" id="rec_etiqueta_${i}" value="${escAttr(val)}" placeholder="Numero etiqueta ${i}"></div>`;
+        }
+        form.innerHTML = html;
+      } catch(e) {
+        form.innerHTML = '<div class="empty"><p>Error cargando datos</p></div>';
+      }
+    }
+
+    function recChangeSacos(delta) {
+      const input = document.getElementById('rec_sacos');
+      let val = parseInt(input.value) + delta;
+      if (val < 1) val = 1;
+      if (val > 15) val = 15;
+      input.value = val;
+      // Rebuild etiquetas in recogida form
+      const form = document.getElementById('etiquetasForm');
+      const saved = {};
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`rec_etiqueta_${i}`);
+        if (el) saved[i] = el.value;
+      }
+      // Remove old etiqueta fields
+      form.querySelectorAll('.fg-etiqueta-rec').forEach(el => el.remove());
+      // Add new ones
+      for (let i = 1; i <= val; i++) {
+        const div = document.createElement('div');
+        div.className = 'fg fg-etiqueta-rec';
+        div.innerHTML = `<label>Etiqueta ${i}</label><input type="text" class="field-input" id="rec_etiqueta_${i}" value="${escAttr(saved[i]||'')}" placeholder="Numero etiqueta ${i}">`;
+        form.appendChild(div);
+      }
+    }
+
+    async function confirmRecogida() {
+      const btn = document.getElementById('btnConfirmRecogida');
+      btn.textContent = 'Guardando...'; btn.classList.add('saving');
+
+      // Save sacas, marca, etiquetas
+      const payload = {
+        action: 'actualizar',
+        id: recogidaStopId,
+        sacos: document.getElementById('rec_sacos').value,
+        marca: document.getElementById('rec_marca').value,
+      };
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`rec_etiqueta_${i}`);
+        payload[`etiqueta_${i}`] = el ? el.value : '';
+      }
+
+      try {
+        await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        // Now mark as recogida
+        await doSetEstado(recogidaStopId, 'recogida');
+        recogidaStopId = null;
+        showScreen('appScreen');
+        renderStops();
+        loadStats();
+      } catch(e) { alert('Error'); }
+
+      btn.textContent = 'Confirmar Recogida'; btn.classList.remove('saving');
+    }
+
+    function cancelRecogida() {
+      recogidaStopId = null;
+      showScreen('appScreen');
+    }
+
+    // ── Update status ──
+    async function setEstado(id, estado) {
+      // If marking as recogida, open etiquetas screen first
+      if (estado === 'recogida') {
+        openRecogidaScreen(id);
+        return;
+      }
+      await doSetEstado(id, estado);
+    }
+
+    async function doSetEstado(id, estado) {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'estado', id, estado })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          // Update local data
+          for (const key of ['por_recoger', 'recogida', 'no_estan']) {
+            const idx = stopsData[key].findIndex(s => +s.id === id);
+            if (idx >= 0) stopsData[key][idx].estado = estado;
+          }
+
+          // Move stop between lists
+          const stop = findStop(id);
+          if (stop) {
+            for (const key of ['por_recoger', 'recogida', 'no_estan']) {
+              stopsData[key] = stopsData[key].filter(s => +s.id !== id);
+            }
+            const targetKey = (!estado || estado === 'por_recoger') ? 'por_recoger' : estado;
+            stopsData[targetKey].push(stop);
+          }
+
+          updateCounts();
+          renderStops();
+          loadStats();
+        }
+      } catch (e) { alert('Error actualizando estado'); }
+    }
+
+    // ── Reorder (local swap, no full reload) ──
+    async function reorder(id, direction) {
+      // Find in current filtered list and swap locally first for instant feedback
+      const filtered = stopsData[currentFilter] || stopsData.por_recoger;
+      const idx = filtered.findIndex(s => +s.id === id);
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+
+      if (idx < 0 || swapIdx < 0 || swapIdx >= filtered.length) return;
+
+      // Swap in array
+      [filtered[idx], filtered[swapIdx]] = [filtered[swapIdx], filtered[idx]];
+      renderStops();
+
+      // Send to server in background
+      try {
+        await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'reordenar', id, direction })
+        });
+      } catch (e) {
+        // Revert on error
+        [filtered[idx], filtered[swapIdx]] = [filtered[swapIdx], filtered[idx]];
+        renderStops();
+        alert('Error reordenando');
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // SCREEN 3: DETAIL / OBSERVACIONES
+    // ══════════════════════════════════════════════════════════
+    async function openDetail(id) {
+      detailStopId = id;
+      const stop = findStop(id);
+      document.getElementById('detailTitle').textContent = stop ? stop.direccion : 'Cargando...';
+      showScreen('detailScreen');
+
+      const form = document.getElementById('detailForm');
+      form.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+      try {
+        const res = await fetch(`${API}?action=detalle&id=${id}`);
+        const data = await res.json();
+        const p = data.parada;
+        const numSacos = parseInt(p.sacos) || 1;
+
+        let etiquetasHtml = '';
+        for (let i = 1; i <= Math.min(Math.max(numSacos, 1), 15); i++) {
+          const val = p[`etiqueta_${i}`] || '';
+          etiquetasHtml += `
+            <div class="field-group">
+              <label class="field-label">Etiqueta ${i}</label>
+              <input type="text" class="field-input" id="det_etiqueta_${i}" value="${escAttr(val)}" placeholder="Etiqueta saco ${i}">
+            </div>
+          `;
+        }
+
+        form.innerHTML = `
+          <div class="field-group">
+            <label class="field-label">Sacas *</label>
+            <div class="sacas-control">
+              <button class="sacas-btn" onclick="changeSacos(-1)">-</button>
+              <input type="number" class="field-input" id="det_sacos" value="${numSacos}" min="1" max="99" readonly>
+              <button class="sacas-btn" onclick="changeSacos(1)">+</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Marca</label>
+            <select class="field-input" id="det_marca">
+              ${MARCAS.map(m => `<option value="${m}" ${m === p.marca ? 'selected' : ''}>${m}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Observaciones</label>
+            <textarea class="field-input" id="det_obs" rows="3" placeholder="Notas del conductor...">${esc(p.observaciones || '')}</textarea>
+          </div>
+
+          <div class="etiquetas-section" id="etiquetasSection">
+            <div class="etiquetas-title">Etiquetas (1 por saco)</div>
+            ${etiquetasHtml}
+          </div>
+        `;
+      } catch (e) {
+        form.innerHTML = '<div class="empty"><p>Error cargando detalle</p></div>';
+      }
+    }
+
+    function changeSacos(delta) {
+      const input = document.getElementById('det_sacos');
+      let val = parseInt(input.value) + delta;
+      if (val < 1) val = 1;
+      if (val > 15) val = 15; // max 15 etiquetas en la DB
+      input.value = val;
+      rebuildEtiquetas(val);
+    }
+
+    function rebuildEtiquetas(num) {
+      const section = document.getElementById('etiquetasSection');
+      // Save current values
+      const saved = {};
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`det_etiqueta_${i}`);
+        if (el) saved[i] = el.value;
+      }
+
+      let html = '<div class="etiquetas-title">Etiquetas (1 por saco)</div>';
+      for (let i = 1; i <= num; i++) {
+        html += `
+          <div class="field-group">
+            <label class="field-label">Etiqueta ${i}</label>
+            <input type="text" class="field-input" id="det_etiqueta_${i}" value="${escAttr(saved[i] || '')}" placeholder="Etiqueta saco ${i}">
+          </div>
+        `;
+      }
+      section.innerHTML = html;
+    }
+
+    async function saveDetail() {
+      const btn = document.getElementById('btnSave');
+      btn.textContent = 'Guardando...';
+      btn.classList.add('saving');
+
+      const sacos = document.getElementById('det_sacos').value;
+      const payload = {
+        action: 'actualizar',
+        id: detailStopId,
+        sacos: sacos,
+        marca: document.getElementById('det_marca').value,
+        observaciones: document.getElementById('det_obs').value,
+      };
+
+      // Collect etiquetas
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`det_etiqueta_${i}`);
+        payload[`etiqueta_${i}`] = el ? el.value : '';
+      }
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.ok) {
+          // Update local data
+          const stop = findStop(detailStopId);
+          if (stop) {
+            stop.sacos = sacos;
+            stop.marca = payload.marca;
+            stop.observaciones = payload.observaciones;
+          }
+          closeDetail();
+        } else {
+          alert('Error: ' + (data.error || 'desconocido'));
+        }
+      } catch (e) {
+        alert('Error de conexion');
+      }
+
+      btn.textContent = 'Guardar';
+      btn.classList.remove('saving');
+    }
+
+    function closeDetail() {
+      detailStopId = null;
+      showScreen('appScreen');
+      renderStops();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // SCREEN 4: SUMMARY (read-only view)
+    // ══════════════════════════════════════════════════════════
+    let summaryStopId = null;
+
+    async function openSummary(id) {
+      summaryStopId = id;
+      const stop = findStop(id);
+      document.getElementById('summaryTitle').textContent = stop ? stop.direccion : 'Cargando...';
+      showScreen('summaryScreen');
+
+      // Action buttons at top
+      const actionsDiv = document.getElementById('summaryActions');
+      actionsDiv.innerHTML = `
+        <button class="summary-action sa-obs" onclick="closeSummary();openDetail(${id})">
+          <div class="sa-icon">&#128172;</div>
+          <span class="sa-label">Escribir Observacion</span>
+        </button>
+        <button class="summary-action sa-recogida" onclick="summarySetEstado(${id},'recogida')">
+          <div class="sa-icon">&#10004;</div>
+          <span class="sa-label">Marcar Recogida</span>
+        </button>
+        <button class="summary-action sa-no-estan" onclick="summarySetEstado(${id},'no_estan')">
+          <div class="sa-icon">&#10008;</div>
+          <span class="sa-label">Marcar No Esta</span>
+        </button>
+      `;
+
+      const fields = document.getElementById('summaryFields');
+      fields.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+      try {
+        const res = await fetch(`${API}?action=detalle&id=${id}`);
+        const data = await res.json();
+        const p = data.parada;
+
+        // Also get full info from stopsData
+        const full = stop || {};
+
+        const numSacos = parseInt(p.sacos) || 1;
+        const marcaOpts = MARCAS.map(m =>
+          `<option value="${m}" ${m===p.marca?'selected':''}>${m}</option>`
+        ).join('');
+
+        // Read-only rows
+        const readRows = [
+          ['ID', p.id],
+          ['Direccion', p.direccion],
+          ['Barrio / CP', p.barrio_cp],
+          ['Urgente', full.urgen || ''],
+          ['Telefono', full.tlf_aviso, true],
+          ['Conductor', full.conductor],
+          ['Fecha Recogida', full.fecha_recogida || ''],
+          ['Avisador', full.avisador],
+          ['Hora Aviso', full.hora_aviso],
+          ['Fecha Aviso', full.fecha_aviso],
+          ['Fecha de Ruta', full.fecha_de_ruta],
+          ['Estado', full.estado || 'POR RECOGER'],
+        ];
+
+        const readHtml = readRows.map(([label, value, isPhone]) => {
+          const display = value
+            ? (isPhone ? `<a href="tel:${value}">${esc(value)}</a>` : esc(String(value)))
+            : '';
+          const cls = value ? '' : ' empty-val';
+          return `<div class="summary-field"><div class="summary-label">${esc(label)}</div><div class="summary-value${cls}">${display || '—'}</div></div>`;
+        }).join('');
+
+        // Editable: sacas, marca, etiquetas
+        let etiquetasHtml = '';
+        for (let i = 1; i <= Math.max(numSacos, 1); i++) {
+          if (i > 15) break;
+          const val = p[`etiqueta_${i}`] || '';
+          etiquetasHtml += `<div class="fg"><label>Etiqueta ${i}</label><input type="text" class="field-input" id="sum_etiqueta_${i}" value="${escAttr(val)}"></div>`;
+        }
+
+        fields.innerHTML = `
+          <div class="fg"><label>Sacas</label>
+            <div class="sacas-control">
+              <button class="sacas-btn" onclick="sumChangeSacos(-1)">-</button>
+              <input type="number" class="field-input" id="sum_sacos" value="${numSacos}" min="1" max="99" readonly>
+              <button class="sacas-btn" onclick="sumChangeSacos(1)">+</button>
+            </div>
+          </div>
+          <div class="fg"><label>Marca</label><select class="field-input" id="sum_marca">${marcaOpts}</select></div>
+          <div class="etiquetas-section" id="sumEtiquetasSection">
+            <div class="etiquetas-title">Etiquetas (1 por saco)</div>
+            ${etiquetasHtml}
+          </div>
+          <div class="fg"><label>Observaciones</label><textarea class="field-input" id="sum_obs" rows="3" placeholder="Notas del conductor...">${esc(p.observaciones || '')}</textarea></div>
+          ${readHtml}
+        `;
+
+        document.getElementById('summarySaveBar').style.display = 'block';
+
+      } catch (e) {
+        fields.innerHTML = '<div class="empty"><p>Error cargando datos</p></div>';
+      }
+    }
+
+    async function summarySetEstado(id, estado) {
+      await setEstado(id, estado);
+      closeSummary();
+    }
+
+    function sumChangeSacos(delta) {
+      const input = document.getElementById('sum_sacos');
+      let val = parseInt(input.value) + delta;
+      if (val < 1) val = 1;
+      if (val > 15) val = 15;
+      input.value = val;
+      // Rebuild etiquetas
+      const section = document.getElementById('sumEtiquetasSection');
+      const saved = {};
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`sum_etiqueta_${i}`);
+        if (el) saved[i] = el.value;
+      }
+      let html = '<div class="etiquetas-title">Etiquetas (1 por saco)</div>';
+      for (let i = 1; i <= val; i++) {
+        html += `<div class="fg"><label>Etiqueta ${i}</label><input type="text" class="field-input" id="sum_etiqueta_${i}" value="${escAttr(saved[i]||'')}"></div>`;
+      }
+      section.innerHTML = html;
+    }
+
+    async function saveSummary() {
+      const btn = document.getElementById('btnSummarySave');
+      btn.textContent = 'Guardando...'; btn.classList.add('saving');
+
+      const payload = {
+        action: 'actualizar',
+        id: summaryStopId,
+        sacos: document.getElementById('sum_sacos').value,
+        marca: document.getElementById('sum_marca').value,
+        observaciones: document.getElementById('sum_obs').value,
+      };
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`sum_etiqueta_${i}`);
+        payload[`etiqueta_${i}`] = el ? el.value : '';
+      }
+
+      try {
+        const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        const data = await res.json();
+        if (data.ok) {
+          const stop = findStop(summaryStopId);
+          if (stop) { stop.sacos = payload.sacos; stop.marca = payload.marca; }
+          closeSummary();
+        } else { alert('Error: ' + (data.error || 'desconocido')); }
+      } catch(e) { alert('Error de conexion'); }
+
+      btn.textContent = 'Guardar'; btn.classList.remove('saving');
+    }
+
+    function closeSummary() {
+      summaryStopId = null;
+      document.getElementById('summarySaveBar').style.display = 'none';
+      showScreen('appScreen');
+      renderStops();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // SCREEN 6: NUEVA PARADA
+    // ══════════════════════════════════════════════════════════
+    function openNewStop() {
+      const marcaOpts = MARCAS.map(m => `<option value="${m}">${m}</option>`).join('');
+      const today = new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+      document.getElementById('newStopForm').innerHTML = `
+        <div class="fg"><label>Direccion</label><input type="text" class="field-input" id="ns_direccion" placeholder="Calle y numero"></div>
+        <div class="fg"><label>Barrio / CP</label><input type="text" class="field-input" id="ns_barrio" placeholder="Barrio o codigo postal"></div>
+        <div class="fg"><label>Sacas *</label>
+          <div class="sacas-control">
+            <button class="sacas-btn" onclick="nsChangeSacos(-1)">-</button>
+            <input type="number" class="field-input" id="ns_sacos" value="1" min="1" max="15" readonly>
+            <button class="sacas-btn" onclick="nsChangeSacos(1)">+</button>
+          </div>
+        </div>
+        <div class="fg"><label>Marca *</label><select class="field-input" id="ns_marca">${marcaOpts}</select></div>
+        <div class="fg"><label>Viaje</label>
+          <select class="field-input" id="ns_viaje">
+            <option value="">Sin viaje</option>
+            <option value="Viaje 1">Viaje 1</option>
+            <option value="Viaje 2">Viaje 2</option>
+            <option value="Viaje 3">Viaje 3</option>
+            <option value="Viaje 4">Viaje 4</option>
+          </select>
+        </div>
+        <div class="fg"><label>Telefono</label><input type="tel" class="field-input" id="ns_tlf" placeholder="Telefono de contacto"></div>
+        <div class="fg"><label>Urgente</label><input type="text" class="field-input" id="ns_urgen" placeholder="SI o dejar vacio"></div>
+        <div class="fg"><label>Observaciones</label><textarea class="field-input" id="ns_obs" rows="2" placeholder="Notas..."></textarea></div>
+        <div class="etiquetas-section" id="nsEtiquetasSection">
+          <div class="etiquetas-title">Etiquetas (1 por saco)</div>
+          <div class="fg"><label>Etiqueta 1</label><input type="text" class="field-input" id="ns_etiqueta_1" placeholder="Numero etiqueta 1"></div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Fecha aviso</label><input type="text" class="field-input" id="ns_fecha" value="${today}"></div>
+          <div class="fg"><label>Avisador</label><input type="text" class="field-input" id="ns_avisador" value="${esc(currentDriver)}"></div>
+        </div>
+      `;
+      showScreen('newStopScreen');
+    }
+
+    function nsChangeSacos(delta) {
+      const input = document.getElementById('ns_sacos');
+      let val = parseInt(input.value) + delta;
+      if (val < 1) val = 1;
+      if (val > 15) val = 15;
+      input.value = val;
+      const section = document.getElementById('nsEtiquetasSection');
+      const saved = {};
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`ns_etiqueta_${i}`);
+        if (el) saved[i] = el.value;
+      }
+      let html = '<div class="etiquetas-title">Etiquetas (1 por saco)</div>';
+      for (let i = 1; i <= val; i++) {
+        html += `<div class="fg"><label>Etiqueta ${i}</label><input type="text" class="field-input" id="ns_etiqueta_${i}" value="${escAttr(saved[i]||'')}" placeholder="Numero etiqueta ${i}"></div>`;
+      }
+      section.innerHTML = html;
+    }
+
+    function closeNewStop() {
+      showScreen('appScreen');
+    }
+
+    async function saveNewStop() {
+      const btn = document.getElementById('btnNewStop');
+      const sacos = document.getElementById('ns_sacos').value;
+      const marca = document.getElementById('ns_marca').value;
+
+      if (!sacos || !marca) { alert('Sacas y marca son obligatorios'); return; }
+
+      btn.textContent = 'Creando...'; btn.classList.add('saving');
+
+      const payload = {
+        action: 'crear_parada',
+        conductor: currentDriver,
+        direccion: document.getElementById('ns_direccion').value,
+        barrio_cp: document.getElementById('ns_barrio').value,
+        sacos: sacos,
+        marca: marca,
+        tlf_aviso: document.getElementById('ns_tlf').value,
+        urgen: document.getElementById('ns_urgen').value,
+        observaciones: document.getElementById('ns_obs').value,
+        fecha_aviso: document.getElementById('ns_fecha').value,
+        avisador: document.getElementById('ns_avisador').value,
+        viaje: document.getElementById('ns_viaje').value,
+      };
+      // Collect etiquetas
+      for (let i = 1; i <= 15; i++) {
+        const el = document.getElementById(`ns_etiqueta_${i}`);
+        payload[`etiqueta_${i}`] = el ? el.value : '';
+      }
+
+      try {
+        const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        const data = await res.json();
+        if (data.ok) {
+          closeNewStop();
+          loadStops();
+        } else { alert('Error: ' + (data.error || 'desconocido')); }
+      } catch(e) { alert('Error de conexion'); }
+
+      btn.textContent = 'Crear parada'; btn.classList.remove('saving');
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // CREAR RUTA AUTOMATICA
+    // ══════════════════════════════════════════════════════════
+    async function crearRuta(forzar) {
+      try {
+        const fecha = document.getElementById('dateInput').value;
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'crear_ruta', conductor: currentDriver, fecha, forzar: !!forzar })
+        });
+        const data = await res.json();
+
+        // Server asks for confirmation (stops already have viaje)
+        if (data.confirm) {
+          if (confirm(data.msg + '\n\nQuieres sobreescribir los viajes?')) {
+            crearRuta(true); // retry with forzar=true
+          }
+          return;
+        }
+
+        if (data.ok) {
+          let msg = 'Ruta creada: ' + data.total + ' paradas\n';
+          msg += 'Capacidad camion: ' + (data.capacidad || 13) + ' sacas\n';
+          if (data.km) msg += 'Km estimados: ' + data.km + ' km\n';
+          msg += '\n';
+          for (const [v, n] of Object.entries(data.viajes || {})) {
+            const sacas = (data.sacas || {})[v] || '?';
+            msg += v + ': ' + n + ' paradas, ' + sacas + '/' + (data.capacidad || 13) + ' sacas\n';
+          }
+          alert(msg);
+          await loadStops();
+          loadStats();
+        } else { alert('Error: ' + (data.error || 'desconocido')); }
+      } catch(e) { alert('Error de conexion'); }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // DRAG & DROP (touch) - bound to stopsList directly
+    // ══════════════════════════════════════════════════════════
+    let dragState = null; // { el, clone, cards, startY }
+
+    function initDrag() {
+      const list = document.getElementById('stopsList');
+
+      list.addEventListener('touchstart', e => {
+        const handle = e.target.closest('.drag-handle');
+        if (!handle) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const card = handle.closest('.stop-card');
+        const cards = Array.from(list.querySelectorAll('.stop-card[data-id]'));
+        const startY = e.touches[0].clientY;
+
+        // Clone for visual feedback
+        const clone = card.cloneNode(true);
+        const rect = card.getBoundingClientRect();
+        clone.style.cssText = `
+          position:fixed; left:${rect.left}px; width:${rect.width}px; z-index:999;
+          opacity:0.9; transform:scale(1.02);
+          pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.5);
+          top:${rect.top}px; border:2px solid #DA291C; border-radius:12px;
+        `;
+        document.body.appendChild(clone);
+        card.classList.add('dragging');
+
+        // Disable scroll on the list
+        list.style.overflowY = 'hidden';
+
+        dragState = { el: card, clone, cards, startY, offsetY: startY - rect.top };
+      }, { passive: false });
+
+      list.addEventListener('touchmove', e => {
+        if (!dragState) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const y = e.touches[0].clientY;
+        dragState.clone.style.top = (y - dragState.offsetY) + 'px';
+
+        // Highlight drop target
+        dragState.cards.forEach(card => {
+          card.classList.remove('drag-over');
+          if (card === dragState.el) return;
+          const r = card.getBoundingClientRect();
+          if (y > r.top && y < r.bottom) {
+            card.classList.add('drag-over');
+          }
+        });
+      }, { passive: false });
+
+      list.addEventListener('touchend', async e => {
+        if (!dragState) return;
+
+        const y = e.changedTouches[0].clientY;
+        const { el, clone, cards } = dragState;
+
+        // Find drop target
+        let dropIdx = -1;
+        cards.forEach((card, i) => {
+          card.classList.remove('drag-over');
+          const r = card.getBoundingClientRect();
+          if (y > r.top && y < r.bottom) dropIdx = i;
+        });
+
+        // Clean up
+        clone.remove();
+        el.classList.remove('dragging');
+        list.style.overflowY = 'auto';
+
+        const fromIdx = cards.indexOf(el);
+        dragState = null;
+
+        if (dropIdx >= 0 && dropIdx !== fromIdx) {
+          // Reorder in local data
+          const filtered = stopsData[currentFilter] || stopsData.por_recoger;
+          const movedStop = filtered.splice(fromIdx, 1)[0];
+          filtered.splice(dropIdx, 0, movedStop);
+          renderStops();
+
+          // Send to server in background
+          const ids = filtered.map(s => parseInt(s.id));
+          try {
+            await fetch(API, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'reordenar_bulk', ids })
+            });
+          } catch (err) {
+            // Revert on error
+            const reverted = filtered.splice(dropIdx, 1)[0];
+            filtered.splice(fromIdx, 0, reverted);
+            renderStops();
+            alert('Error reordenando');
+          }
+        }
+      });
+    }
+
+    // Init drag after DOM ready
+    document.addEventListener('DOMContentLoaded', initDrag);
+
+    // ══════════════════════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════════════════════
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Delegated listener for viaje selects
+    document.addEventListener('change', async e => {
+      const sel = e.target.closest('.viaje-select');
+      if (!sel) return;
+      const id = parseInt(sel.dataset.stopId);
+      const viaje = sel.value;
+
+      // Update in ALL lists (same id can appear in 'todas' and 'por_recoger')
+      for (const key of ['todas', 'por_recoger', 'recogida', 'no_estan']) {
+        const s = (stopsData[key] || []).find(s => +s.id === id);
+        if (s) s.viaje = viaje;
+      }
+
+      // Send to server
+      try {
+        await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'set_viaje', id, viaje })
+        });
+      } catch (e) { alert('Error guardando viaje'); }
+    });
+
+    // Rutas config
+    const RUTA_SALIDAS = {
+      'Viaje 1': { lat: 40.35119, lng: -3.562747 },       // Salida V1
+      'Viaje 2': { lat: 40.335487, lng: -3.5917364 },     // Vertedero
+      'Viaje 3': { lat: 40.335487, lng: -3.5917364 },
+      'Viaje 4': { lat: 40.335487, lng: -3.5917364 },
+    };
+    const RUTA_FIN = { lat: 40.335487, lng: -3.5917364 }; // Vertedero Valdemingomez
+
+    function openRuta(optimize) {
+      if (!currentViaje) return;
+
+      // Get stops with coords for current viaje
+      const stops = (stopsData.por_recoger || []).filter(s =>
+        s.viaje === currentViaje && s.lat && s.lng && s.lat !== '' && s.lng !== ''
+      );
+
+      if (stops.length === 0) {
+        alert('No hay paradas con ubicacion en este viaje');
+        return;
+      }
+
+      const salida = RUTA_SALIDAS[currentViaje] || RUTA_FIN;
+
+      if (optimize) {
+        // Use Google Maps direct URL format: /maps/dir/origin/stop1/stop2/.../destination
+        // This format handles optimize better
+        const points = [
+          `${salida.lat},${salida.lng}`,
+          ...stops.map(s => `${s.lat},${s.lng}`),
+          `${RUTA_FIN.lat},${RUTA_FIN.lng}`
+        ];
+        const url = 'https://www.google.com/maps/dir/' + points.join('/');
+        window.open(url, '_blank');
+      } else {
+        // Normal route: API URL with explicit origin/destination
+        const origin = `${salida.lat},${salida.lng}`;
+        const destination = `${RUTA_FIN.lat},${RUTA_FIN.lng}`;
+        const waypointsStr = stops.map(s => `${s.lat},${s.lng}`).join('|');
+        const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsStr}&travelmode=driving`;
+        window.open(url, '_blank');
+      }
+    }
+
+    function openMapsCoords(lat, lng) {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+    }
+
+    function openMaps(direccion, barrio) {
+      // Clean address for Google Maps
+      let addr = direccion || '';
+      // Remove phone numbers (6-9 digits together)
+      addr = addr.replace(/\b\d{6,}\b/g, '');
+      // Remove "UBICACION" tags
+      addr = addr.replace(/ubicacion/gi, '');
+      // Collapse multiple spaces
+      addr = addr.replace(/\s+/g, ' ').trim();
+      // Remove trailing dashes/slashes
+      addr = addr.replace(/[\-\/\s]+$/, '').trim();
+      // Build full query with barrio/zone
+      let query = addr;
+      if (barrio) {
+        query += ', ' + barrio;
+      }
+      query += ', Madrid, España';
+      const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(query);
+      window.open(url, '_blank');
+    }
+
+    function calcDias(fechaStr) {
+      // fecha_aviso can be "20/3/2026" (d/m/y) or "2026-03-20" (y-m-d)
+      let d;
+      if (fechaStr.includes('/')) {
+        const parts = fechaStr.split('/');
+        d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+      } else {
+        d = new Date(fechaStr);
+      }
+      if (isNaN(d)) return 0;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      d.setHours(0,0,0,0);
+      return Math.floor((today - d) / 86400000);
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function escAttr(str) {
+      return (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function enc(str) { return encodeURIComponent(str); }
+
+    // Service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw-conductor.js').catch(() => {});
+    }
+
+    // Install PWA prompt
+    let deferredPrompt;
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBanner').classList.add('show');
+      // Also update manual button
+      document.getElementById('btnInstall').textContent = 'Instalar App en tu movil';
+      document.getElementById('installHint').textContent = '';
+      document.getElementById('installManual').classList.add('show');
+    });
+
+    // Show manual install button if not already installed
+    if (!isInstalled) {
+      const manual = document.getElementById('installManual');
+      const hint = document.getElementById('installHint');
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      const isAndroid = /Android/.test(navigator.userAgent);
+
+      if (isIOS) {
+        manual.classList.add('show');
+        document.getElementById('btnInstall').textContent = 'Como instalar en iPhone';
+        hint.innerHTML = 'Pulsa el boton de compartir <b>(cuadrado con flecha)</b> y luego <b>"Añadir a pantalla de inicio"</b>';
+        document.getElementById('btnInstall').onclick = () => { hint.style.display = hint.style.display === 'none' ? 'block' : 'block'; };
+      } else if (isAndroid) {
+        manual.classList.add('show');
+        hint.innerHTML = 'Si no se instala automaticamente: menu <b>(3 puntos)</b> > <b>"Añadir a pantalla de inicio"</b>';
+      }
+    }
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('installBanner').classList.remove('show');
+      document.getElementById('installManual').classList.remove('show');
+      deferredPrompt = null;
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          document.getElementById('installBanner').classList.remove('show');
+          deferredPrompt = null;
+        });
+      }
+    }
+  </script>
+
+</body>
+</html>

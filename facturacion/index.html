@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturación — Servisaco</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Inter,system-ui,sans-serif;background:#f5f5f5;color:#333}
+        .header{background:#111;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px}
+        .header h1{font-size:18px;font-weight:800}
+        .header a{color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:color .2s}
+        .header a:hover{color:#fff}
+        .header .nav-links{display:flex;gap:4px;margin-left:auto}
+        .header .nav-link{color:#fff;text-decoration:none;background:rgba(255,255,255,.12);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;transition:background .2s;border:1px solid rgba(255,255,255,.1)}
+        .header .nav-link:hover{background:rgba(255,255,255,.25)}
+        .header .nav-link--active{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3)}
+        .container{max-width:1200px;margin:0 auto;padding:16px}
+
+        .tabs{display:flex;gap:4px;margin-bottom:16px;background:#fff;border-radius:8px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+        .tab{padding:10px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:#666;transition:all .2s;border:none;background:none}
+        .tab:hover{color:#333;background:#f5f5f5}
+        .tab--active{background:#111;color:#fff}
+
+        .card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
+        .card h3{font-size:14px;font-weight:700;margin-bottom:12px;color:#333}
+
+        .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+        .kpi{background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #e0e0e0;transition:transform .15s}
+        .kpi:hover{transform:translateY(-2px)}
+        .kpi .value{font-size:24px;font-weight:800;color:#111}
+        .kpi .label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+        .kpi--success{border-top-color:#00A651}
+        .kpi--success .value{color:#00A651}
+        .kpi--warning{border-top-color:#F59E0B}
+        .kpi--warning .value{color:#E65100}
+        .kpi--danger{border-top-color:#DA291C}
+        .kpi--danger .value{color:#c62828}
+
+        .filters{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+        .filters input,.filters select{padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;transition:border-color .2s}
+        .filters input:focus,.filters select:focus{outline:none;border-color:#00A651;box-shadow:0 0 0 3px rgba(0,166,81,.1)}
+        .filters button{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .2s}
+        .filters button:hover{opacity:.85}
+        .btn-primary{background:#111;color:#fff}
+        .btn-secondary{background:#f0f0f0;color:#333}
+        .btn-danger{background:#c62828;color:#fff}
+        .btn-export{background:#1565C0;color:#fff}
+
+        table{width:100%;border-collapse:collapse;font-size:12px}
+        th{background:#fafafa;padding:10px 8px;text-align:left;font-weight:600;border-bottom:2px solid #eee;white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#666}
+        td{padding:8px;border-bottom:1px solid #f0f0f0}
+        tr:hover{background:#f9f9f9}
+
+        .badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700}
+        .badge--ok{background:#E8F5E9;color:#2E7D32}
+        .badge--warn{background:#FFF3E0;color:#E65100}
+        .badge--err{background:#FFEBEE;color:#C62828}
+        .badge--info{background:#E3F2FD;color:#1565C0}
+
+        .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2000;justify-content:center;align-items:center}
+        .modal{background:#fff;border-radius:12px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+        .modal h3{margin-bottom:16px;font-size:16px;font-weight:700}
+        .modal label{display:block;margin-bottom:10px;font-size:13px;font-weight:500}
+        .modal label input,.modal label select,.modal label textarea{display:block;width:100%;margin-top:4px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit}
+        .modal .actions{display:flex;gap:8px;margin-top:16px}
+        .tab-panel{display:none}
+        .tab-panel--active{display:block}
+
+        @media(max-width:768px){
+            .header{flex-wrap:wrap;gap:8px}
+            .header .nav-links{width:100%;justify-content:center}
+            .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+            .kpi-row{grid-template-columns:repeat(2,1fr)}
+            .filters{flex-direction:column;align-items:stretch}
+            .filters input,.filters select,.filters button{width:100%}
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💰 Facturación</h1>
+        <div class="nav-links">
+            <a href="../admin/" class="nav-link">📋 Admin</a>
+            <a href="../reporting/" class="nav-link">📊 Reporting</a>
+            <a href="../rutas/" class="nav-link">🗺️ Rutas</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- KPIs -->
+        <div class="kpi-row" id="kpi-row"></div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab tab--active" onclick="switchTab('facturas')">Facturas</div>
+            <div class="tab" onclick="switchTab('abonos')">Abonos</div>
+            <div class="tab" onclick="switchTab('resumen')">Resumen</div>
+        </div>
+
+        <!-- FACTURAS TAB -->
+        <div class="tab-panel tab-panel--active" id="panel-facturas">
+            <div class="filters">
+                <input type="date" id="f-from">
+                <input type="date" id="f-to">
+                <select id="f-status">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="pagada">Pagada</option>
+                    <option value="abonada">Abonada</option>
+                    <option value="parcial">Parcial</option>
+                </select>
+                <select id="f-sent">
+                    <option value="">Email: Todas</option>
+                    <option value="yes">Enviadas</option>
+                    <option value="no">Sin enviar</option>
+                </select>
+                <button class="btn-primary" onclick="loadFacturas()">Filtrar</button>
+                <button class="btn-export" onclick="exportCSV()">CSV General</button>
+                <button class="btn-export" onclick="exportA3()">CSV A3 Cont</button>
+            </div>
+            <div class="card" style="padding:0;overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº Factura</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>NIF</th>
+                            <th>Base</th>
+                            <th>IVA</th>
+                            <th>Total</th>
+                            <th>Abonado</th>
+                            <th>Estado</th>
+                            <th>Email</th>
+                            <th>Origen</th>
+                            <th>Forma pago</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facturas-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ABONOS TAB -->
+        <div class="tab-panel" id="panel-abonos">
+            <div class="filters">
+                <input type="date" id="ab-from">
+                <input type="date" id="ab-to">
+                <button class="btn-primary" onclick="loadAbonos()">Filtrar</button>
+                <button class="btn-export" onclick="exportAbonosCSV()">Exportar CSV</button>
+            </div>
+            <div class="card" style="padding:0;overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº Abono</th>
+                            <th>Fecha</th>
+                            <th>Factura</th>
+                            <th>Cliente</th>
+                            <th>Motivo</th>
+                            <th>Base</th>
+                            <th>IVA</th>
+                            <th>Total</th>
+                            <th>Marca</th>
+                        </tr>
+                    </thead>
+                    <tbody id="abonos-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESUMEN TAB -->
+        <div class="tab-panel" id="panel-resumen">
+            <div class="filters">
+                <input type="date" id="r-from">
+                <input type="date" id="r-to">
+                <button class="btn-primary" onclick="loadResumen()">Filtrar</button>
+            </div>
+            <div id="resumen-content"></div>
+        </div>
+    </div>
+
+    <!-- ABONO MODAL -->
+    <div class="modal-overlay" id="abono-modal">
+        <div class="modal">
+            <h3>Crear Abono (Nota de crédito)</h3>
+            <form id="abono-form" onsubmit="return submitAbono(event)">
+                <input type="hidden" id="ab-invoice-id">
+                <label>Factura asociada
+                    <input type="text" id="ab-invoice-num" readonly style="background:#f5f5f5">
+                </label>
+                <label>Cliente
+                    <input type="text" id="ab-cliente" required>
+                </label>
+                <label>NIF
+                    <input type="text" id="ab-nif">
+                </label>
+                <label>Motivo *
+                    <textarea id="ab-motivo" required rows="2" placeholder="Motivo del abono..."></textarea>
+                </label>
+                <label>Importe base (sin IVA) *
+                    <input type="number" id="ab-base" step="0.01" min="0.01" required>
+                </label>
+                <label>% IVA
+                    <select id="ab-iva">
+                        <option value="21" selected>21%</option>
+                        <option value="10">10%</option>
+                        <option value="4">4%</option>
+                        <option value="0">0% (exento)</option>
+                    </select>
+                </label>
+                <label>Marca
+                    <select id="ab-brand">
+                        <option value="BF10">BF10</option>
+                        <option value="SERVISACO">SERVISACO</option>
+                        <option value="ATUSACO">ATUSACO</option>
+                        <option value="ECOSACO">ECOSACO</option>
+                    </select>
+                </label>
+                <div class="actions">
+                    <button type="submit" class="btn-primary" style="padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600">Crear abono</button>
+                    <button type="button" class="btn-secondary" style="padding:10px 20px;border:none;border-radius:6px;cursor:pointer" onclick="document.getElementById('abono-modal').style.display='none'">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div class="modal-overlay" id="payment-modal">
+        <div class="modal">
+            <h3>Actualizar estado de pago</h3>
+            <form id="payment-form" onsubmit="return submitPayment(event)">
+                <input type="hidden" id="pay-id">
+                <label>Factura: <strong id="pay-num"></strong></label>
+                <label>Estado
+                    <select id="pay-status">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="pagada">Pagada</option>
+                        <option value="parcial">Pago parcial</option>
+                    </select>
+                </label>
+                <label>Forma de pago
+                    <select id="pay-method">
+                        <option value="">—</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="domiciliacion">Domiciliación</option>
+                    </select>
+                </label>
+                <div class="actions">
+                    <button type="submit" class="btn-primary" style="padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600">Guardar</button>
+                    <button type="button" class="btn-secondary" style="padding:10px 20px;border:none;border-radius:6px;cursor:pointer" onclick="document.getElementById('payment-modal').style.display='none'">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    var API = '../api/';
+    var currentTab = 'facturas';
+
+    // Init dates
+    var now = new Date();
+    var yearStart = now.getFullYear() + '-01-01';
+    var today = now.toISOString().slice(0,10);
+    ['f-from','ab-from','r-from'].forEach(function(id) { document.getElementById(id).value = yearStart; });
+    ['f-to','ab-to','r-to'].forEach(function(id) { document.getElementById(id).value = today; });
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(function(t,i) {
+            t.className = 'tab' + (['facturas','abonos','resumen'][i] === tab ? ' tab--active' : '');
+        });
+        document.querySelectorAll('.tab-panel').forEach(function(p) { p.className = 'tab-panel'; });
+        document.getElementById('panel-' + tab).className = 'tab-panel tab-panel--active';
+
+        if (tab === 'facturas') loadFacturas();
+        else if (tab === 'abonos') loadAbonos();
+        else if (tab === 'resumen') loadResumen();
+    }
+
+    function esc(s) { var d = document.createElement('div'); d.appendChild(document.createTextNode(s||'')); return d.innerHTML; }
+    function fmt(n) { return parseFloat(n||0).toFixed(2).replace('.', ',') + ' €'; }
+
+    function badgeStatus(s) {
+        if (s === 'pagada') return '<span class="badge badge--ok">Pagada</span>';
+        if (s === 'abonada') return '<span class="badge badge--err">Abonada</span>';
+        if (s === 'parcial') return '<span class="badge badge--info">Parcial</span>';
+        return '<span class="badge badge--warn">Pendiente</span>';
+    }
+
+    // Load KPIs
+    function loadKPIs() {
+        fetch(API + 'facturacion_export.php?action=summary&from=' + yearStart + '&to=' + today)
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var html = '';
+                html += '<div class="kpi"><div class="value">' + (d.total_facturas || 0) + '</div><div class="label">Facturas</div></div>';
+                html += '<div class="kpi"><div class="value">' + fmt(d.total_facturado) + '</div><div class="label">Facturado</div></div>';
+                html += '<div class="kpi kpi--success"><div class="value">' + fmt(d.total_cobrado) + '</div><div class="label">Cobrado</div></div>';
+                html += '<div class="kpi kpi--warning"><div class="value">' + fmt(d.total_pendiente) + '</div><div class="label">Pdte. cobro</div></div>';
+                html += '<div class="kpi kpi--danger"><div class="value">' + fmt(d.total_abonos) + '</div><div class="label">Abonos</div></div>';
+                document.getElementById('kpi-row').innerHTML = html;
+            });
+    }
+
+    // Load facturas
+    function loadFacturas() {
+        var from = document.getElementById('f-from').value;
+        var to = document.getElementById('f-to').value;
+        var status = document.getElementById('f-status').value;
+        var sent = document.getElementById('f-sent').value;
+        var url = API + 'facturacion_export.php?action=list&from=' + from + '&to=' + to;
+        if (status) url += '&status=' + status;
+        if (sent) url += '&sent=' + sent;
+
+        fetch(url).then(function(r) { return r.json(); }).then(function(d) {
+            var rows = d.invoices || [];
+            var tbody = document.getElementById('facturas-body');
+            if (!rows.length) { tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:#999;padding:30px">Sin facturas</td></tr>'; return; }
+
+            tbody.innerHTML = rows.map(function(r) {
+                var abonado = parseFloat(r.total_abonado || 0);
+                var isAlbaran = !!r.albaran_code && r.albaran_code !== '';
+                var code = r.order_code || r.albaran_code || '';
+                var sentBadge = r.sent_at
+                    ? '<span class="badge badge--ok" title="' + esc(r.sent_at) + '">Enviada</span>'
+                    : '<span class="badge badge--warn">Sin enviar</span>';
+                var originBadge = isAlbaran
+                    ? '<span class="badge badge--info">Albarán</span>'
+                    : '<span class="badge" style="background:#e8f5e9;color:#2e7d32">Pedido</span>';
+                return '<tr>' +
+                    '<td><strong>' + esc(r.invoice_number) + '</strong></td>' +
+                    '<td>' + (r.issued_at||'').slice(0,10) + '</td>' +
+                    '<td>' + esc(r.cliente_nombre) + '<br><small style="color:#888">' + esc(r.email || '') + '</small></td>' +
+                    '<td>' + esc(r.cliente_nif) + '</td>' +
+                    '<td style="text-align:right">' + fmt(r.base_amount) + '</td>' +
+                    '<td style="text-align:right">' + fmt(r.iva_amount) + '</td>' +
+                    '<td style="text-align:right;font-weight:700">' + fmt(r.total_amount) + '</td>' +
+                    '<td style="text-align:right;color:#c62828">' + (abonado > 0 ? '-' + fmt(abonado) : '-') + '</td>' +
+                    '<td>' + badgeStatus(r.payment_status || 'pendiente') + '</td>' +
+                    '<td>' + sentBadge + '</td>' +
+                    '<td>' + originBadge + '</td>' +
+                    '<td>' + esc(r.payment_method || '-') + '</td>' +
+                    '<td style="white-space:nowrap">' +
+                        '<button onclick="showPaymentModal(' + r.id + ',\'' + esc(r.invoice_number) + '\',\'' + (r.payment_status||'pendiente') + '\',\'' + (r.payment_method||'') + '\')" style="padding:3px 8px;font-size:11px;border:1px solid #ddd;border-radius:4px;cursor:pointer;background:#fff" title="Estado de pago">Pago</button> ' +
+                        (!isAlbaran ? '<button onclick="resendInvoice(\'' + esc(code) + '\')" style="padding:3px 8px;font-size:11px;border:1px solid #43A047;color:#43A047;border-radius:4px;cursor:pointer;background:#fff" title="Enviar factura por email">Enviar</button> ' : '') +
+                        '<button onclick="refreshInvoiceClient(' + r.id + ')" style="padding:3px 8px;font-size:11px;border:1px solid #FF9800;color:#FF9800;border-radius:4px;cursor:pointer;background:#fff" title="Actualizar datos cliente">Datos</button> ' +
+                        '<button onclick="showAbonoModal(' + r.id + ',\'' + esc(r.invoice_number) + '\',\'' + esc(r.cliente_nombre) + '\',\'' + esc(r.cliente_nif) + '\',' + parseFloat(r.base_amount) + ',\'' + (r.brand||'BF10') + '\')" style="padding:3px 8px;font-size:11px;border:1px solid #c62828;color:#c62828;border-radius:4px;cursor:pointer;background:#fff">Abonar</button> ' +
+                        '<a href="' + API + 'invoices.php?action=download&code=' + encodeURIComponent(code) + '" target="_blank" style="padding:3px 8px;font-size:11px;border:1px solid #1565C0;color:#1565C0;border-radius:4px;text-decoration:none;display:inline-block">PDF</a>' +
+                    '</td></tr>';
+            }).join('');
+        });
+    }
+
+    // Send/resend invoice by email
+    function resendInvoice(code) {
+        if (!confirm('¿Enviar la factura por email al cliente?')) return;
+        fetch(API + 'invoices.php?action=send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            alert(d.success ? '✓ Factura enviada' : (d.error || 'Error al enviar'));
+            if (d.success) loadFacturas();
+        });
+    }
+
+    // Refresh client data on invoice
+    function refreshInvoiceClient(invoiceId) {
+        fetch(API + 'admin.php?action=invoice-refresh-client', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ invoice_id: invoiceId })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                alert('Datos del cliente actualizados' + (d.customer ? ' (' + d.customer + ')' : ''));
+                loadFacturas();
+            } else { alert(d.error || 'Error al actualizar'); }
+        });
+    }
+
+    // Load abonos
+    function loadAbonos() {
+        var from = document.getElementById('ab-from').value;
+        var to = document.getElementById('ab-to').value;
+        fetch(API + 'abonos.php?action=list&from=' + from + '&to=' + to)
+            .then(function(r) { return r.json(); }).then(function(d) {
+                var rows = d.abonos || [];
+                var tbody = document.getElementById('abonos-body');
+                if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:30px">Sin abonos</td></tr>'; return; }
+
+                tbody.innerHTML = rows.map(function(r) {
+                    return '<tr>' +
+                        '<td><strong>' + esc(r.abono_number) + '</strong></td>' +
+                        '<td>' + (r.issued_at||'').slice(0,10) + '</td>' +
+                        '<td>' + esc(r.invoice_number || '-') + '</td>' +
+                        '<td>' + esc(r.cliente) + '</td>' +
+                        '<td>' + esc(r.motivo) + '</td>' +
+                        '<td style="text-align:right">' + fmt(r.base_amount) + '</td>' +
+                        '<td style="text-align:right">' + fmt(r.iva_amount) + '</td>' +
+                        '<td style="text-align:right;font-weight:700;color:#c62828">-' + fmt(r.total_amount) + '</td>' +
+                        '<td>' + esc(r.brand) + '</td></tr>';
+                }).join('');
+            });
+    }
+
+    // Load resumen
+    function loadResumen() {
+        var from = document.getElementById('r-from').value;
+        var to = document.getElementById('r-to').value;
+        fetch(API + 'facturacion_export.php?action=summary&from=' + from + '&to=' + to)
+            .then(function(r) { return r.json(); }).then(function(d) {
+                var html = '';
+
+                // Main stats
+                html += '<div class="card"><h3>Resumen ' + from + ' a ' + to + '</h3>';
+                html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">';
+                html += '<div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#1B5E20">' + fmt(d.total_facturado) + '</div><div style="font-size:11px;color:#888">TOTAL FACTURADO</div></div>';
+                html += '<div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#43A047">' + fmt(d.total_cobrado) + '</div><div style="font-size:11px;color:#888">COBRADO</div></div>';
+                html += '<div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#E65100">' + fmt(d.total_pendiente) + '</div><div style="font-size:11px;color:#888">PENDIENTE</div></div>';
+                html += '</div>';
+
+                html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">';
+                html += '<div style="text-align:center"><div style="font-size:18px;font-weight:700">' + fmt(d.total_base) + '</div><div style="font-size:11px;color:#888">Base imponible</div></div>';
+                html += '<div style="text-align:center"><div style="font-size:18px;font-weight:700">' + fmt(d.total_iva) + '</div><div style="font-size:11px;color:#888">IVA repercutido</div></div>';
+                html += '<div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#c62828">-' + fmt(d.total_abonos) + '</div><div style="font-size:11px;color:#888">Abonos</div></div>';
+                html += '</div></div>';
+
+                // By brand
+                if (d.por_marca && d.por_marca.length) {
+                    html += '<div class="card"><h3>Por marca</h3><table><thead><tr><th>Marca</th><th style="text-align:right">Facturas</th><th style="text-align:right">Total</th></tr></thead><tbody>';
+                    d.por_marca.forEach(function(m) {
+                        html += '<tr><td><strong>' + esc(m.brand || '-') + '</strong></td><td style="text-align:right">' + m.cnt + '</td><td style="text-align:right;font-weight:600">' + fmt(m.total) + '</td></tr>';
+                    });
+                    html += '</tbody></table></div>';
+                }
+
+                // Monthly
+                if (d.mensual && d.mensual.length) {
+                    html += '<div class="card"><h3>Evolución mensual</h3><table><thead><tr><th>Mes</th><th style="text-align:right">Facturas</th><th style="text-align:right">Total</th></tr></thead><tbody>';
+                    d.mensual.forEach(function(m) {
+                        html += '<tr><td>' + m.mes + '</td><td style="text-align:right">' + m.facturas + '</td><td style="text-align:right;font-weight:600">' + fmt(m.total) + '</td></tr>';
+                    });
+                    html += '</tbody></table></div>';
+                }
+
+                document.getElementById('resumen-content').innerHTML = html;
+            });
+    }
+
+    // Modals
+    function showAbonoModal(invoiceId, invoiceNum, cliente, nif, base, brand) {
+        document.getElementById('ab-invoice-id').value = invoiceId;
+        document.getElementById('ab-invoice-num').value = invoiceNum;
+        document.getElementById('ab-cliente').value = cliente;
+        document.getElementById('ab-nif').value = nif;
+        document.getElementById('ab-base').value = base;
+        document.getElementById('ab-brand').value = brand;
+        document.getElementById('ab-motivo').value = '';
+        document.getElementById('abono-modal').style.display = 'flex';
+    }
+
+    function submitAbono(e) {
+        e.preventDefault();
+        if (!confirm('¿Crear abono? Esta acción marcará la factura como abonada.')) return false;
+
+        fetch(API + 'abonos.php?action=create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                invoice_id: parseInt(document.getElementById('ab-invoice-id').value),
+                cliente: document.getElementById('ab-cliente').value,
+                nif: document.getElementById('ab-nif').value,
+                motivo: document.getElementById('ab-motivo').value,
+                base_amount: parseFloat(document.getElementById('ab-base').value),
+                iva_rate: parseInt(document.getElementById('ab-iva').value),
+                brand: document.getElementById('ab-brand').value
+            })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                alert('Abono ' + d.abono_number + ' creado');
+                document.getElementById('abono-modal').style.display = 'none';
+                loadFacturas();
+                loadKPIs();
+            } else { alert(d.error || 'Error'); }
+        });
+        return false;
+    }
+
+    function showPaymentModal(id, num, status, method) {
+        document.getElementById('pay-id').value = id;
+        document.getElementById('pay-num').textContent = num;
+        document.getElementById('pay-status').value = status || 'pendiente';
+        document.getElementById('pay-method').value = method || '';
+        document.getElementById('payment-modal').style.display = 'flex';
+    }
+
+    function submitPayment(e) {
+        e.preventDefault();
+        fetch(API + 'facturacion_export.php?action=update-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: parseInt(document.getElementById('pay-id').value),
+                status: document.getElementById('pay-status').value,
+                method: document.getElementById('pay-method').value
+            })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                document.getElementById('payment-modal').style.display = 'none';
+                loadFacturas();
+                loadKPIs();
+            } else { alert(d.error || 'Error'); }
+        });
+        return false;
+    }
+
+    // Exports
+    function exportCSV() {
+        var from = document.getElementById('f-from').value;
+        var to = document.getElementById('f-to').value;
+        window.open(API + 'facturacion_export.php?action=csv-general&from=' + from + '&to=' + to);
+    }
+    function exportA3() {
+        var from = document.getElementById('f-from').value;
+        var to = document.getElementById('f-to').value;
+        window.open(API + 'facturacion_export.php?action=csv-a3&from=' + from + '&to=' + to);
+    }
+    function exportAbonosCSV() {
+        var from = document.getElementById('ab-from').value;
+        var to = document.getElementById('ab-to').value;
+        window.open(API + 'abonos.php?action=export-csv&from=' + from + '&to=' + to);
+    }
+
+    // Init
+    loadKPIs();
+    loadFacturas();
+    </script>
+</body>
+</html>

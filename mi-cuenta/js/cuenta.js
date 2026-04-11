@@ -111,7 +111,8 @@
         var statusLabels = {
             'pendiente_pago': 'Pendiente de pago',
             'confirmado': 'Confirmado',
-            'enviado': 'Enviado'
+            'enviado': 'Enviado',
+            'recogida': 'Recogido ♻️'
         };
 
         list.innerHTML = orders.map(function (o) {
@@ -158,22 +159,25 @@
         var statusLabels = {
             'pendiente_pago': 'Pendiente de pago',
             'confirmado': 'Confirmado',
-            'enviado': 'Enviado'
+            'enviado': 'Enviado',
+            'recogida': 'Recogido ♻️'
         };
         var statusClass = 'cuenta__order-status--' + order.status.replace('_', '-');
 
         var wantsInvoice = order.request_invoice == 1 || order.request_invoice === '1';
         var paidStr = order.paid_at ? new Date(order.paid_at).toLocaleString('es-ES') : null;
 
-        // Progress tracker: 3 steps
+        // Progress tracker: 4 steps
         var step = 1;
         if (order.status === 'confirmado') step = 2;
         if (order.status === 'enviado') step = 3;
+        if (order.status === 'recogida') step = 4;
         var tracker =
             '<div class="cuenta__tracker">' +
                 '<div class="cuenta__tracker-step' + (step >= 1 ? ' is-done' : '') + '"><span>1</span>Pedido recibido</div>' +
                 '<div class="cuenta__tracker-step' + (step >= 2 ? ' is-done' : '') + '"><span>2</span>' + (order.payment_method === 'card' ? 'Pago confirmado' : 'Transferencia recibida') + '</div>' +
-                '<div class="cuenta__tracker-step' + (step >= 3 ? ' is-done' : '') + '"><span>3</span>Sacos entregados</div>' +
+                '<div class="cuenta__tracker-step' + (step >= 3 ? ' is-done' : '') + '"><span>3</span>Sacas entregadas</div>' +
+                '<div class="cuenta__tracker-step' + (step >= 4 ? ' is-done' : '') + '"><span>4</span>Recogida y gestión</div>' +
             '</div>';
 
         body.innerHTML =
@@ -205,10 +209,51 @@
                         '<button class="cuenta__btn cuenta__btn--primary" onclick="bf10IssueAndDownload(\'' + encodeURIComponent(order.order_code) + '\')">📄 Descargar factura</button>' +
                     '</div>' +
                 '</div>' +
+                '<div class="cuenta__detail-section cuenta__detail-section--full">' +
+                    '<h3>Certificado de gestión de residuos (RCD)</h3>' +
+                    (order.certificate_issued_at
+                        ? '<p>📜 Tu certificado <strong>' + esc(order.certificate_number || '') + '</strong> ha sido emitido el ' + new Date(order.certificate_issued_at).toLocaleDateString('es-ES') + '. Te lo enviamos por email y puedes descargarlo aquí.</p>'
+                        : (parseInt(order.certificate_requested, 10) === 1
+                            ? (order.status === 'recogida'
+                                ? '<p>Estamos generando tu certificado. Estará disponible en unos minutos.</p>'
+                                : '<p>✓ Has solicitado el certificado. Lo emitiremos automáticamente cuando recojamos las sacas y te lo enviaremos por email, sin coste adicional.</p>')
+                            : '<p>Solicita el certificado oficial de gestión de residuos. Es <strong>gratis</strong> y lo necesitarás como justificante frente al ayuntamiento o cualquier inspección. Se emite automáticamente cuando recogemos las sacas.</p>')) +
+                    '<div class="cuenta__detail-actions">' +
+                        (parseInt(order.certificate_requested, 10) !== 1
+                            ? '<button class="cuenta__btn cuenta__btn--primary" onclick="bf10RequestCertificate(\'' + encodeURIComponent(order.order_code) + '\')">📜 Solicitar certificado gratis</button>'
+                            : '') +
+                        (order.certificate_issued_at
+                            ? '<a class="cuenta__btn cuenta__btn--primary" href="' + API + 'orders.php?action=download-certificate&code=' + encodeURIComponent(order.order_code) + '" target="_blank">📄 Descargar certificado</a>'
+                            : '') +
+                    '</div>' +
+                '</div>' +
             '</div>';
 
         modal.style.display = 'flex';
     }
+
+    // Request certificate of waste management
+    window.bf10RequestCertificate = function (encodedCode) {
+        var code = decodeURIComponent(encodedCode);
+        if (!confirm('¿Solicitar el certificado de gestión de residuos?\n\nEs gratis. Lo emitiremos automáticamente cuando recojamos las sacas y te lo enviaremos por email.')) return;
+        fetch(API + 'orders.php?action=request-certificate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code }),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                alert(data.message || '✓ Solicitud registrada');
+                // Reload order detail
+                viewOrder(code);
+                loadOrders();
+            } else {
+                alert(data.error || 'No se pudo registrar la solicitud');
+            }
+        })
+        .catch(function () { alert('Error de conexión'); });
+    };
 
     // Issue invoice (if missing) then download
     window.bf10IssueAndDownload = function (encodedCode) {

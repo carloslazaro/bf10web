@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Recogidas — Servisaco</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Inter,system-ui,sans-serif;background:#f5f5f5;color:#333}
+        .header{background:linear-gradient(135deg,#DA291C 0%,#B71C1C 100%);color:#fff;padding:20px;text-align:center}
+        .header h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+        .header p{font-size:12px;opacity:.8;margin-top:4px}
+
+        .container{max-width:600px;margin:0 auto;padding:16px}
+
+        /* Login by phone */
+        .phone-login{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+        .phone-login h2{font-size:16px;margin-bottom:12px;color:#333}
+        .phone-input{display:flex;gap:8px}
+        .phone-input input{flex:1;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:16px;font-family:inherit}
+        .phone-input input:focus{border-color:#DA291C;outline:none}
+        .phone-input button{padding:12px 20px;background:#DA291C;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+
+        /* Tabs */
+        .tabs{display:flex;gap:8px;margin-bottom:16px}
+        .tab{flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;background:#fff;text-align:center;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+        .tab--active{border-color:#DA291C;background:#FFF5F5;color:#DA291C}
+        .tab .count{display:block;font-size:20px;font-weight:800;margin-bottom:2px}
+
+        /* Cards */
+        .saca-card{background:#fff;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid #ddd}
+        .saca-card--pending{border-left-color:#FF9800}
+        .saca-card--enroute{border-left-color:#1565C0}
+        .saca-card--done{border-left-color:#43A047}
+        .saca-dir{font-weight:600;font-size:14px;margin-bottom:4px}
+        .saca-detail{font-size:12px;color:#666;display:flex;gap:12px;flex-wrap:wrap}
+        .saca-estado{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-top:6px}
+        .estado-pending{background:#FFF3E0;color:#E65100}
+        .estado-enroute{background:#E3F2FD;color:#1565C0}
+        .estado-done{background:#E8F5E9;color:#2E7D32}
+
+        /* Map */
+        .map-container{border-radius:12px;overflow:hidden;height:300px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+        /* Request form */
+        .request-form{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .request-form h3{font-size:15px;margin-bottom:12px}
+        .form-field{margin-bottom:12px}
+        .form-field label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px}
+        .form-field input,.form-field textarea,.form-field select{width:100%;padding:10px;border:2px solid #eee;border-radius:8px;font-size:14px;font-family:inherit}
+        .form-field input:focus,.form-field textarea:focus{border-color:#DA291C;outline:none}
+        .btn-submit{width:100%;padding:14px;background:#DA291C;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+        .btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+        .msg{padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:500;display:none}
+        .msg--ok{display:block;background:#E8F5E9;color:#2E7D32}
+        .msg--err{display:block;background:#FFEBEE;color:#C62828}
+        .empty{text-align:center;color:#999;padding:30px;font-size:13px}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Mis Recogidas</h1>
+        <p>Consulta el estado de tus sacas de escombro</p>
+    </div>
+
+    <div class="container">
+        <!-- Phone login -->
+        <div class="phone-login" id="phone-section">
+            <h2>Introduce tu teléfono</h2>
+            <div class="phone-input">
+                <input type="tel" id="phone-input" placeholder="674 783 479" maxlength="15">
+                <button onclick="checkPhone()">Ver sacas</button>
+            </div>
+        </div>
+
+        <!-- Results (hidden initially) -->
+        <div id="results-section" style="display:none">
+            <div class="tabs">
+                <div class="tab tab--active" id="tab-pending" onclick="switchTab('pending')">
+                    <span class="count" id="count-pending">0</span>
+                    Por recoger
+                </div>
+                <div class="tab" id="tab-done" onclick="switchTab('done')">
+                    <span class="count" id="count-done">0</span>
+                    Recogidas
+                </div>
+            </div>
+
+            <div id="map-container" class="map-container"></div>
+
+            <div id="saca-list"></div>
+
+            <div id="msg" class="msg"></div>
+        </div>
+
+        <!-- New request -->
+        <div class="request-form" id="request-section" style="display:none">
+            <h3>Solicitar nueva recogida</h3>
+            <form id="request-form" onsubmit="return submitRequest(event)">
+                <div class="form-field">
+                    <label>Teléfono</label>
+                    <input type="tel" id="req-tel" readonly>
+                </div>
+                <div class="form-field">
+                    <label>Nombre (opcional)</label>
+                    <input type="text" id="req-nombre" placeholder="Tu nombre">
+                </div>
+                <div class="form-field">
+                    <label>Dirección de recogida *</label>
+                    <input type="text" id="req-direccion" placeholder="Calle, número, piso..." required>
+                </div>
+                <div class="form-field">
+                    <label>Barrio / Localidad</label>
+                    <input type="text" id="req-barrio" placeholder="Ej: Chamberí, Getafe...">
+                </div>
+                <div class="form-field">
+                    <label>Nº de sacas</label>
+                    <select id="req-sacos">
+                        <option value="1">1 saca</option>
+                        <option value="2">2 sacas</option>
+                        <option value="3">3 sacas</option>
+                        <option value="4">4 sacas</option>
+                        <option value="5" selected>5 sacas</option>
+                        <option value="10">10 sacas</option>
+                        <option value="15">15 sacas</option>
+                        <option value="20">20 sacas</option>
+                        <option value="25">25 sacas</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Observaciones</label>
+                    <textarea id="req-obs" rows="2" placeholder="Portal, escalera, indicaciones..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit" id="btn-submit">Solicitar recogida</button>
+            </form>
+            <div id="req-msg" class="msg" style="margin-top:10px"></div>
+        </div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340"></script>
+    <script>
+    var API = '../api/';
+    var currentPhone = '';
+    var allStops = [];
+    var currentTab = 'pending';
+    var map = null;
+    var markers = [];
+
+    function checkPhone() {
+        var tel = document.getElementById('phone-input').value.replace(/\s/g, '');
+        if (tel.length < 9) { alert('Introduce un teléfono válido'); return; }
+        currentPhone = tel;
+        document.getElementById('req-tel').value = tel;
+
+        fetch(API + 'solicitud_recogida.php?action=mis-sacas&tel=' + encodeURIComponent(tel))
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) { alert(d.error); return; }
+
+                allStops = d.paradas || [];
+                var solicitudes = d.solicitudes_pendientes || [];
+
+                document.getElementById('count-pending').textContent = d.total_pendientes || 0;
+                document.getElementById('count-done').textContent = d.total_recogidas || 0;
+                document.getElementById('results-section').style.display = '';
+                document.getElementById('request-section').style.display = '';
+
+                initMap();
+                switchTab('pending');
+            })
+            .catch(function(err) { alert('Error: ' + err.message); });
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-pending').className = 'tab' + (tab === 'pending' ? ' tab--active' : '');
+        document.getElementById('tab-done').className = 'tab' + (tab === 'done' ? ' tab--active' : '');
+        renderList();
+        updateMapMarkers();
+    }
+
+    function renderList() {
+        var list = document.getElementById('saca-list');
+        var filtered = allStops.filter(function(s) {
+            return currentTab === 'done' ? s.is_recogida : !s.is_recogida;
+        });
+
+        if (!filtered.length) {
+            list.innerHTML = '<div class="empty">' + (currentTab === 'done' ? 'No hay recogidas recientes' : 'No tienes sacas pendientes') + '</div>';
+            return;
+        }
+
+        list.innerHTML = filtered.map(function(s) {
+            var cls = s.is_recogida ? 'done' : (s.estado_cliente === 'Estamos en camino!' ? 'enroute' : 'pending');
+            var estCls = s.is_recogida ? 'done' : (s.estado_cliente === 'Estamos en camino!' ? 'enroute' : 'pending');
+            return '<div class="saca-card saca-card--' + cls + '">' +
+                '<div class="saca-dir">' + esc(s.direccion) + '</div>' +
+                '<div class="saca-detail">' +
+                    '<span>' + (s.sacos || 1) + ' sacas</span>' +
+                    (s.barrio_cp ? '<span>' + esc(s.barrio_cp) + '</span>' : '') +
+                '</div>' +
+                '<span class="saca-estado estado-' + estCls + '">' + esc(s.estado_cliente) + '</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    function initMap() {
+        if (map) { updateMapMarkers(); return; }
+        map = new google.maps.Map(document.getElementById('map-container'), {
+            center: { lat: 40.4168, lng: -3.7038 },
+            zoom: 11,
+            disableDefaultUI: true,
+            zoomControl: true
+        });
+        updateMapMarkers();
+    }
+
+    function updateMapMarkers() {
+        markers.forEach(function(m) { m.setMap(null); });
+        markers = [];
+
+        var filtered = allStops.filter(function(s) {
+            return currentTab === 'done' ? s.is_recogida : !s.is_recogida;
+        });
+
+        var bounds = new google.maps.LatLngBounds();
+        var hasCoords = false;
+
+        filtered.forEach(function(s) {
+            if (!s.lat || !s.lng) return;
+            hasCoords = true;
+            var color = s.is_recogida ? '#43A047' : (s.estado_cliente === 'Estamos en camino!' ? '#1565C0' : '#FF9800');
+            var mkr = new google.maps.Marker({
+                position: { lat: s.lat, lng: s.lng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: color, fillOpacity: 1,
+                    strokeColor: '#fff', strokeWeight: 2,
+                    scale: 10
+                },
+                title: s.direccion
+            });
+
+            var iw = new google.maps.InfoWindow({
+                content: '<div style="font-family:Inter,sans-serif;font-size:12px;max-width:250px">' +
+                    '<strong>' + esc(s.direccion) + '</strong><br>' +
+                    '<span style="color:#666">' + (s.barrio_cp || '') + '</span><br>' +
+                    (s.sacos || 1) + ' sacas<br>' +
+                    '<span style="color:' + color + ';font-weight:700">' + esc(s.estado_cliente) + '</span>' +
+                    '</div>'
+            });
+            mkr.addListener('click', function() { iw.open(map, mkr); });
+            markers.push(mkr);
+            bounds.extend(mkr.getPosition());
+        });
+
+        if (hasCoords) map.fitBounds(bounds);
+    }
+
+    function submitRequest(e) {
+        e.preventDefault();
+        var btn = document.getElementById('btn-submit');
+        btn.disabled = true;
+
+        var payload = {
+            telefono: currentPhone,
+            nombre: document.getElementById('req-nombre').value,
+            direccion: document.getElementById('req-direccion').value,
+            barrio_cp: document.getElementById('req-barrio').value,
+            sacos: parseInt(document.getElementById('req-sacos').value),
+            observaciones: document.getElementById('req-obs').value
+        };
+
+        fetch(API + 'solicitud_recogida.php?action=crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            btn.disabled = false;
+            var msg = document.getElementById('req-msg');
+            if (d.success) {
+                msg.className = 'msg msg--ok';
+                msg.textContent = 'Solicitud registrada. Te avisaremos cuando programemos la recogida.';
+                msg.style.display = 'block';
+                document.getElementById('request-form').reset();
+                document.getElementById('req-tel').value = currentPhone;
+                // Refresh data
+                setTimeout(function() { checkPhone(); }, 1000);
+            } else {
+                msg.className = 'msg msg--err';
+                msg.textContent = d.error || 'Error al enviar solicitud';
+                msg.style.display = 'block';
+            }
+        }).catch(function() {
+            btn.disabled = false;
+            alert('Error de red');
+        });
+
+        return false;
+    }
+
+    function esc(s) {
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(s || ''));
+        return d.innerHTML;
+    }
+
+    // Auto-focus phone input
+    document.getElementById('phone-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') checkPhone();
+    });
+    </script>
+</body>
+</html>

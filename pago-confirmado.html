@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago procesado — BF10</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .confirm-page {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: var(--color-bg-alt); padding: 20px;
+        }
+        .confirm-card {
+            background: var(--color-bg); border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl); padding: 48px 36px; max-width: 480px;
+            text-align: center; box-shadow: var(--shadow-md);
+        }
+        .confirm-icon { font-size: 3.5rem; margin-bottom: 16px; }
+        .confirm-title { font-size: 1.4rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px; }
+        .confirm-code { font-size: 1.1rem; font-weight: 600; color: var(--color-green); margin-bottom: 16px; }
+        .confirm-text { color: var(--color-text-light); font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px; }
+        .confirm-wa-btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: #25D366; color: white; font-size: 1rem; font-weight: 700;
+            padding: 14px 28px; border-radius: var(--radius); text-decoration: none;
+            font-family: var(--font-family); transition: background var(--transition);
+        }
+        .confirm-wa-btn:hover { background: #1ebe57; }
+        .confirm-wa-btn svg { width: 22px; height: 22px; fill: white; }
+        .confirm-cancel .confirm-icon { font-size: 3rem; }
+        .confirm-cancel .confirm-title { color: var(--color-accent); }
+    </style>
+</head>
+<body>
+    <div class="confirm-page">
+        <div class="confirm-card" id="card">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+    <script>
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code') || '';
+        const isCancelled = params.get('status') === 'cancel';
+        const card = document.getElementById('card');
+        const waIcon = '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.609.609l4.458-1.495A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.37 0-4.567-.82-6.293-2.188l-.44-.364-2.93.982.982-2.93-.364-.44A9.962 9.962 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>';
+
+        if (isCancelled) {
+            card.classList.add('confirm-cancel');
+            card.innerHTML =
+                '<div class="confirm-icon">&#10060;</div>' +
+                '<div class="confirm-title">Pago cancelado</div>' +
+                (code ? '<div class="confirm-code">Pedido: ' + code + '</div>' : '') +
+                '<p class="confirm-text">No se ha realizado ning\u00fan cargo. Tu pedido sigue pendiente de pago. Puedes volver a intentarlo desde WhatsApp.</p>' +
+                '<a href="https://wa.me/34674783479?text=menu" class="confirm-wa-btn">' + waIcon + ' Volver a WhatsApp</a>';
+        } else {
+            card.innerHTML =
+                '<div class="confirm-icon">&#9989;</div>' +
+                '<div class="confirm-title">Pago confirmado</div>' +
+                (code ? '<div class="confirm-code">Pedido: ' + code + '</div>' : '') +
+                '<p class="confirm-text">Hemos recibido tu pago correctamente. Te enviaremos la confirmaci\u00f3n por WhatsApp en unos instantes. Puedes cerrar esta p\u00e1gina.</p>' +
+                '<a href="https://wa.me/34674783479?text=menu" class="confirm-wa-btn">' + waIcon + ' Volver a WhatsApp</a>';
+        }
+    })();
+    </script>
+</body>
+</html>

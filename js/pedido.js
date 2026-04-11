@@ -37,9 +37,9 @@
     })();
 
     const packages = {
-        10: { name: '10 sacos', price: 450.00 },
-        25: { name: '25 sacos', price: 1050.00 },
-        50: { name: '50 sacos', price: 2000.00 },
+        10: { name: '10 sacas', price: 450.00 },
+        25: { name: '25 sacas', price: 1012.50 },
+        50: { name: '50 sacas', price: 1912.50 },
     };
 
     // Elements
