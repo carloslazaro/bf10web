@@ -3,112 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#DA291C">
+  <meta name="theme-color" content="#111">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>BF10 Comercial</title>
   <link rel="manifest" href="/manifest-comercial.json">
   <link rel="apple-touch-icon" href="/img/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --black: #111; --dark: #1a1a1a; --card: #222; --border: #333;
-      --red: #DA291C; --green: #00A651; --blue: #3B82F6; --yellow: #EAB308;
-      --orange: #F97316; --gray: #777; --light: #ccc; --white: #fff;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--black); color:var(--white); min-height:100vh; }
+    :root{--font:'Inter',system-ui,sans-serif;--black:#111;--red:#DA291C;--green:#00A651;--blue:#1565C0;--border:#e0e0e0;--bg:#f5f5f5;--white:#fff;--text:#333;--text-light:#777;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.08)}
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
 
-    .screen { display:none; }
-    .screen.active { display:flex; flex-direction:column; min-height:100vh; }
+    .screen{display:none}.screen.active{display:flex;flex-direction:column;min-height:100vh}
 
     /* ═ Login ═ */
-    #loginScreen { align-items:center; justify-content:center; padding:40px 20px; text-align:center; }
-    #loginScreen img { width:80px; margin-bottom:20px; border-radius:16px; }
-    #loginScreen h1 { font-size:22px; margin-bottom:4px; }
-    #loginScreen h1 span { color:var(--red); }
-    #loginScreen .sub { color:var(--gray); font-size:13px; margin-bottom:32px; }
-    .user-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; max-width:340px; }
-    .user-btn { background:var(--dark); border:1px solid var(--border); border-radius:10px; padding:14px 8px; color:var(--white); font-size:14px; font-weight:600; cursor:pointer; }
-    .user-btn:active { background:var(--red); border-color:var(--red); }
+    #loginScreen{align-items:center;justify-content:center;padding:40px 20px;text-align:center;background:var(--black)}
+    #loginScreen img{width:80px;margin-bottom:20px;border-radius:16px}
+    #loginScreen h1{font-size:22px;color:#fff}
+    #loginScreen h1 span{color:var(--red)}
+    #loginScreen .sub{color:#888;font-size:13px;margin-bottom:32px}
+    .user-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:340px}
+    .user-btn{background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px 8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)}
+    .user-btn:active{background:var(--red);border-color:var(--red)}
 
     /* ═ PIN ═ */
-    .pin-dots { display:flex; gap:12px; margin-bottom:12px; }
-    .pin-dot { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); }
-    .pin-dot.filled { background:var(--red); border-color:var(--red); }
-    .pin-error { color:var(--red); font-size:13px; min-height:20px; margin-bottom:16px; }
-    .pin-pad { display:grid; grid-template-columns:repeat(3,72px); gap:10px; }
-    .pin-pad button { width:72px; height:54px; border-radius:10px; border:1px solid var(--border); background:var(--dark); color:var(--white); font-size:22px; font-weight:600; cursor:pointer; }
-    .pin-pad button:active { background:var(--red); border-color:var(--red); }
-    .pin-empty { visibility:hidden; }
+    #pinScreen{background:var(--black);color:#fff}
+    .pin-hdr{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #333}
+    .btn-back{background:none;border:1px solid #333;color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .pin-dots{display:flex;gap:12px;margin-bottom:12px}
+    .pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid #333}
+    .pin-dot.filled{background:var(--red);border-color:var(--red)}
+    .pin-error{color:var(--red);font-size:13px;min-height:20px;margin-bottom:16px}
+    .pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+    .pin-pad button{width:72px;height:54px;border-radius:10px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:22px;font-weight:600;cursor:pointer;font-family:var(--font)}
+    .pin-pad button:active{background:var(--red);border-color:var(--red)}
+    .pin-empty{visibility:hidden}
 
-    /* ═ Header ═ */
-    .hdr { background:var(--dark); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid var(--red); position:sticky; top:0; z-index:100; }
-    .hdr-name { font-size:16px; font-weight:700; color:var(--red); }
-    .btn-sm { background:none; border:1px solid var(--border); color:var(--gray); padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; }
-    .btn-back { background:none; border:1px solid var(--border); color:var(--white); width:36px; height:36px; border-radius:8px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    /* ═ Main app (light theme, admin style) ═ */
+    .app-header{background:var(--black);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .app-header__name{font-size:16px;font-weight:800}
+    .app-header__actions{display:flex;gap:8px;align-items:center}
+    .btn-sm{background:rgba(255,255,255,.15);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
+    .btn-sm:hover{background:rgba(255,255,255,.25)}
 
-    /* ═ Stats ═ */
-    .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; }
-    .stat { background:var(--dark); border-radius:10px; padding:12px; text-align:center; }
-    .stat .val { font-size:20px; font-weight:700; }
-    .stat .lbl { font-size:10px; color:var(--gray); text-transform:uppercase; margin-top:2px; }
-    .stat .val.red { color:var(--red); }
-    .stat .val.green { color:var(--green); }
-    .stat .val.blue { color:var(--blue); }
+    /* Stats */
+    .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;max-width:900px;margin:0 auto;width:100%}
+    .stat-card{background:var(--white);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow);border-top:3px solid var(--border)}
+    .stat-card--blue{border-top-color:var(--blue)}.stat-card--green{border-top-color:var(--green)}.stat-card--red{border-top-color:var(--red)}
+    .stat-val{font-size:24px;font-weight:800;color:var(--black)}
+    .stat-lbl{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 
-    /* ═ Filters ═ */
-    .filters { padding:8px 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .filter-input { background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--white); padding:6px 10px; font-size:13px; font-family:inherit; }
-    .filter-select { appearance:none; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--white); padding:6px 10px; font-size:13px; }
+    /* Filters */
+    .filter-bar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;max-width:900px;margin:0 auto;width:100%;align-items:center}
+    .filter-bar input,.filter-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font)}
+    .filter-bar .btn-new{background:var(--green);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)}
+    .filter-bar .btn-new:hover{background:#008c44}
 
-    /* ═ Albaran list ═ */
-    .alb-list { flex:1; padding:10px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; padding-bottom:80px; }
-    .alb-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 14px; cursor:pointer; }
-    .alb-card:active { border-color:var(--red); }
-    .alb-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
-    .alb-code { font-size:13px; font-weight:700; color:var(--blue); }
-    .alb-date { font-size:11px; color:var(--gray); }
-    .alb-client { font-size:15px; font-weight:600; margin-bottom:6px; }
-    .alb-meta { display:flex; flex-wrap:wrap; gap:6px; font-size:11px; }
-    .alb-meta .badge { background:var(--dark); padding:2px 8px; border-radius:6px; font-weight:600; }
-    .badge.sacas { color:var(--blue); }
-    .badge.marca { color:var(--yellow); }
-    .badge.importe { color:var(--green); }
-    .badge.pagado-si { color:var(--green); background:rgba(0,166,81,0.15); }
-    .badge.pagado-no { color:var(--red); background:rgba(218,41,28,0.15); }
-    .badge.pago { color:var(--light); }
+    /* Table */
+    .table-wrap{max-width:900px;margin:0 auto;padding:0 16px 40px;width:100%}
+    .data-table{width:100%;border-collapse:collapse;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .data-table th{background:var(--black);color:#fff;padding:10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+    .data-table td{padding:10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top}
+    .data-table tr:hover td{background:rgba(0,166,81,.03)}
+    .data-table td small{color:var(--text-light);font-size:11px}
+    .empty-msg{text-align:center;padding:40px;color:var(--text-light)}
 
-    /* ═ FAB (create button) ═ */
-    .fab { position:fixed; bottom:24px; right:20px; width:56px; height:56px; background:var(--red); border:none; border-radius:50%; color:var(--white); font-size:28px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:90; display:flex; align-items:center; justify-content:center; }
-    .fab:active { opacity:0.8; }
+    /* Badges */
+    .badge-paid{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+    .badge-paid--yes{background:#d1fae5;color:#065f46}.badge-paid--no{background:#fef3c7;color:#92400e}
 
-    /* ═ Form ═ */
-    .form-body { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; overflow-y:auto; padding-bottom:100px; }
-    .fg { display:flex; flex-direction:column; gap:5px; }
-    .fg label { font-size:11px; font-weight:600; color:var(--gray); text-transform:uppercase; letter-spacing:.5px; }
-    .fg input, .fg select, .fg textarea { background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--white); padding:10px 14px; font-size:15px; font-family:inherit; width:100%; }
-    .fg input:focus, .fg select:focus, .fg textarea:focus { outline:none; border-color:var(--blue); }
-    .fg select { appearance:none; }
-    .fg-row { display:flex; gap:10px; }
-    .fg-row .fg { flex:1; }
-    .chk-row { display:flex; align-items:center; gap:10px; }
-    .chk-row input[type=checkbox] { width:20px; height:20px; accent-color:var(--green); }
+    /* Action buttons */
+    .btn-action{padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--white);font-family:var(--font);font-size:12px;cursor:pointer}
+    .btn-action--edit{color:var(--blue);border-color:var(--blue)}.btn-action--edit:hover{background:var(--blue);color:#fff}
+    .btn-action--del{color:#c62828;border-color:#c62828}.btn-action--del:hover{background:#c62828;color:#fff}
 
-    .save-bar { position:fixed; bottom:0; left:0; right:0; background:var(--dark); border-top:1px solid var(--border); padding:12px 16px max(12px,env(safe-area-inset-bottom)); z-index:100; display:flex; gap:10px; }
-    .btn-save { flex:1; padding:14px; background:var(--green); border:none; border-radius:10px; color:var(--white); font-size:16px; font-weight:700; cursor:pointer; }
-    .btn-save:active { opacity:.8; }
-    .btn-save.saving { background:var(--gray); pointer-events:none; }
-    .btn-del { padding:14px 18px; background:var(--red); border:none; border-radius:10px; color:var(--white); font-size:14px; font-weight:700; cursor:pointer; }
+    /* ═ Modal ═ */
+    .modal{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center}
+    .modal.open{display:flex}
+    .modal__overlay{position:absolute;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(6px)}
+    .modal__content{position:relative;background:var(--white);border-radius:16px;max-width:640px;width:92%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.18)}
+    .modal__header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px 0}
+    .modal__header h2{font-size:18px;font-weight:800;color:var(--black)}
+    .modal__close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-light);padding:4px}
+    .modal__body{padding:20px 24px 24px}
 
-    /* ═ Empty / Loading ═ */
-    .empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gray); text-align:center; padding:40px 20px; }
-    .empty .icon { font-size:48px; margin-bottom:12px; }
-    .loading { flex:1; display:flex; align-items:center; justify-content:center; }
-    .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--red); border-radius:50%; animation:spin .8s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    /* Form */
+    .form-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+    .form-row label{flex:1;min-width:180px;display:flex;flex-direction:column;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.3px;gap:4px}
+    .form-row label.wide{flex:1 1 100%}
+    .form-row input,.form-row select,.form-row textarea{padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:var(--font);color:var(--text);font-weight:400}
+    .form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,166,81,.1)}
+    .form-row textarea{resize:vertical}
+    .toggle-check{flex-direction:row!important;align-items:center!important;gap:8px!important;align-self:end}
+    .toggle-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--green)}
+    .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+    .btn-cancel{padding:10px 20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);font-family:var(--font);font-size:14px;cursor:pointer;color:var(--text)}
+    .btn-save{padding:10px 24px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer}
+    .btn-save:hover{background:#008c44}
+    .form-error{color:#c62828;font-size:13px;margin-bottom:8px;display:none}
+    .form-divider{border:none;border-top:1px solid #eee;margin:8px 0}
 
-    .install-banner { display:none; background:var(--red); padding:14px 20px; text-align:center; cursor:pointer; font-weight:600; font-size:14px; color:var(--white); }
-    .install-banner.show { display:block; }
+    /* Client dropdown */
+    .client-search-wrap{position:relative}
+    .client-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:0 0 6px 6px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:10;max-height:240px;overflow-y:auto}
+    .client-dropdown-item{padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5}
+    .client-dropdown-item:hover{background:#f0faf0}
+    .client-dropdown-item small{display:block;color:var(--text-light);font-size:11px}
+    .client-dropdown-item--new{color:var(--green);font-weight:600;border-bottom:none}
+
+    /* Install banner */
+    .install-banner{display:none;background:var(--red);padding:12px 20px;text-align:center;cursor:pointer;font-weight:600;font-size:14px;color:#fff}
+    .install-banner.show{display:block}
+
+    @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}.form-row label{min-width:140px}.data-table{font-size:12px}.data-table th,.data-table td{padding:8px 6px}}
   </style>
 </head>
 <body>
@@ -125,13 +133,12 @@
 
   <!-- ═ PIN ═ -->
   <div id="pinScreen" class="screen">
-    <div class="hdr">
+    <div class="pin-hdr">
       <button class="btn-back" onclick="showScreen('loginScreen')">&#8592;</button>
-      <span id="pinName"></span>
-      <span></span>
+      <span id="pinName" style="font-weight:700"></span>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center">
-      <p style="color:var(--gray);font-size:13px;margin-bottom:20px">Introduce tu PIN de 4 digitos</p>
+      <p style="color:#888;font-size:13px;margin-bottom:20px">Introduce tu PIN de 4 digitos</p>
       <div class="pin-dots" id="pinDots"><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
       <p class="pin-error" id="pinError"></p>
       <div class="pin-pad">
@@ -143,75 +150,153 @@
     </div>
   </div>
 
-  <!-- ═ MAIN (list) ═ -->
+  <!-- ═ MAIN APP ═ -->
   <div id="mainScreen" class="screen">
-    <div class="hdr">
-      <span class="hdr-name" id="mainName"></span>
-      <button class="btn-sm" onclick="logout()">Salir</button>
+    <div class="app-header">
+      <span class="app-header__name" id="mainName">Comercial</span>
+      <div class="app-header__actions">
+        <button class="btn-sm" onclick="logout()">Salir</button>
+      </div>
     </div>
-    <div class="stats" id="statsBar">
-      <div class="stat"><div class="val blue" id="stTotal">0</div><div class="lbl">Albaranes</div></div>
-      <div class="stat"><div class="val" id="stSacas">0</div><div class="lbl">Sacas</div></div>
-      <div class="stat"><div class="val green" id="stImporte">0</div><div class="lbl">Importe</div></div>
-      <div class="stat"><div class="val red" id="stPagados">0</div><div class="lbl">Pagados</div></div>
+
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card stat-card--blue"><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Albaranes</div></div>
+      <div class="stat-card"><div class="stat-val" id="stSacas">0</div><div class="stat-lbl">Sacas</div></div>
+      <div class="stat-card stat-card--green"><div class="stat-val" id="stImporte">0 &euro;</div><div class="stat-lbl">Importe</div></div>
+      <div class="stat-card stat-card--red"><div class="stat-val" id="stPagados">0/0</div><div class="stat-lbl">Pagados</div></div>
     </div>
-    <div class="filters">
-      <input type="date" class="filter-input" id="fDesde" placeholder="Desde">
-      <input type="date" class="filter-input" id="fHasta" placeholder="Hasta">
-      <select class="filter-select" id="fPagado">
+
+    <div class="filter-bar">
+      <button class="btn-new" onclick="openModal(null)">+ Nuevo albaran</button>
+      <input type="date" id="fDesde">
+      <input type="date" id="fHasta">
+      <select id="fPagado">
         <option value="">Todos</option>
         <option value="1">Pagados</option>
         <option value="0">Pendientes</option>
       </select>
     </div>
-    <div class="alb-list" id="albList"><div class="loading"><div class="spinner"></div></div></div>
-    <button class="fab" onclick="openForm(null)">+</button>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Codigo</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Marca</th>
+            <th>Sacas</th>
+            <th>Importe</th>
+            <th>Pagado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="albBody"></tbody>
+      </table>
+      <div class="empty-msg" id="albEmpty" style="display:none">No hay albaranes</div>
+    </div>
   </div>
 
-  <!-- ═ FORM (create/edit) ═ -->
-  <div id="formScreen" class="screen">
-    <div class="hdr">
-      <button class="btn-back" onclick="closeForm()">&#8592;</button>
-      <span id="formTitle">Nuevo Albaran</span>
-      <span></span>
-    </div>
-    <div class="form-body" id="formBody"></div>
-    <div class="save-bar" id="formSaveBar">
-      <button class="btn-save" id="btnSave" onclick="saveAlbaran()">Guardar</button>
+  <!-- ═ MODAL ═ -->
+  <div class="modal" id="albModal">
+    <div class="modal__overlay" onclick="closeModal()"></div>
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 id="modalTitle">Nuevo albaran</h2>
+        <button class="modal__close" onclick="closeModal()">&times;</button>
+      </div>
+      <form class="modal__body" id="albForm">
+        <input type="hidden" id="f-id">
+        <div class="form-row">
+          <label>Cliente *
+            <div class="client-search-wrap">
+              <input type="text" id="f-cliente" required autocomplete="off" placeholder="Buscar cliente...">
+              <input type="hidden" id="f-cliente-id">
+              <div id="clientDropdown" class="client-dropdown" style="display:none"></div>
+            </div>
+          </label>
+          <label>Fecha entrega *<input type="date" id="f-fecha" required></label>
+        </div>
+        <div class="form-row">
+          <label class="wide">Direccion de envio<input type="text" id="f-direccion" placeholder="Calle, numero, ciudad..."></label>
+        </div>
+        <div class="form-row">
+          <label>Marca
+            <select id="f-marca">
+              <option value="BF10">BF10</option>
+              <option value="SERVISACO">Servisaco</option>
+              <option value="ATUSACO">Atusaco</option>
+              <option value="ATUSACO_LUISFER">Atusaco Luisfer</option>
+              <option value="ATUSACO_HERREROCON">Atusaco Herrerocon</option>
+              <option value="ATUSACO_COSASCASA">Atusaco Cosas Casa</option>
+              <option value="ECOSACO">Eco Saco</option>
+              <option value="SACAS_BLANCAS">Sacas Blancas</option>
+            </select>
+          </label>
+          <label>N sacas *<input type="number" id="f-sacas" min="1" required></label>
+        </div>
+        <div class="form-row">
+          <label>Numeracion inicial<input type="number" id="f-num-ini" min="0"></label>
+          <label>Numeracion final<input type="number" id="f-num-fin" min="0"></label>
+        </div>
+        <div class="form-row">
+          <label>Precio por saca (EUR)<input type="number" id="f-precio" min="0" step="0.01"></label>
+          <label>Importe total (EUR)<input type="number" id="f-importe" min="0" step="0.01" readonly></label>
+        </div>
+        <hr class="form-divider">
+        <div class="form-row">
+          <label>Forma de pago
+            <select id="f-pago">
+              <option value="pendiente">Pendiente</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+          </label>
+          <label class="toggle-check">
+            <input type="checkbox" id="f-pagado"> Pagado
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="wide">Comentarios<textarea id="f-comentarios" rows="2"></textarea></label>
+        </div>
+        <p class="form-error" id="formError"></p>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
 
 <script>
-  const API = '/api/comercial_app.php';
-  const MARCAS = ['BF10','SERVISACO','ATUSACO','ATUSACO_LUISFER','ATUSACO_HERREROCON','ATUSACO_COSASCASA','ECOSACO','SACAS_BLANCAS'];
-  const PAGOS = ['pendiente','efectivo','tarjeta','transferencia'];
+  var API = '/api/comercial_app.php';
+  var currentUser = null;
+  var albaranes = [];
+  var editingId = null;
+  var clientSearchTimer = null;
 
-  let currentUser = null; // {nombre, user_id}
-  let albaranes = [];
-  let editingId = null;
-
-  // ══ INIT ══
-  document.addEventListener('DOMContentLoaded', () => {
-    loadUsers();
-    document.getElementById('fDesde').addEventListener('change', loadAlbaranes);
-    document.getElementById('fHasta').addEventListener('change', loadAlbaranes);
-    document.getElementById('fPagado').addEventListener('change', loadAlbaranes);
-  });
-
-  // ══ LOGIN ══
-  async function loadUsers() {
-    try {
-      const res = await fetch(`${API}?action=comerciales`);
-      const data = await res.json();
-      document.getElementById('userGrid').innerHTML = data.comerciales.map(n =>
-        `<button class="user-btn" onclick="selectUser('${esc(n)}')">${esc(n)}</button>`
-      ).join('');
-    } catch(e) {
-      document.getElementById('userGrid').innerHTML = '<p style="color:var(--red);grid-column:1/-1">Error</p>';
-    }
+  // ══ SCREENS ══
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
   }
 
-  let pinValue = '', pinTarget = '';
+  // ══ LOGIN ══
+  function loadUsers() {
+    fetch(API + '?action=comerciales')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        document.getElementById('userGrid').innerHTML = (data.comerciales || []).map(function(n) {
+          return '<button class="user-btn" onclick="selectUser(\'' + esc(n).replace(/'/g, "\\'") + '\')">' + esc(n) + '</button>';
+        }).join('');
+      })
+      .catch(function() {
+        document.getElementById('userGrid').innerHTML = '<p style="color:var(--red);grid-column:1/-1">Error de conexion</p>';
+      });
+  }
+
+  var pinValue = '', pinTarget = '';
 
   function selectUser(name) {
     pinTarget = name;
@@ -223,151 +308,202 @@
   }
 
   function pinKey(d) { if (pinValue.length >= 4) return; pinValue += d; updatePinDots(); if (pinValue.length === 4) verifyPin(); }
-  function pinDelete() { pinValue = pinValue.slice(0,-1); document.getElementById('pinError').textContent = ''; updatePinDots(); }
-  function updatePinDots() { document.querySelectorAll('#pinDots .pin-dot').forEach((d,i) => d.classList.toggle('filled', i < pinValue.length)); }
+  function pinDelete() { pinValue = pinValue.slice(0, -1); document.getElementById('pinError').textContent = ''; updatePinDots(); }
+  function updatePinDots() { document.querySelectorAll('#pinDots .pin-dot').forEach(function(d, i) { d.classList.toggle('filled', i < pinValue.length); }); }
 
-  async function verifyPin() {
-    try {
-      const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'login', nombre:pinTarget, pin:pinValue}) });
-      const data = await res.json();
-      if (data.ok) {
-        currentUser = { nombre: data.nombre, user_id: data.user_id };
-        document.getElementById('mainName').textContent = data.nombre;
-        showScreen('mainScreen');
-        loadAlbaranes();
-      } else {
-        document.getElementById('pinError').textContent = 'PIN incorrecto';
-        pinValue = ''; updatePinDots();
-      }
-    } catch(e) { document.getElementById('pinError').textContent = 'Error de conexion'; pinValue = ''; updatePinDots(); }
+  function verifyPin() {
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', nombre: pinTarget, pin: pinValue }) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          currentUser = { nombre: data.nombre, user_id: data.user_id };
+          document.getElementById('mainName').textContent = data.nombre;
+          showScreen('mainScreen');
+          loadAlbaranes();
+        } else {
+          document.getElementById('pinError').textContent = 'PIN incorrecto';
+          pinValue = ''; updatePinDots();
+        }
+      })
+      .catch(function() { document.getElementById('pinError').textContent = 'Error de conexion'; pinValue = ''; updatePinDots(); });
   }
 
   function logout() { currentUser = null; showScreen('loginScreen'); }
 
   // ══ ALBARANES LIST ══
-  async function loadAlbaranes() {
-    const list = document.getElementById('albList');
-    list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-
-    const params = new URLSearchParams({ action:'list' });
-    const desde = document.getElementById('fDesde').value;
-    const hasta = document.getElementById('fHasta').value;
-    const pagado = document.getElementById('fPagado').value;
+  function loadAlbaranes() {
+    var params = new URLSearchParams({ action: 'list', user_id: currentUser.user_id });
+    var desde = document.getElementById('fDesde').value;
+    var hasta = document.getElementById('fHasta').value;
+    var pagado = document.getElementById('fPagado').value;
     if (desde) params.set('desde', desde);
     if (hasta) params.set('hasta', hasta);
     if (pagado !== '') params.set('pagado', pagado);
 
-    try {
-      const res = await fetch(`${API}?${params}`);
-      const data = await res.json();
-      albaranes = data.albaranes || [];
-
-      const s = data.stats || {};
-      document.getElementById('stTotal').textContent = s.count || 0;
-      document.getElementById('stSacas').textContent = s.sacas || 0;
-      document.getElementById('stImporte').textContent = (s.importe || 0).toFixed(2) + ' \u20ac';
-      document.getElementById('stPagados').textContent = `${s.pagados || 0}/${s.count || 0}`;
-
-      renderAlbaranes();
-    } catch(e) {
-      list.innerHTML = '<div class="empty"><div class="icon">&#9888;</div><p>Error de conexion</p></div>';
-    }
+    fetch(API + '?' + params)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        albaranes = data.albaranes || [];
+        var s = data.stats || {};
+        document.getElementById('stTotal').textContent = s.count || 0;
+        document.getElementById('stSacas').textContent = s.sacas || 0;
+        document.getElementById('stImporte').textContent = (s.importe || 0).toFixed(2) + ' \u20ac';
+        document.getElementById('stPagados').textContent = (s.pagados || 0) + '/' + (s.count || 0);
+        renderTable();
+      })
+      .catch(function() {
+        document.getElementById('albBody').innerHTML = '<tr><td colspan="8" class="empty-msg">Error de conexion</td></tr>';
+      });
   }
 
-  function renderAlbaranes() {
-    const list = document.getElementById('albList');
-    if (!albaranes.length) {
-      list.innerHTML = '<div class="empty"><div class="icon">&#128196;</div><p>No hay albaranes</p></div>';
+  function renderTable() {
+    var tbody = document.getElementById('albBody');
+    var empty = document.getElementById('albEmpty');
+    if (!albaranes.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+    empty.style.display = 'none';
+
+    var pagoLabels = { pendiente: 'Pendiente', efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transfer.' };
+
+    tbody.innerHTML = albaranes.map(function(a) {
+      var paid = a.pagado == 1;
+      return '<tr>' +
+        '<td><strong>' + esc(a.albaran_code) + '</strong></td>' +
+        '<td>' + formatDate(a.fecha_entrega) + '</td>' +
+        '<td>' + esc(a.cliente) + (a.direccion_envio ? '<br><small>' + esc(a.direccion_envio) + '</small>' : '') + '</td>' +
+        '<td>' + esc(a.marca) + '</td>' +
+        '<td style="text-align:center">' + a.num_sacas + '</td>' +
+        '<td>' + parseFloat(a.importe || 0).toFixed(2) + ' \u20ac<br><small>' + (pagoLabels[a.forma_pago] || a.forma_pago) + '</small></td>' +
+        '<td><span class="badge-paid badge-paid--' + (paid ? 'yes' : 'no') + '">' + (paid ? 'Si' : 'No') + '</span></td>' +
+        '<td>' +
+          '<button class="btn-action btn-action--edit" onclick="openEdit(' + a.id + ')">Editar</button> ' +
+          '<button class="btn-action btn-action--del" onclick="deleteAlb(' + a.id + ')">Eliminar</button>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ══ MODAL ══
+  function openModal(data) {
+    editingId = data ? data.id : null;
+    document.getElementById('modalTitle').textContent = data ? 'Editar albaran' : 'Nuevo albaran';
+    document.getElementById('formError').style.display = 'none';
+    document.getElementById('f-id').value = data ? data.id : '';
+    document.getElementById('f-cliente').value = data ? data.cliente : '';
+    document.getElementById('f-cliente-id').value = data ? (data.customer_id || '') : '';
+    document.getElementById('clientDropdown').style.display = 'none';
+    document.getElementById('f-direccion').value = data ? (data.direccion_envio || '') : '';
+    document.getElementById('f-fecha').value = data ? data.fecha_entrega : new Date().toISOString().split('T')[0];
+    document.getElementById('f-marca').value = data ? data.marca : 'BF10';
+    document.getElementById('f-sacas').value = data ? data.num_sacas : '';
+    document.getElementById('f-num-ini').value = data ? (data.numeracion_inicial || '') : '';
+    document.getElementById('f-num-fin').value = data ? (data.numeracion_final || '') : '';
+    document.getElementById('f-precio').value = data ? (data.precio || '') : '';
+    document.getElementById('f-importe').value = data ? data.importe : '';
+    document.getElementById('f-pago').value = data ? data.forma_pago : 'pendiente';
+    document.getElementById('f-pagado').checked = data ? data.pagado == 1 : false;
+    document.getElementById('f-comentarios').value = data ? (data.comentarios || '') : '';
+    document.getElementById('albModal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('albModal').classList.remove('open'); }
+
+  function openEdit(id) {
+    var a = albaranes.find(function(x) { return x.id == id; });
+    if (a) openModal(a);
+  }
+
+  // ══ CLIENT SEARCH ══
+  var clientInput = document.getElementById('f-cliente');
+  var clientIdInput = document.getElementById('f-cliente-id');
+  var clientDropdown = document.getElementById('clientDropdown');
+
+  clientInput.addEventListener('input', function() {
+    clearTimeout(clientSearchTimer);
+    clientIdInput.value = '';
+    var q = this.value.trim();
+    if (q.length < 2) { clientDropdown.style.display = 'none'; return; }
+    clientSearchTimer = setTimeout(function() {
+      fetch(API + '?action=customers&q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var customers = data.customers || [];
+          var html = '';
+          customers.forEach(function(c) {
+            var detail = [c.phone, c.email, c.nif].filter(Boolean).join(' \u00b7 ');
+            html += '<div class="client-dropdown-item" data-id="' + c.id + '" data-name="' + escAttr(c.name) + '">' +
+              esc(c.name) + (detail ? '<small>' + esc(detail) + '</small>' : '') + '</div>';
+          });
+          html += '<div class="client-dropdown-item client-dropdown-item--new" id="clientNew">+ Dar de alta nuevo cliente</div>';
+          clientDropdown.innerHTML = html;
+          clientDropdown.style.display = '';
+        });
+    }, 250);
+  });
+
+  clientDropdown.addEventListener('click', function(e) {
+    var item = e.target.closest('.client-dropdown-item');
+    if (!item) return;
+    if (item.id === 'clientNew') {
+      var nombre = prompt('Nombre del nuevo cliente:');
+      if (!nombre || !nombre.trim()) return;
+      fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'customer-create', name: nombre.trim() }) })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            clientInput.value = data.name;
+            clientIdInput.value = data.id;
+            clientDropdown.style.display = 'none';
+          } else { alert(data.error || 'Error al crear cliente'); }
+        });
       return;
     }
-    list.innerHTML = albaranes.map(a => `
-      <div class="alb-card" onclick="openForm(${a.id})">
-        <div class="alb-top">
-          <span class="alb-code">${esc(a.albaran_code)}</span>
-          <span class="alb-date">${formatDate(a.fecha_entrega)}</span>
-        </div>
-        <div class="alb-client">${esc(a.cliente)}</div>
-        <div class="alb-meta">
-          <span class="badge sacas">Sacas: ${a.num_sacas}</span>
-          <span class="badge marca">${esc(a.marca)}</span>
-          <span class="badge importe">${parseFloat(a.importe).toFixed(2)}\u20ac</span>
-          <span class="badge ${a.pagado == 1 ? 'pagado-si' : 'pagado-no'}">${a.pagado == 1 ? 'Pagado' : 'Pendiente'}</span>
-          <span class="badge pago">${esc(a.forma_pago)}</span>
-          ${a.comercial_name ? `<span class="badge">${esc(a.comercial_name)}</span>` : ''}
-        </div>
-      </div>
-    `).join('');
+    clientInput.value = item.dataset.name;
+    clientIdInput.value = item.dataset.id;
+    clientDropdown.style.display = 'none';
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.client-search-wrap')) clientDropdown.style.display = 'none';
+  });
+
+  // ══ PRICE CALC ══
+  function calcImporte() {
+    var precio = parseFloat(document.getElementById('f-precio').value) || 0;
+    var sacas = parseInt(document.getElementById('f-sacas').value) || 0;
+    document.getElementById('f-importe').value = (precio * sacas).toFixed(2);
   }
+  document.getElementById('f-precio').addEventListener('input', calcImporte);
+  document.getElementById('f-sacas').addEventListener('input', calcImporte);
 
-  // ══ FORM (create/edit) ══
-  async function openForm(id) {
-    editingId = id;
-    const title = document.getElementById('formTitle');
-    const body = document.getElementById('formBody');
-    const saveBar = document.getElementById('formSaveBar');
+  // ══ FORM SUBMIT ══
+  document.getElementById('albForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var errEl = document.getElementById('formError');
+    var cliente = document.getElementById('f-cliente').value.trim();
+    var fecha = document.getElementById('f-fecha').value;
+    var sacas = document.getElementById('f-sacas').value;
 
-    if (id) {
-      title.textContent = 'Editar Albaran';
-      body.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-      showScreen('formScreen');
-
-      try {
-        const res = await fetch(`${API}?action=detail&id=${id}`);
-        const data = await res.json();
-        renderForm(data.albaran);
-        saveBar.innerHTML = `
-          <button class="btn-del" onclick="deleteAlbaran(${id})">Borrar</button>
-          <button class="btn-save" id="btnSave" onclick="saveAlbaran()">Guardar</button>
-        `;
-      } catch(e) { body.innerHTML = '<div class="empty"><p>Error</p></div>'; }
-    } else {
-      title.textContent = 'Nuevo Albaran';
-      renderForm({ fecha_entrega: new Date().toISOString().split('T')[0], marca:'BF10', forma_pago:'pendiente', pagado:0 });
-      saveBar.innerHTML = '<button class="btn-save" id="btnSave" onclick="saveAlbaran()">Crear Albaran</button>';
-      showScreen('formScreen');
+    if (!cliente || !fecha || !sacas) {
+      errEl.textContent = 'Rellena los campos obligatorios';
+      errEl.style.display = 'block';
+      return;
     }
-  }
+    errEl.style.display = 'none';
 
-  function renderForm(a) {
-    const marcaOpts = MARCAS.map(m => `<option value="${m}" ${m===a.marca?'selected':''}>${m}</option>`).join('');
-    const pagoOpts = PAGOS.map(p => `<option value="${p}" ${p===a.forma_pago?'selected':''}>${p}</option>`).join('');
-
-    document.getElementById('formBody').innerHTML = `
-      <div class="fg"><label>Cliente *</label><input type="text" id="fCliente" value="${escA(a.cliente||'')}" placeholder="Nombre del cliente"></div>
-      <div class="fg-row">
-        <div class="fg"><label>Sacas *</label><input type="number" id="fSacas" value="${a.num_sacas||''}" min="1"></div>
-        <div class="fg"><label>Marca</label><select id="fMarca">${marcaOpts}</select></div>
-      </div>
-      <div class="fg-row">
-        <div class="fg"><label>Num. inicial</label><input type="number" id="fNumIni" value="${a.numeracion_inicial||''}"></div>
-        <div class="fg"><label>Num. final</label><input type="number" id="fNumFin" value="${a.numeracion_final||''}"></div>
-      </div>
-      <div class="fg"><label>Fecha entrega *</label><input type="date" id="fFecha" value="${a.fecha_entrega||''}"></div>
-      <div class="fg-row">
-        <div class="fg"><label>Importe (\u20ac)</label><input type="number" id="fImporte" value="${a.importe||''}" step="0.01" min="0"></div>
-        <div class="fg"><label>Forma de pago</label><select id="fPago">${pagoOpts}</select></div>
-      </div>
-      <div class="chk-row"><input type="checkbox" id="fPagado" ${a.pagado==1?'checked':''}><label for="fPagado" style="font-size:14px">Pagado</label></div>
-      <div class="fg"><label>Comentarios</label><textarea id="fComentarios" rows="2" placeholder="Notas...">${esc(a.comentarios||'')}</textarea></div>
-    `;
-  }
-
-  async function saveAlbaran() {
-    const btn = document.getElementById('btnSave');
-    btn.textContent = 'Guardando...'; btn.classList.add('saving');
-
-    const payload = {
+    var payload = {
       action: editingId ? 'update' : 'create',
-      cliente: document.getElementById('fCliente').value,
-      num_sacas: document.getElementById('fSacas').value,
-      marca: document.getElementById('fMarca').value,
-      numeracion_inicial: document.getElementById('fNumIni').value,
-      numeracion_final: document.getElementById('fNumFin').value,
-      fecha_entrega: document.getElementById('fFecha').value,
-      importe: document.getElementById('fImporte').value,
-      forma_pago: document.getElementById('fPago').value,
-      pagado: document.getElementById('fPagado').checked ? 1 : 0,
-      comentarios: document.getElementById('fComentarios').value,
+      cliente: cliente,
+      direccion_envio: document.getElementById('f-direccion').value,
+      fecha_entrega: fecha,
+      marca: document.getElementById('f-marca').value,
+      num_sacas: parseInt(sacas),
+      numeracion_inicial: document.getElementById('f-num-ini').value || null,
+      numeracion_final: document.getElementById('f-num-fin').value || null,
+      precio: parseFloat(document.getElementById('f-precio').value) || 0,
+      forma_pago: document.getElementById('f-pago').value,
+      importe: parseFloat(document.getElementById('f-importe').value) || 0,
+      pagado: document.getElementById('f-pagado').checked ? 1 : 0,
+      comentarios: document.getElementById('f-comentarios').value
     };
 
     if (editingId) {
@@ -376,46 +512,52 @@
       payload.user_id = currentUser.user_id;
     }
 
-    try {
-      const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-      const data = await res.json();
-      if (data.ok || data.success) {
-        closeForm();
-        loadAlbaranes();
-      } else {
-        alert('Error: ' + (data.error || 'desconocido'));
-      }
-    } catch(e) { alert('Error de conexion'); }
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok || data.success) {
+          closeModal();
+          loadAlbaranes();
+        } else {
+          errEl.textContent = data.error || 'Error al guardar';
+          errEl.style.display = 'block';
+        }
+      })
+      .catch(function() {
+        errEl.textContent = 'Error de conexion';
+        errEl.style.display = 'block';
+      });
+  });
 
-    btn.textContent = editingId ? 'Guardar' : 'Crear Albaran';
-    btn.classList.remove('saving');
-  }
-
-  async function deleteAlbaran(id) {
+  // ══ DELETE ══
+  function deleteAlb(id) {
     if (!confirm('Mover albaran a papelera?')) return;
-    try {
-      await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'delete', id}) });
-      closeForm();
-      loadAlbaranes();
-    } catch(e) { alert('Error'); }
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id: id }) })
+      .then(function() { loadAlbaranes(); })
+      .catch(function() { alert('Error'); });
   }
 
-  function closeForm() { editingId = null; showScreen('mainScreen'); }
+  // ══ FILTERS ══
+  document.getElementById('fDesde').addEventListener('change', loadAlbaranes);
+  document.getElementById('fHasta').addEventListener('change', loadAlbaranes);
+  document.getElementById('fPagado').addEventListener('change', loadAlbaranes);
 
   // ══ HELPERS ══
-  function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-  function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-  function escA(s) { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-  function formatDate(d) { if (!d) return ''; const parts = d.split('-'); return `${parts[2]}/${parts[1]}/${parts[0]}`; }
+  function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  function escAttr(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+  function formatDate(d) { if (!d) return ''; var p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+
+  // ══ INIT ══
+  loadUsers();
 
   // Service worker
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw-comercial.js').catch(()=>{});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw-comercial.js').catch(function() {});
 
   // Install
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBanner').classList.add('show'); });
-  window.addEventListener('appinstalled', () => { document.getElementById('installBanner').classList.remove('show'); deferredPrompt = null; });
-  function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { document.getElementById('installBanner').classList.remove('show'); deferredPrompt = null; }); } }
+  var deferredPrompt;
+  window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); deferredPrompt = e; document.getElementById('installBanner').classList.add('show'); });
+  window.addEventListener('appinstalled', function() { document.getElementById('installBanner').classList.remove('show'); deferredPrompt = null; });
+  function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(function() { document.getElementById('installBanner').classList.remove('show'); deferredPrompt = null; }); } }
 </script>
 
 </body>

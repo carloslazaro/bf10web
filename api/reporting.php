@@ -214,4 +214,45 @@ if ($action === 'facturacion') {
     ]);
 }
 
+// ── Google API usage stats ──
+if ($action === 'google-api-usage') {
+    $month = sanitize($_GET['month'] ?? date('Y-m'));
+
+    $startDate = $month . '-01';
+    $endDate = date('Y-m-t', strtotime($startDate));
+
+    // Total calls this month
+    $total = $pdo->prepare("SELECT COUNT(*) as total FROM google_api_log WHERE created_at BETWEEN ? AND ?");
+    $total->execute([$startDate, $endDate . ' 23:59:59']);
+
+    // By endpoint
+    $byEndpoint = $pdo->prepare("
+        SELECT endpoint, COUNT(*) as calls, AVG(response_time_ms) as avg_ms,
+               SUM(CASE WHEN status_code != 200 THEN 1 ELSE 0 END) as errors
+        FROM google_api_log WHERE created_at BETWEEN ? AND ?
+        GROUP BY endpoint ORDER BY calls DESC
+    ");
+    $byEndpoint->execute([$startDate, $endDate . ' 23:59:59']);
+
+    // By day
+    $byDay = $pdo->prepare("
+        SELECT DATE(created_at) as fecha, COUNT(*) as calls
+        FROM google_api_log WHERE created_at BETWEEN ? AND ?
+        GROUP BY DATE(created_at) ORDER BY fecha
+    ");
+    $byDay->execute([$startDate, $endDate . ' 23:59:59']);
+
+    // Avg response time
+    $avgTime = $pdo->prepare("SELECT AVG(response_time_ms) as avg_ms FROM google_api_log WHERE created_at BETWEEN ? AND ?");
+    $avgTime->execute([$startDate, $endDate . ' 23:59:59']);
+
+    jsonResponse([
+        'month' => $month,
+        'total_calls' => (int)$total->fetch()['total'],
+        'avg_response_ms' => round((float)$avgTime->fetch()['avg_ms']),
+        'by_endpoint' => $byEndpoint->fetchAll(),
+        'by_day' => $byDay->fetchAll()
+    ]);
+}
+
 jsonResponse(['error' => 'Acción no válida'], 400);

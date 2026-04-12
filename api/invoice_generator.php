@@ -46,11 +46,16 @@ function getOrCreateInvoice($orderCode) {
     $brand = getBrand($brandCode);
     $prefix = $brand['invoice_prefix'];
 
-    // Sequential per brand+year
+    // Sequential per brand+year — use MAX to avoid collisions
     $year = date('Y');
-    $stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM invoices WHERE YEAR(issued_at) = ? AND brand = ?");
-    $stmt->execute([$year, $brandCode]);
-    $nextSeq = ((int)$stmt->fetch()['c']) + 1;
+    $pattern = "$prefix-$year-%";
+    $stmt = $pdo->prepare("SELECT invoice_number FROM invoices WHERE invoice_number LIKE ? ORDER BY invoice_number DESC LIMIT 1");
+    $stmt->execute([$pattern]);
+    $lastInv = $stmt->fetchColumn();
+    $nextSeq = 1;
+    if ($lastInv && preg_match('/-(\d+)$/', $lastInv, $m)) {
+        $nextSeq = (int)$m[1] + 1;
+    }
     $invoiceNumber = sprintf('%s-%s-%04d', $prefix, $year, $nextSeq);
 
     $totalInclIva = (float)$order['package_price'];

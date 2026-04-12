@@ -295,52 +295,60 @@ if ($method === 'GET' && $action === 'trash') {
 // POST ?action=invoice  — Generate invoice from albarán
 // ====================================================================
 if ($method === 'POST' && $action === 'invoice') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    $id = (int)($data['id'] ?? 0);
-    if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+    try {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $id = (int)($data['id'] ?? 0);
+        if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
 
-    $stmt = $pdo->prepare("SELECT * FROM albaranes WHERE id = ? AND deleted_at IS NULL");
-    $stmt->execute([$id]);
-    $alb = $stmt->fetch();
-    if (!$alb) jsonResponse(['error' => 'Albarán no encontrado'], 404);
+        $stmt = $pdo->prepare("SELECT * FROM albaranes WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([$id]);
+        $alb = $stmt->fetch();
+        if (!$alb) jsonResponse(['error' => 'Albarán no encontrado'], 404);
 
-    // Check if invoice already exists for this albaran
-    $chk = $pdo->prepare("SELECT * FROM invoices WHERE albaran_id = ?");
-    $chk->execute([$id]);
-    $existing = $chk->fetch();
-    if ($existing) {
-        jsonResponse(['success' => true, 'invoice' => $existing, 'is_new' => false]);
+        // Check if invoice already exists for this albaran
+        $chk = $pdo->prepare("SELECT * FROM invoices WHERE albaran_id = ?");
+        $chk->execute([$id]);
+        $existing = $chk->fetch();
+        if ($existing) {
+            jsonResponse(['success' => true, 'invoice' => $existing, 'is_new' => false]);
+        }
+
+        // Generate invoice number (prefix-YYYY-NNNN) using MAX to avoid collisions
+        $brandCode = $alb['marca'] ?? 'BF10';
+        $brand = getBrand($brandCode);
+        $prefix = $brand['invoice_prefix'];
+        $year = date('Y');
+
+        $pattern = "$prefix-$year-%";
+        $stmt = $pdo->prepare("SELECT invoice_number FROM invoices WHERE invoice_number LIKE ? ORDER BY invoice_number DESC LIMIT 1");
+        $stmt->execute([$pattern]);
+        $lastInv = $stmt->fetchColumn();
+        $nextSeq = 1;
+        if ($lastInv && preg_match('/-(\d+)$/', $lastInv, $m)) {
+            $nextSeq = (int)$m[1] + 1;
+        }
+        $invoiceNumber = sprintf('%s-%s-%04d', $prefix, $year, $nextSeq);
+
+        // Calculate amounts (IVA 21%)
+        $totalInclIva = (float)$alb['importe'];
+        $base = round($totalInclIva / 1.21, 2);
+        $iva  = round($totalInclIva - $base, 2);
+
+        $ins = $pdo->prepare("
+            INSERT INTO invoices (albaran_id, invoice_number, brand, base_amount, iva_amount, total_amount, issued_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
+        ");
+        $ins->execute([$id, $invoiceNumber, $brandCode, $base, $iva, $totalInclIva]);
+
+        $invoiceId = (int)$pdo->lastInsertId();
+        $stmt = $pdo->prepare("SELECT * FROM invoices WHERE id = ?");
+        $stmt->execute([$invoiceId]);
+        $invoice = $stmt->fetch();
+
+        jsonResponse(['success' => true, 'invoice' => $invoice, 'is_new' => true]);
+    } catch (Exception $e) {
+        jsonResponse(['error' => 'Error al generar factura: ' . $e->getMessage()], 500);
     }
-
-    // Generate invoice number (same system as orders: prefix-YYYY-NNNN)
-    require_once __DIR__ . '/config.php';
-    $brandCode = $alb['marca'] ?? 'BF10';
-    $brand = getBrand($brandCode);
-    $prefix = $brand['invoice_prefix'];
-    $year = date('Y');
-
-    $stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM invoices WHERE YEAR(issued_at) = ? AND brand = ?");
-    $stmt->execute([$year, $brandCode]);
-    $nextSeq = ((int)$stmt->fetch()['c']) + 1;
-    $invoiceNumber = sprintf('%s-%s-%04d', $prefix, $year, $nextSeq);
-
-    // Calculate amounts (IVA 21%)
-    $totalInclIva = (float)$alb['importe'];
-    $base = round($totalInclIva / 1.21, 2);
-    $iva  = round($totalInclIva - $base, 2);
-
-    $ins = $pdo->prepare("
-        INSERT INTO invoices (albaran_id, invoice_number, brand, base_amount, iva_amount, total_amount, issued_at)
-        VALUES (?, ?, ?, ?, ?, ?, NOW())
-    ");
-    $ins->execute([$id, $invoiceNumber, $brandCode, $base, $iva, $totalInclIva]);
-
-    $invoiceId = (int)$pdo->lastInsertId();
-    $stmt = $pdo->prepare("SELECT * FROM invoices WHERE id = ?");
-    $stmt->execute([$invoiceId]);
-    $invoice = $stmt->fetch();
-
-    jsonResponse(['success' => true, 'invoice' => $invoice, 'is_new' => true]);
 }
 
 jsonResponse(['error' => 'Acción no válida'], 400);

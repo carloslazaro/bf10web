@@ -107,6 +107,29 @@
             <h3>Facturación</h3>
             <div id="fact-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px"></div>
         </div>
+
+        <!-- Google API Usage -->
+        <div class="section">
+            <h3>📡 Google API — Consumo del mes</h3>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+                <input type="month" id="api-month" style="padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit">
+                <button onclick="loadGoogleApi()" style="padding:6px 14px;background:#111;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Ver</button>
+            </div>
+            <div id="api-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:12px"></div>
+            <div class="grid-2">
+                <div>
+                    <h4 style="font-size:12px;font-weight:600;margin-bottom:8px;color:#666">Por endpoint</h4>
+                    <table>
+                        <thead><tr><th>Endpoint</th><th style="text-align:center">Llamadas</th><th style="text-align:center">Errores</th><th style="text-align:center">Avg ms</th></tr></thead>
+                        <tbody id="api-endpoints"></tbody>
+                    </table>
+                </div>
+                <div>
+                    <h4 style="font-size:12px;font-weight:600;margin-bottom:8px;color:#666">Por día</h4>
+                    <div id="api-chart" style="display:flex;align-items:flex-end;gap:2px;height:120px;padding:8px 0"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -225,7 +248,56 @@
             });
     }
 
+    // Google API month selector default
+    document.getElementById('api-month').value = now.toISOString().slice(0,7);
+
+    function loadGoogleApi() {
+        var month = document.getElementById('api-month').value;
+        fetch(API + 'reporting.php?action=google-api-usage&month=' + month)
+            .then(function(r){return r.json();})
+            .then(function(d) {
+                // KPIs
+                var html = '';
+                html += '<div style="text-align:center;padding:12px;background:#E3F2FD;border-radius:8px"><div style="font-size:22px;font-weight:800;color:#1565C0">' + d.total_calls + '</div><div style="font-size:11px;color:#888">Llamadas totales</div></div>';
+                html += '<div style="text-align:center;padding:12px;background:#f5f5f5;border-radius:8px"><div style="font-size:22px;font-weight:800">' + d.avg_response_ms + ' ms</div><div style="font-size:11px;color:#888">Tiempo medio</div></div>';
+                var endpoints = d.by_endpoint || [];
+                var totalErrors = 0;
+                endpoints.forEach(function(e) { totalErrors += parseInt(e.errors) || 0; });
+                html += '<div style="text-align:center;padding:12px;background:' + (totalErrors > 0 ? '#FFEBEE' : '#E8F5E9') + ';border-radius:8px"><div style="font-size:22px;font-weight:800;color:' + (totalErrors > 0 ? '#c62828' : '#43A047') + '">' + totalErrors + '</div><div style="font-size:11px;color:#888">Errores</div></div>';
+                document.getElementById('api-kpis').innerHTML = html;
+
+                // Endpoints table
+                document.getElementById('api-endpoints').innerHTML = endpoints.map(function(e) {
+                    return '<tr>' +
+                        '<td><strong>' + esc(e.endpoint) + '</strong></td>' +
+                        '<td style="text-align:center;font-weight:600">' + e.calls + '</td>' +
+                        '<td style="text-align:center;color:' + (parseInt(e.errors) > 0 ? '#c62828' : '#43A047') + '">' + e.errors + '</td>' +
+                        '<td style="text-align:center">' + Math.round(parseFloat(e.avg_ms)) + '</td>' +
+                        '</tr>';
+                }).join('') || '<tr><td colspan="4" style="text-align:center;color:#888;padding:20px">Sin datos este mes. El logging empezará con las próximas llamadas.</td></tr>';
+
+                // Daily chart (bar chart)
+                var days = d.by_day || [];
+                var chartEl = document.getElementById('api-chart');
+                if (!days.length) {
+                    chartEl.innerHTML = '<div style="text-align:center;color:#888;width:100%;padding:20px;font-size:13px">Sin datos</div>';
+                    return;
+                }
+                var maxCalls = Math.max.apply(null, days.map(function(d){return parseInt(d.calls);}));
+                chartEl.innerHTML = days.map(function(day) {
+                    var h = Math.max(4, Math.round((parseInt(day.calls) / maxCalls) * 100));
+                    var dayNum = day.fecha.split('-')[2];
+                    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="' + day.fecha + ': ' + day.calls + ' llamadas">' +
+                        '<span style="font-size:10px;color:#666">' + day.calls + '</span>' +
+                        '<div style="width:100%;height:' + h + 'px;background:#1565C0;border-radius:2px"></div>' +
+                        '<span style="font-size:9px;color:#999">' + dayNum + '</span>' +
+                        '</div>';
+                }).join('');
+            });
+    }
+
     loadAll();
+    loadGoogleApi();
     </script>
 </body>
 </html>

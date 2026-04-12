@@ -2,6 +2,15 @@
 /**
  * Google Sheets helper — uses service account JWT auth (no SDK needed).
  */
+require_once __DIR__ . '/config.php';
+
+function logGoogleApiCall($endpoint, $method, $spreadsheetId, $range, $statusCode, $responseTimeMs) {
+    try {
+        $pdo = getDB();
+        $pdo->prepare("INSERT INTO google_api_log (endpoint, method, spreadsheet_id, sheet_range, status_code, response_time_ms) VALUES (?,?,?,?,?,?)")
+            ->execute([$endpoint, $method, $spreadsheetId, $range, $statusCode, $responseTimeMs]);
+    } catch (Exception $e) { /* silent */ }
+}
 
 function getGoogleAccessToken() {
     $credsFile = __DIR__ . '/google_service_account.json';
@@ -64,6 +73,7 @@ function sheetsRead($spreadsheetId, $range) {
     $url = 'https://sheets.googleapis.com/v4/spreadsheets/' . urlencode($spreadsheetId)
          . '/values/' . urlencode($range);
 
+    $t0 = microtime(true);
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_HTTPHEADER => ["Authorization: Bearer $token"],
@@ -73,6 +83,7 @@ function sheetsRead($spreadsheetId, $range) {
     $resp = json_decode(curl_exec($ch), true);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    logGoogleApiCall('sheets.values.get', 'GET', $spreadsheetId, $range, $code, (int)((microtime(true) - $t0) * 1000));
 
     if ($code !== 200) {
         return ['error' => $resp['error']['message'] ?? "HTTP $code"];
@@ -91,6 +102,7 @@ function sheetsUpdate($spreadsheetId, $range, $values) {
          . '/values/' . urlencode($range)
          . '?valueInputOption=USER_ENTERED';
 
+    $t0 = microtime(true);
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_CUSTOMREQUEST => 'PUT',
@@ -105,6 +117,7 @@ function sheetsUpdate($spreadsheetId, $range, $values) {
     $resp = json_decode(curl_exec($ch), true);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    logGoogleApiCall('sheets.values.update', 'PUT', $spreadsheetId, $range, $code, (int)((microtime(true) - $t0) * 1000));
 
     if ($code !== 200) {
         return ['error' => $resp['error']['message'] ?? "HTTP $code"];
@@ -123,6 +136,7 @@ function sheetsAppend($spreadsheetId, $range, $values) {
          . '/values/' . urlencode($range) . ':append'
          . '?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS';
 
+    $t0 = microtime(true);
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_POST => true,
@@ -137,6 +151,7 @@ function sheetsAppend($spreadsheetId, $range, $values) {
     $resp = json_decode(curl_exec($ch), true);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    logGoogleApiCall('sheets.values.append', 'POST', $spreadsheetId, $range, $code, (int)((microtime(true) - $t0) * 1000));
 
     if ($code !== 200) {
         return ['error' => $resp['error']['message'] ?? "HTTP $code"];
@@ -168,6 +183,7 @@ function sheetsInsertRows($spreadsheetId, $sheetId, $rowIndex, $count = 1) {
         ]],
     ];
 
+    $t0 = microtime(true);
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_POST => true,
@@ -182,6 +198,7 @@ function sheetsInsertRows($spreadsheetId, $sheetId, $rowIndex, $count = 1) {
     $resp = json_decode(curl_exec($ch), true);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    logGoogleApiCall('sheets.batchUpdate', 'POST', $spreadsheetId, 'insertRows', $code, (int)((microtime(true) - $t0) * 1000));
 
     if ($code !== 200) {
         return ['error' => $resp['error']['message'] ?? "HTTP $code"];
@@ -199,6 +216,7 @@ function sheetsMetadata($spreadsheetId) {
     $url = 'https://sheets.googleapis.com/v4/spreadsheets/' . urlencode($spreadsheetId)
          . '?fields=sheets.properties';
 
+    $t0 = microtime(true);
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_HTTPHEADER => ["Authorization: Bearer $token"],
@@ -208,6 +226,7 @@ function sheetsMetadata($spreadsheetId) {
     $resp = json_decode(curl_exec($ch), true);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    logGoogleApiCall('sheets.metadata', 'GET', $spreadsheetId, null, $code, (int)((microtime(true) - $t0) * 1000));
 
     if ($code !== 200) {
         return ['error' => $resp['error']['message'] ?? "HTTP $code"];

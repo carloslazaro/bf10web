@@ -1208,6 +1208,9 @@
     .bv-dropzone.drag-over{background:#E3F2FD!important;outline:2px dashed #1565C0;outline-offset:-2px}
     .bv-drag-handle{cursor:grab;padding:0 6px;color:#aaa;font-size:16px;user-select:none}
     .bv-drag-handle:active{cursor:grabbing}
+    .bv-row.drop-above{box-shadow:0 -2px 0 0 #1565C0 inset, 0 -2px 0 0 #1565C0}
+    .bv-row.drop-above td{border-top:2px solid #1565C0!important}
+    .bv-row.drop-below td{border-bottom:2px solid #1565C0!important}
     </style>
     <script>
     (function() {
@@ -1370,6 +1373,94 @@
                     row.classList.remove('dragging');
                     bvDragId = null;
                     zones.forEach(function(z) { z.classList.remove('drag-over'); });
+                    // Clear all row drop indicators
+                    document.querySelectorAll('.bv-row.drop-above,.bv-row.drop-below').forEach(function(r) {
+                        r.classList.remove('drop-above', 'drop-below');
+                    });
+                });
+
+                // Row-level dragover for reordering within same viaje
+                row.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.dataTransfer.dropEffect = 'move';
+                    // Determine if dropping above or below this row
+                    var rect = row.getBoundingClientRect();
+                    var midY = rect.top + rect.height / 2;
+                    // Clear previous indicators on all rows
+                    document.querySelectorAll('.bv-row.drop-above,.bv-row.drop-below').forEach(function(r) {
+                        r.classList.remove('drop-above', 'drop-below');
+                    });
+                    if (e.clientY < midY) {
+                        row.classList.add('drop-above');
+                    } else {
+                        row.classList.add('drop-below');
+                    }
+                });
+
+                row.addEventListener('dragleave', function() {
+                    row.classList.remove('drop-above', 'drop-below');
+                });
+
+                // Drop on a specific row
+                row.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    row.classList.remove('drop-above', 'drop-below');
+                    var draggedId = e.dataTransfer.getData('text/plain') || bvDragId;
+                    if (!draggedId || draggedId === row.dataset.id) return;
+
+                    // Find the dropzone (viaje container) of the target row
+                    var zone = row.closest('.bv-dropzone');
+                    if (!zone) return;
+
+                    var targetConductor = zone.dataset.conductor;
+                    var targetViaje = zone.dataset.viaje;
+
+                    // Find the source row's zone
+                    var srcRow = document.querySelector('.bv-row[data-id="' + draggedId + '"]');
+                    var srcZone = srcRow ? srcRow.closest('.bv-dropzone') : null;
+                    var sameConductor = srcZone && srcZone.dataset.conductor === targetConductor;
+                    var sameViaje = srcZone && srcZone.dataset.viaje === targetViaje;
+
+                    if (sameConductor && sameViaje) {
+                        // Reorder within same viaje
+                        var tbody = zone.querySelector('tbody');
+                        var allRows = Array.from(tbody.querySelectorAll('.bv-row'));
+                        var rect = row.getBoundingClientRect();
+                        var dropAbove = e.clientY < (rect.top + rect.height / 2);
+
+                        // Build new order: remove dragged, insert at position
+                        var ids = allRows.map(function(r) { return parseInt(r.dataset.id); });
+                        var dragIdx = ids.indexOf(parseInt(draggedId));
+                        if (dragIdx > -1) ids.splice(dragIdx, 1);
+                        var targetIdx = ids.indexOf(parseInt(row.dataset.id));
+                        if (!dropAbove) targetIdx++;
+                        ids.splice(targetIdx, 0, parseInt(draggedId));
+
+                        fetch(bvAPI + 'borrador_rutas.php?action=reorder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ids: ids })
+                        }).then(function() {
+                            loadBorradorView();
+                        });
+                    } else {
+                        // Move to different conductor/viaje
+                        var p1 = fetch(bvAPI + 'borrador_rutas.php?action=update-cell', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: parseInt(draggedId), field: 'conductor', value: targetConductor })
+                        });
+                        var p2 = fetch(bvAPI + 'borrador_rutas.php?action=update-cell', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: parseInt(draggedId), field: 'viaje', value: targetViaje })
+                        });
+                        Promise.all([p1, p2]).then(function() {
+                            loadBorradorView();
+                        });
+                    }
                 });
             });
 
@@ -1377,15 +1468,19 @@
                 zone.addEventListener('dragover', function(e) {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
-                    zone.classList.add('drag-over');
+                    // Only highlight zone if not over a row
+                    if (!e.target.closest('.bv-row')) {
+                        zone.classList.add('drag-over');
+                    }
                 });
                 zone.addEventListener('dragleave', function(e) {
-                    // Only remove if actually leaving the zone (not entering a child)
                     if (!zone.contains(e.relatedTarget)) {
                         zone.classList.remove('drag-over');
                     }
                 });
                 zone.addEventListener('drop', function(e) {
+                    // Only handle if dropped on zone directly (not on a row)
+                    if (e.target.closest('.bv-row')) return;
                     e.preventDefault();
                     zone.classList.remove('drag-over');
                     var draggedId = e.dataTransfer.getData('text/plain') || bvDragId;
@@ -1394,7 +1489,6 @@
                     var targetConductor = zone.dataset.conductor;
                     var targetViaje = zone.dataset.viaje;
 
-                    // Update both conductor and viaje
                     var p1 = fetch(bvAPI + 'borrador_rutas.php?action=update-cell', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1405,7 +1499,6 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: parseInt(draggedId), field: 'viaje', value: targetViaje })
                     });
-
                     Promise.all([p1, p2]).then(function() {
                         loadBorradorView();
                     });

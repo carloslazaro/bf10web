@@ -68,6 +68,26 @@ if ($action === 'login') {
     jsonResponse(['ok' => true, 'nombre' => $nombre, 'user_id' => (int)$row['user_id']]);
 }
 
+// ── Search customers ────────────────────────────────────────
+if ($action === 'customers') {
+    $q = sanitize($_GET['q'] ?? '');
+    if (strlen($q) < 2) jsonResponse(['customers' => []]);
+    $stmt = $pdo->prepare("SELECT id, name, phone, email, nif FROM customers WHERE name LIKE ? OR phone LIKE ? OR nif LIKE ? ORDER BY name LIMIT 8");
+    $like = "%$q%";
+    $stmt->execute([$like, $like, $like]);
+    jsonResponse(['customers' => $stmt->fetchAll()]);
+}
+
+// ── Create customer (inline) ────────────────────────────────
+if ($action === 'customer-create') {
+    $d = getBody();
+    $name = trim($d['name'] ?? '');
+    if (!$name) jsonResponse(['error' => 'Nombre requerido'], 400);
+    $stmt = $pdo->prepare("INSERT INTO customers (name) VALUES (?)");
+    $stmt->execute([$name]);
+    jsonResponse(['success' => true, 'id' => (int)$pdo->lastInsertId(), 'name' => $name]);
+}
+
 // ── Next albarán code ───────────────────────────────────────
 if ($action === 'next-code') {
     $year = date('Y');
@@ -84,15 +104,13 @@ if ($action === 'next-code') {
 // ── List albaranes ──────────────────────────────────────────
 if ($action === 'list') {
     $userId = (int)($_GET['user_id'] ?? 0);
+    if (!$userId) jsonResponse(['error' => 'user_id requerido'], 400);
     $desde = sanitize($_GET['desde'] ?? '');
     $hasta = sanitize($_GET['hasta'] ?? '');
     $pagado = $_GET['pagado'] ?? '';
 
-    $where = ['a.deleted_at IS NULL'];
-    $params = [];
-
-    // Filter by comercial — each comercial only sees their own
-    if ($userId) { $where[] = 'a.comercial_id = ?'; $params[] = $userId; }
+    $where = ['a.deleted_at IS NULL', 'a.comercial_id = ?'];
+    $params = [$userId];
 
     if ($desde) { $where[] = 'a.fecha_entrega >= ?'; $params[] = $desde; }
     if ($hasta) { $where[] = 'a.fecha_entrega <= ?'; $params[] = $hasta; }

@@ -145,6 +145,7 @@ if ($method === 'GET' && $action === 'preview') {
         FROM rutas_data
         WHERE (estado = '' OR estado IS NULL OR estado = 'por_recoger')
           AND (conductor = '' OR conductor IS NULL)
+          AND NOT (UPPER(TRIM(direccion)) LIKE 'DIA %' AND (sacos IS NULL OR sacos = '' OR sacos = '0'))
     ")->fetch();
 
     // Load zonas habituales per conductor
@@ -215,12 +216,14 @@ if ($method === 'POST' && $action === 'generate') {
     }
 
     // ── Step 1: Get unassigned pending stops, urgentes first then oldest ──
+    // Exclude organizer rows (direccion starts with "DIA" and no sacos)
     $unassigned = $pdo->query("
         SELECT id, direccion, barrio_cp, sacos, urgen, marca,
                CASE WHEN urgen != '' AND LOWER(urgen) != 'no' THEN 1 ELSE 0 END as is_urgent
         FROM rutas_data
         WHERE (conductor = '' OR conductor IS NULL)
           AND (estado = '' OR estado IS NULL OR estado = 'por_recoger')
+          AND NOT (UPPER(TRIM(direccion)) LIKE 'DIA %' AND (sacos IS NULL OR sacos = '' OR sacos = '0'))
         ORDER BY is_urgent DESC, id ASC
     ")->fetchAll();
 

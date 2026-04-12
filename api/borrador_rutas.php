@@ -109,6 +109,21 @@ if ($method === 'POST' && $action === 'update-cell') {
     jsonResponse(['success' => true]);
 }
 
+// ── Reorder stops within a viaje ──
+if ($method === 'POST' && $action === 'reorder') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $ids = $input['ids'] ?? [];
+    if (empty($ids) || !is_array($ids)) {
+        jsonResponse(['error' => 'Lista de IDs requerida'], 400);
+    }
+
+    $stmt = $pdo->prepare("UPDATE borrador_rutas SET orden = ? WHERE id = ?");
+    foreach ($ids as $i => $id) {
+        $stmt->execute([$i + 1, (int)$id]);
+    }
+    jsonResponse(['success' => true]);
+}
+
 // ── Confirm: push draft to rutas_data ──
 if ($method === 'POST' && $action === 'confirm') {
     $rows = $pdo->query("SELECT * FROM borrador_rutas ORDER BY id")->fetchAll();
