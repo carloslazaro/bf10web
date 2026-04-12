@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — Avisador | BF10</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.7}
+.container{max-width:800px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#1565C0,#0D47A1);color:#fff;padding:40px 24px;text-align:center;border-radius:0 0 24px 24px}
+header h1{font-size:28px;font-weight:800;margin-bottom:4px}
+header p{font-size:14px;opacity:.85}
+.badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-top:12px}
+h2{font-size:22px;font-weight:700;color:#1565C0;margin:36px 0 12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:17px;font-weight:600;color:#334155;margin:20px 0 8px}
+p{margin-bottom:12px;font-size:15px}
+.step{background:#fff;border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #1565C0}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#1565C0;color:#fff;border-radius:50%;font-size:14px;font-weight:700;margin-right:8px;flex-shrink:0}
+.step-title{font-weight:600;font-size:16px;color:#1e293b}
+.step-text{margin-top:8px;font-size:14px;color:#475569}
+.screenshot{text-align:center;margin:16px 0}
+.screenshot img{max-width:320px;width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);border:1px solid #e2e8f0}
+.screenshot figcaption{font-size:12px;color:#94a3b8;margin-top:6px;font-style:italic}
+.tip{background:#E3F2FD;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #1565C0}
+.tip strong{color:#1565C0}
+.warning{background:#FFF3E0;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #E65100}
+.warning strong{color:#E65100}
+.field-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+.field-table th{background:#f1f5f9;padding:8px 12px;text-align:left;font-weight:600;border-bottom:2px solid #e2e8f0}
+.field-table td{padding:8px 12px;border-bottom:1px solid #f1f5f9}
+.field-table .required{color:#c62828;font-weight:700}
+footer{text-align:center;padding:30px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:40px}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Manual del Avisador</h1>
+    <p>Guia de uso de la app de registro de avisos de recogida</p>
+    <span class="badge">BF10 Sacos de Escombro</span>
+</header>
+
+<div class="container">
+
+<h2>1. Pantalla principal — Crear aviso</h2>
+
+<p>Al entrar en la app veras el formulario de creacion de avisos. En la cabecera aparece tu nombre y el boton "Salir".</p>
+
+<figure class="screenshot">
+    <img src="img/avisador_01_form.png" alt="Formulario de nuevo aviso">
+    <figcaption>Pantalla principal — formulario de nuevo aviso</figcaption>
+</figure>
+
+<h3>Campos del formulario</h3>
+
+<table class="field-table">
+    <tr><th>Campo</th><th>Descripcion</th><th>Obligatorio</th></tr>
+    <tr><td><strong>Direccion</strong></td><td>Calle y numero donde estan los sacos. Al escribir, Google sugiere direcciones automaticamente.</td><td class="required">Si</td></tr>
+    <tr><td><strong>Barrio / CP</strong></td><td>Zona o barrio. <strong>Se detecta automaticamente</strong> al seleccionar una direccion de Google, pero puedes cambiarlo manualmente.</td><td>No</td></tr>
+    <tr><td><strong>Sacos</strong></td><td>Numero aproximado de sacos a recoger.</td><td>No</td></tr>
+    <tr><td><strong>Urgen?</strong></td><td>Indica si la recogida es urgente (SI/NO).</td><td>No</td></tr>
+    <tr><td><strong>Telefono aviso</strong></td><td>Telefono de contacto del cliente.</td><td>No</td></tr>
+    <tr><td><strong>Marca</strong></td><td>Marca de los sacos (BF10, Servisaco, Atusaco, etc.).</td><td>No</td></tr>
+    <tr><td><strong>Fecha aviso</strong></td><td>Fecha en que se realiza el aviso. Por defecto, hoy.</td><td>No</td></tr>
+    <tr><td><strong>Observaciones</strong></td><td>Notas adicionales: horario de porteria, piso, instrucciones especiales.</td><td>No</td></tr>
+</table>
+
+<h2>2. Rellenar y enviar un aviso</h2>
+
+<div class="step">
+    <span class="step-num">1</span>
+    <span class="step-title">Escribe la direccion</span>
+    <div class="step-text">Empieza a escribir en el campo <strong>Direccion</strong>. Apareceran sugerencias de Google. Al seleccionar una, el <strong>barrio se detecta automaticamente</strong> y el campo parpadea en verde para confirmarte la seleccion.</div>
+</div>
+
+<div class="step">
+    <span class="step-num">2</span>
+    <span class="step-title">Completa los datos</span>
+    <div class="step-text">Rellena el numero de sacos, telefono, marca y cualquier observacion relevante. Si el barrio detectado no es correcto, cambialo manualmente.</div>
+</div>
+
+<figure class="screenshot">
+    <img src="img/avisador_02_form_filled.png" alt="Formulario rellenado">
+    <figcaption>Formulario rellenado — el barrio "Centro" se ha detectado automaticamente</figcaption>
+</figure>
+
+<div class="step">
+    <span class="step-num">3</span>
+    <span class="step-title">Pulsa "Crear Aviso"</span>
+    <div class="step-text">Pulsa el boton azul. Si todo es correcto, veras un mensaje verde de confirmacion en la parte superior.</div>
+</div>
+
+<figure class="screenshot">
+    <img src="img/avisador_03_success.png" alt="Confirmacion de aviso">
+    <figcaption>Mensaje de confirmacion — el aviso se ha registrado correctamente</figcaption>
+</figure>
+
+<div class="warning">
+    <strong>Importante:</strong> La direccion es el unico campo obligatorio. Sin embargo, cuanta mas informacion aportes (sacos, telefono, barrio), mas facil sera organizar la ruta de recogida.
+</div>
+
+<h2>3. Avisos recientes</h2>
+
+<p>Pulsa el boton <strong>"Ver mis avisos recientes"</strong> debajo del formulario para consultar los avisos que has registrado. Cada aviso muestra la direccion, los sacos, el barrio, la fecha y el <strong>estado actual</strong>.</p>
+
+<figure class="screenshot">
+    <img src="img/avisador_04_history.png" alt="Historial de avisos">
+    <figcaption>Historial de avisos — cada uno muestra su estado actual</figcaption>
+</figure>
+
+<h3>Estados de los avisos</h3>
+
+<table class="field-table">
+    <tr><th>Estado</th><th>Significado</th><th>Color</th></tr>
+    <tr><td><strong>por_recoger</strong></td><td>Pendiente de recogida. Aun no se ha asignado o completado.</td><td style="color:#E65100">Naranja</td></tr>
+    <tr><td><strong>recogida</strong></td><td>Los sacos ya han sido recogidos por el conductor.</td><td style="color:#2E7D32">Verde</td></tr>
+    <tr><td><strong>no_estan</strong></td><td>El conductor fue pero los sacos no estaban.</td><td style="color:#C62828">Rojo</td></tr>
+</table>
+
+<div class="tip">
+    <strong>Instalar como app:</strong> Puedes instalar la app en tu movil como una app nativa. En Chrome, pulsa el menu (tres puntos) y selecciona "Agregar a pantalla de inicio".
+</div>
+
+</div>
+
+<footer>
+    Manual de usuario — Avisador | BF10 Sacos de Escombro Madrid<br>
+    Ultima actualizacion: Abril 2026
+</footer>
+
+</body>
+</html>

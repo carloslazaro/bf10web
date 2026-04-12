@@ -18,15 +18,6 @@
     .screen{display:none}.screen.active{display:flex;flex-direction:column;min-height:100vh}
 
     /* ═ Login ═ */
-    #loginScreen{align-items:center;justify-content:center;padding:40px 20px;text-align:center;background:var(--black)}
-    #loginScreen img{width:80px;margin-bottom:20px;border-radius:16px}
-    #loginScreen h1{font-size:22px;color:#fff}
-    #loginScreen h1 span{color:var(--red)}
-    #loginScreen .sub{color:#888;font-size:13px;margin-bottom:32px}
-    .user-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:340px}
-    .user-btn{background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px 8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)}
-    .user-btn:active{background:var(--red);border-color:var(--red)}
-
     /* ═ PIN ═ */
     #pinScreen{background:var(--black);color:#fff}
     .pin-hdr{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #333}
@@ -124,21 +115,12 @@
   <div class="install-banner" id="installBanner" onclick="installPWA()">Instalar App BF10 Comercial</div>
 
   <!-- ═ LOGIN ═ -->
-  <div id="loginScreen" class="screen active">
-    <img src="/img/icon-192.png" alt="BF10" onerror="this.style.background='#DA291C';this.style.display='block'">
-    <h1>SACOS <span>BF10</span></h1>
-    <p class="sub">App Comercial</p>
-    <div class="user-grid" id="userGrid"><button class="user-btn" disabled>Cargando...</button></div>
-  </div>
-
-  <!-- ═ PIN ═ -->
-  <div id="pinScreen" class="screen">
-    <div class="pin-hdr">
-      <button class="btn-back" onclick="showScreen('loginScreen')">&#8592;</button>
-      <span id="pinName" style="font-weight:700"></span>
-    </div>
+  <!-- ═ PIN LOGIN ═ -->
+  <div id="pinScreen" class="screen active">
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center">
-      <p style="color:#888;font-size:13px;margin-bottom:20px">Introduce tu PIN de 4 digitos</p>
+      <img src="/img/icon-192.png" alt="BF10" style="width:80px;margin-bottom:20px;border-radius:16px" onerror="this.style.background='#DA291C';this.style.display='block'">
+      <h1 style="font-size:22px;color:#fff;margin-bottom:4px">SACOS <span style="color:#DA291C">BF10</span></h1>
+      <p style="color:#888;font-size:13px;margin-bottom:32px">Comercial — Introduce tu PIN</p>
       <div class="pin-dots" id="pinDots"><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
       <p class="pin-error" id="pinError"></p>
       <div class="pin-pad">
@@ -283,36 +265,14 @@
   }
 
   // ══ LOGIN ══
-  function loadUsers() {
-    fetch(API + '?action=comerciales')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        document.getElementById('userGrid').innerHTML = (data.comerciales || []).map(function(n) {
-          return '<button class="user-btn" onclick="selectUser(\'' + esc(n).replace(/'/g, "\\'") + '\')">' + esc(n) + '</button>';
-        }).join('');
-      })
-      .catch(function() {
-        document.getElementById('userGrid').innerHTML = '<p style="color:var(--red);grid-column:1/-1">Error de conexion</p>';
-      });
-  }
-
-  var pinValue = '', pinTarget = '';
-
-  function selectUser(name) {
-    pinTarget = name;
-    pinValue = '';
-    document.getElementById('pinName').textContent = name;
-    document.getElementById('pinError').textContent = '';
-    updatePinDots();
-    showScreen('pinScreen');
-  }
+  var pinValue = '';
 
   function pinKey(d) { if (pinValue.length >= 4) return; pinValue += d; updatePinDots(); if (pinValue.length === 4) verifyPin(); }
   function pinDelete() { pinValue = pinValue.slice(0, -1); document.getElementById('pinError').textContent = ''; updatePinDots(); }
   function updatePinDots() { document.querySelectorAll('#pinDots .pin-dot').forEach(function(d, i) { d.classList.toggle('filled', i < pinValue.length); }); }
 
   function verifyPin() {
-    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', nombre: pinTarget, pin: pinValue }) })
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', pin: pinValue }) })
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.ok) {
@@ -328,7 +288,7 @@
       .catch(function() { document.getElementById('pinError').textContent = 'Error de conexion'; pinValue = ''; updatePinDots(); });
   }
 
-  function logout() { currentUser = null; showScreen('loginScreen'); }
+  function logout() { currentUser = null; pinValue = ''; updatePinDots(); showScreen('pinScreen'); }
 
   // ══ ALBARANES LIST ══
   function loadAlbaranes() {
@@ -548,7 +508,6 @@
   function formatDate(d) { if (!d) return ''; var p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
 
   // ══ INIT ══
-  loadUsers();
 
   // Service worker
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw-comercial.js').catch(function() {});

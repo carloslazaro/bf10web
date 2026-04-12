@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — Comercial | BF10</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.7}
+.container{max-width:800px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#111,#333);color:#fff;padding:40px 24px;text-align:center;border-radius:0 0 24px 24px}
+header h1{font-size:28px;font-weight:800;margin-bottom:4px}
+header p{font-size:14px;opacity:.85}
+.badge{display:inline-block;background:rgba(218,41,28,.9);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-top:12px}
+h2{font-size:22px;font-weight:700;color:#1e293b;margin:36px 0 12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:17px;font-weight:600;color:#334155;margin:20px 0 8px}
+p{margin-bottom:12px;font-size:15px}
+.step{background:#fff;border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #DA291C}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#DA291C;color:#fff;border-radius:50%;font-size:14px;font-weight:700;margin-right:8px;flex-shrink:0}
+.step-title{font-weight:600;font-size:16px;color:#1e293b}
+.step-text{margin-top:8px;font-size:14px;color:#475569}
+.screenshot{text-align:center;margin:16px 0}
+.screenshot img{max-width:320px;width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);border:1px solid #e2e8f0}
+.screenshot figcaption{font-size:12px;color:#94a3b8;margin-top:6px;font-style:italic}
+.tip{background:#E3F2FD;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #1565C0}
+.tip strong{color:#1565C0}
+.warning{background:#FFF3E0;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #E65100}
+.warning strong{color:#E65100}
+.field-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+.field-table th{background:#f1f5f9;padding:8px 12px;text-align:left;font-weight:600;border-bottom:2px solid #e2e8f0}
+.field-table td{padding:8px 12px;border-bottom:1px solid #f1f5f9}
+.field-table .required{color:#c62828;font-weight:700}
+footer{text-align:center;padding:30px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:40px}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Manual del Comercial</h1>
+    <p>Guia de uso de la app de gestion de albaranes</p>
+    <span class="badge">BF10 Sacos de Escombro</span>
+</header>
+
+<div class="container">
+
+<h2>1. Panel principal</h2>
+
+<p>Al entrar en la app veras tu panel con las estadisticas del periodo seleccionado y la lista de albaranes.</p>
+
+<figure class="screenshot">
+    <img src="img/comercial_01_dashboard.png" alt="Dashboard del comercial">
+    <figcaption>Panel principal — estadisticas y lista de albaranes</figcaption>
+</figure>
+
+<h3>Tarjetas de resumen</h3>
+
+<table class="field-table">
+    <tr><th>Tarjeta</th><th>Que muestra</th></tr>
+    <tr><td><strong>Albaranes</strong></td><td>Numero total de albaranes en el periodo filtrado</td></tr>
+    <tr><td><strong>Sacas</strong></td><td>Total de sacas entregadas</td></tr>
+    <tr><td><strong>Importe</strong></td><td>Suma total en euros de todos los albaranes</td></tr>
+    <tr><td><strong>Pagados</strong></td><td>Proporcion de albaranes pagados vs total (ej: 8/12)</td></tr>
+</table>
+
+<h3>Filtros</h3>
+
+<p>Encima de la tabla tienes filtros para acotar la vista:</p>
+
+<table class="field-table">
+    <tr><th>Filtro</th><th>Funcion</th></tr>
+    <tr><td><strong>Fecha desde/hasta</strong></td><td>Filtra albaranes por rango de fechas de entrega</td></tr>
+    <tr><td><strong>Estado de pago</strong></td><td>Filtra por: Todos, Pagados o Pendientes</td></tr>
+</table>
+
+<h3>Tabla de albaranes</h3>
+
+<p>La tabla muestra: <strong>Codigo</strong>, <strong>Fecha</strong>, <strong>Cliente</strong>, <strong>Marca</strong>, <strong>Sacas</strong>, <strong>Importe</strong>, <strong>Pagado</strong> (Si/No) y <strong>Acciones</strong> (Editar / Eliminar).</p>
+
+<div class="tip">
+    <strong>Codigo de albaran:</strong> Cada albaran tiene un codigo unico automatico (ej: ALB-2026-0045). Este codigo se usa para la trazabilidad y para facturacion posterior.
+</div>
+
+<h2>2. Crear un nuevo albaran</h2>
+
+<div class="step">
+    <span class="step-num">1</span>
+    <span class="step-title">Pulsa "+ Nuevo albaran"</span>
+    <div class="step-text">Pulsa el boton verde <strong>+ Nuevo albaran</strong>. Se abrira un formulario modal.</div>
+</div>
+
+<figure class="screenshot">
+    <img src="img/comercial_02_nuevo_albaran.png" alt="Modal de nuevo albaran">
+    <figcaption>Formulario para crear un nuevo albaran</figcaption>
+</figure>
+
+<h3>Campos del albaran</h3>
+
+<table class="field-table">
+    <tr><th>Campo</th><th>Descripcion</th><th>Obligatorio</th></tr>
+    <tr><td><strong>Cliente</strong></td><td>Escribe el nombre. Aparece un desplegable con clientes existentes. Si no existe, se crea automaticamente.</td><td class="required">Si</td></tr>
+    <tr><td><strong>Fecha entrega</strong></td><td>Fecha en que se entregan las sacas.</td><td class="required">Si</td></tr>
+    <tr><td><strong>Direccion de envio</strong></td><td>Direccion de entrega de las sacas.</td><td>No</td></tr>
+    <tr><td><strong>Marca</strong></td><td>Marca de las sacas (BF10, Servisaco, Atusaco, etc.).</td><td>No</td></tr>
+    <tr><td><strong>N sacas</strong></td><td>Numero de sacas entregadas.</td><td class="required">Si</td></tr>
+    <tr><td><strong>Numeracion inicial/final</strong></td><td>Rango de numeracion de las sacas (si aplica).</td><td>No</td></tr>
+    <tr><td><strong>Precio por saca</strong></td><td>Precio unitario. El importe total se calcula automaticamente.</td><td>No</td></tr>
+    <tr><td><strong>Importe total</strong></td><td>Se calcula automaticamente (sacas x precio), pero puedes ajustarlo.</td><td>No</td></tr>
+    <tr><td><strong>Forma de pago</strong></td><td>Pendiente, Efectivo, Tarjeta o Transferencia.</td><td>No</td></tr>
+    <tr><td><strong>Pagado</strong></td><td>Marca esta casilla si el cliente ya ha pagado.</td><td>No</td></tr>
+    <tr><td><strong>Comentarios</strong></td><td>Notas adicionales sobre la entrega.</td><td>No</td></tr>
+</table>
+
+<div class="step">
+    <span class="step-num">2</span>
+    <span class="step-title">Rellena y guarda</span>
+    <div class="step-text">Completa los campos necesarios y pulsa <strong>Guardar</strong>. El albaran aparecera en tu lista y las estadisticas se actualizaran automaticamente.</div>
+</div>
+
+<div class="tip">
+    <strong>Busqueda de clientes:</strong> Al escribir en el campo Cliente, el sistema busca entre los clientes existentes. Si seleccionas uno del desplegable, se asocia con su ficha (NIF, direccion, etc.), facilitando la facturacion posterior.
+</div>
+
+<h2>3. Editar un albaran</h2>
+
+<div class="step">
+    <span class="step-num">3</span>
+    <span class="step-title">Pulsa "Editar"</span>
+    <div class="step-text">En la columna <strong>Acciones</strong>, pulsa <strong>Editar</strong>. Se abrira el formulario con los datos precargados. Modifica lo necesario y pulsa <strong>Guardar</strong>.</div>
+</div>
+
+<div class="warning">
+    <strong>Atencion:</strong> Si un albaran ya ha sido facturado, editarlo no modificara la factura existente. Contacta con el administrador si necesitas corregir una factura emitida.
+</div>
+
+<h2>4. Marcar como pagado</h2>
+
+<p>Edita el albaran, marca la casilla <strong>Pagado</strong>, selecciona la forma de pago y guarda. El indicador cambiara de <span style="color:#C62828;font-weight:600">No</span> a <span style="color:#2E7D32;font-weight:600">Si</span>.</p>
+
+<h2>5. Eliminar un albaran</h2>
+
+<p>Pulsa <strong>Eliminar</strong> en la columna Acciones. Se pedira confirmacion antes de borrar.</p>
+
+<div class="tip">
+    <strong>Instalar como app:</strong> En Chrome, pulsa el menu (tres puntos) y selecciona "Agregar a pantalla de inicio" para tener un acceso directo como app nativa.
+</div>
+
+</div>
+
+<footer>
+    Manual de usuario — Comercial | BF10 Sacos de Escombro Madrid<br>
+    Ultima actualizacion: Abril 2026
+</footer>
+
+</body>
+</html>

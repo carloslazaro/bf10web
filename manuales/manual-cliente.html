@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — Cliente | BF10</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.7}
+.container{max-width:800px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#00A651,#007A3D);color:#fff;padding:40px 24px;text-align:center;border-radius:0 0 24px 24px}
+header h1{font-size:28px;font-weight:800;margin-bottom:4px}
+header p{font-size:14px;opacity:.85}
+.badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-top:12px}
+h2{font-size:22px;font-weight:700;color:#00A651;margin:36px 0 12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:17px;font-weight:600;color:#334155;margin:20px 0 8px}
+p{margin-bottom:12px;font-size:15px}
+.step{background:#fff;border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #00A651}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#00A651;color:#fff;border-radius:50%;font-size:14px;font-weight:700;margin-right:8px;flex-shrink:0}
+.step-title{font-weight:600;font-size:16px;color:#1e293b}
+.step-text{margin-top:8px;font-size:14px;color:#475569}
+.screenshot{text-align:center;margin:16px 0}
+.screenshot img{max-width:600px;width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);border:1px solid #e2e8f0}
+.screenshot.mobile img{max-width:320px}
+.screenshot figcaption{font-size:12px;color:#94a3b8;margin-top:6px;font-style:italic}
+.tip{background:#E8F5E9;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #00A651}
+.tip strong{color:#00A651}
+.warning{background:#FFF3E0;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #E65100}
+.warning strong{color:#E65100}
+.field-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+.field-table th{background:#f1f5f9;padding:8px 12px;text-align:left;font-weight:600;border-bottom:2px solid #e2e8f0}
+.field-table td{padding:8px 12px;border-bottom:1px solid #f1f5f9}
+footer{text-align:center;padding:30px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:40px}
+.how-it-works{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:16px 0}
+.how-card{background:#fff;border-radius:12px;padding:20px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.how-card .num{width:36px;height:36px;border-radius:50%;background:#00A651;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin-bottom:8px}
+.how-card h4{font-size:15px;margin-bottom:4px;color:#1e293b}
+.how-card p{font-size:13px;color:#64748b;margin:0}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Manual del Cliente</h1>
+    <p>Guia para pedir sacas de escombro, pagar y consultar tus pedidos</p>
+    <span class="badge">BF10 Sacos de Escombro Madrid</span>
+</header>
+
+<div class="container">
+
+<h2>1. Pagina principal</h2>
+
+<p>Desde la web puedes ver los packs disponibles, precios, zonas de servicio y hacer tu pedido directamente.</p>
+
+<figure class="screenshot">
+    <img src="img/cliente_00_landing.png" alt="Pagina principal de BF10">
+    <figcaption>Pagina principal — informacion de packs y precios</figcaption>
+</figure>
+
+<div class="how-it-works">
+    <div class="how-card">
+        <div class="num">1</div>
+        <h4>Pide tus sacas</h4>
+        <p>Elige el pack que necesites desde la web o por WhatsApp</p>
+    </div>
+    <div class="how-card">
+        <div class="num">2</div>
+        <h4>Te las entregamos</h4>
+        <p>Entrega en 24-48 horas en tu direccion</p>
+    </div>
+    <div class="how-card">
+        <div class="num">3</div>
+        <h4>Llenalas</h4>
+        <p>Llena las sacas con escombro de tu obra o reforma</p>
+    </div>
+    <div class="how-card">
+        <div class="num">4</div>
+        <h4>Las recogemos</h4>
+        <p>Avisanos y pasamos a recogerlas. Gestion de residuos incluida</p>
+    </div>
+</div>
+
+<h2>2. Hacer un pedido</h2>
+
+<div class="step">
+    <span class="step-num">1</span>
+    <span class="step-title">Selecciona tu pack</span>
+    <div class="step-text">Pulsa <strong>"Pedir sacos"</strong> o desplazate hasta la seccion de pedidos. Selecciona el numero de sacas que necesitas.</div>
+</div>
+
+<div class="step">
+    <span class="step-num">2</span>
+    <span class="step-title">Rellena tus datos</span>
+    <div class="step-text">Introduce tu nombre, email, telefono, direccion de entrega y codigo postal. Si necesitas factura, marca la casilla correspondiente e introduce tu NIF.</div>
+</div>
+
+<h3>Datos del pedido</h3>
+
+<table class="field-table">
+    <tr><th>Campo</th><th>Descripcion</th></tr>
+    <tr><td><strong>Nombre</strong></td><td>Tu nombre completo o razon social</td></tr>
+    <tr><td><strong>Email</strong></td><td>Para enviarte la confirmacion del pedido</td></tr>
+    <tr><td><strong>Telefono</strong></td><td>Para coordinacion de la entrega</td></tr>
+    <tr><td><strong>Direccion</strong></td><td>Calle, numero, piso/puerta donde entregar las sacas</td></tr>
+    <tr><td><strong>Codigo Postal</strong></td><td>CP de la zona de entrega</td></tr>
+    <tr><td><strong>Necesito factura</strong></td><td>Marca esta casilla si necesitas factura con IVA</td></tr>
+    <tr><td><strong>NIF/CIF</strong></td><td>Solo si solicitas factura</td></tr>
+</table>
+
+<div class="step">
+    <span class="step-num">3</span>
+    <span class="step-title">Paga con tarjeta</span>
+    <div class="step-text">Al confirmar, seras redirigido a la pasarela de pago segura de <strong>Stripe</strong>. Introduce los datos de tu tarjeta y confirma.</div>
+</div>
+
+<div class="step">
+    <span class="step-num">4</span>
+    <span class="step-title">Confirmacion</span>
+    <div class="step-text">Veras la pantalla de confirmacion con tu codigo de pedido. Tambien recibiras un email de confirmacion.</div>
+</div>
+
+<figure class="screenshot">
+    <img src="img/cliente_03_pago_ok.png" alt="Pago confirmado">
+    <figcaption>Confirmacion de pago — tu pedido ha sido registrado</figcaption>
+</figure>
+
+<div class="tip">
+    <strong>Pedido por WhatsApp:</strong> Tambien puedes hacer tu pedido por WhatsApp. Un asistente automatico te guiara paso a paso y al final recibiras un enlace de pago.
+</div>
+
+<h2>3. Mi cuenta — Consultar pedidos</h2>
+
+<p>Desde <strong>"Mi cuenta"</strong> en el menu de la web puedes ver el resumen de todos tus pedidos.</p>
+
+<figure class="screenshot">
+    <img src="img/cliente_01_dashboard.png" alt="Dashboard de Mi cuenta">
+    <figcaption>Panel de Mi cuenta — resumen de pedidos y gasto total</figcaption>
+</figure>
+
+<table class="field-table">
+    <tr><th>Indicador</th><th>Que muestra</th></tr>
+    <tr><td><strong>Pedidos totales</strong></td><td>Numero total de pedidos realizados</td></tr>
+    <tr><td><strong>Pagados</strong></td><td>Pedidos con pago confirmado</td></tr>
+    <tr><td><strong>Pendientes</strong></td><td>Pedidos pendientes de pago o entrega</td></tr>
+    <tr><td><strong>Entregados</strong></td><td>Pedidos ya entregados en tu direccion</td></tr>
+    <tr><td><strong>Gasto total</strong></td><td>Total acumulado de todos tus pedidos</td></tr>
+</table>
+
+<p>Debajo veras la lista de <strong>Mis pedidos</strong> con el detalle de cada uno.</p>
+
+<div class="warning">
+    <strong>Primera vez?</strong> Tu contrasena se genera automaticamente y se envia a tu email con la confirmacion del primer pedido. Revisa tu bandeja de entrada (y spam).
+</div>
+
+<h2>4. Mis recogidas — Estado de tus sacas</h2>
+
+<p>Desde el movil, accede a <strong>"Mis Recogidas"</strong>. Introduce tu numero de telefono y pulsa <strong>"Ver sacas"</strong>.</p>
+
+<figure class="screenshot mobile">
+    <img src="img/cliente_02_recogidas.png" alt="Mis Recogidas">
+    <figcaption>Mis Recogidas — introduce tu telefono para ver el estado</figcaption>
+</figure>
+
+<p>Tus recogidas se organizan en tres pestanas:</p>
+
+<table class="field-table">
+    <tr><th>Pestana</th><th>Contenido</th></tr>
+    <tr><td><strong>Pendientes</strong></td><td>Sacas registradas que aun no se han recogido</td></tr>
+    <tr><td><strong>En ruta</strong></td><td>Sacas asignadas a un conductor en camino</td></tr>
+    <tr><td><strong>Completadas</strong></td><td>Sacas ya recogidas</td></tr>
+</table>
+
+<div class="tip">
+    <strong>Solicitar recogida:</strong> Cuando tus sacas esten llenas, solicita la recogida desde esta pagina o escribe por WhatsApp con la palabra "recogida".
+</div>
+
+<h2>5. Zonas de servicio</h2>
+
+<figure class="screenshot">
+    <img src="img/cliente_04_zonas.png" alt="Zonas de servicio">
+    <figcaption>Zonas de servicio — Madrid capital y municipios</figcaption>
+</figure>
+
+<table class="field-table">
+    <tr><th>Zona</th><th>Cobertura</th></tr>
+    <tr><td><strong>Madrid Capital</strong></td><td>Todos los distritos</td></tr>
+    <tr><td><strong>Zona Norte y Oeste</strong></td><td>Alcobendas, S.S. de los Reyes, Las Rozas, Majadahonda, Pozuelo, Boadilla, Aravaca</td></tr>
+    <tr><td><strong>Zona Sur</strong></td><td>Getafe, Leganes, Alcorcon, Mostoles, Fuenlabrada, Parla, Pinto, Humanes</td></tr>
+    <tr><td><strong>Zona Este</strong></td><td>Coslada, S. Fernando de Henares, Mejorada, Velilla, Rivas, Arganda</td></tr>
+</table>
+
+<h2>6. Contacto</h2>
+
+<div class="step">
+    <span class="step-num">?</span>
+    <span class="step-title">Canales de contacto</span>
+    <div class="step-text">
+        <strong>Telefono:</strong> 674 78 34 79<br>
+        <strong>Email:</strong> pedidos@sacosescombromadridbf10.es<br>
+        <strong>WhatsApp:</strong> Escribe directamente al numero de BF10
+    </div>
+</div>
+
+</div>
+
+<footer>
+    Manual de usuario — Cliente | BF10 Sacos de Escombro Madrid<br>
+    Ultima actualizacion: Abril 2026
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — Conductor | BF10</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.7}
+.container{max-width:800px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,#DA291C,#a01d14);color:#fff;padding:40px 24px;text-align:center;border-radius:0 0 24px 24px}
+header h1{font-size:28px;font-weight:800;margin-bottom:4px}
+header p{font-size:14px;opacity:.85}
+.badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-top:12px}
+h2{font-size:22px;font-weight:700;color:#DA291C;margin:36px 0 12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:17px;font-weight:600;color:#334155;margin:20px 0 8px}
+p{margin-bottom:12px;font-size:15px}
+ul{margin:8px 0 16px 24px;font-size:15px}
+li{margin-bottom:6px}
+.step{background:#fff;border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #DA291C}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#DA291C;color:#fff;border-radius:50%;font-size:14px;font-weight:700;margin-right:8px;flex-shrink:0}
+.step-title{font-weight:600;font-size:16px;color:#1e293b}
+.step-text{margin-top:8px;font-size:14px;color:#475569}
+.screenshot{text-align:center;margin:16px 0}
+.screenshot img{max-width:320px;width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);border:1px solid #e2e8f0}
+.screenshot figcaption{font-size:12px;color:#94a3b8;margin-top:6px;font-style:italic}
+.tip{background:#FFEBEE;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #DA291C}
+.tip strong{color:#DA291C}
+.tip-green{background:#E8F5E9;border-radius:10px;padding:14px 16px;margin:12px 0;font-size:14px;border-left:4px solid #00A651}
+.tip-green strong{color:#00A651}
+.icon-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+.icon-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.icon-table .btn-col{width:120px;font-weight:700;color:#DA291C}
+.field-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+.field-table th{background:#f1f5f9;padding:8px 12px;text-align:left;font-weight:600;border-bottom:2px solid #e2e8f0}
+.field-table td{padding:8px 12px;border-bottom:1px solid #f1f5f9}
+.field-table .required{color:#c62828;font-weight:700}
+footer{text-align:center;padding:30px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:40px}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Manual del Conductor</h1>
+    <p>Guia de uso de la app de rutas y recogidas</p>
+    <span class="badge">BF10 Sacos de Escombro</span>
+</header>
+
+<div class="container">
+
+<!-- 1. ACCESO -->
+<h2>1. Acceso a la aplicacion</h2>
+
+<p>La app del Conductor es una aplicacion movil (PWA) que se instala en tu movil desde el navegador. Se usa para gestionar las paradas de recogida diarias, organizar viajes y marcar las sacas recogidas.</p>
+
+<div class="step">
+    <span class="step-num">1</span>
+    <span class="step-title">Abre la app</span>
+    <div class="step-text">Pulsa el icono "BF10 Rutas" en tu movil. Si no lo tienes instalado, abre Chrome y ve a la direccion de la app. Te aparecera un banner para instalarla.</div>
+</div>
+
+<div class="step">
+    <span class="step-num">2</span>
+    <span class="step-title">Introduce tu PIN</span>
+    <div class="step-text">Veras un teclado numerico. Pulsa los 4 digitos de tu PIN personal. Los puntos se ponen rojos al pulsar cada numero.</div>
+</div>
+
+<figure class="screenshot">
+    <img src="img/01_pin.png" alt="Pantalla de login con PIN">
+    <figcaption>Pantalla de inicio — Introduce tu PIN de 4 digitos</figcaption>
+</figure>
+
+<div class="tip">
+    <strong>Importante:</strong> Tu PIN es personal. No lo compartas con otros conductores. Si te equivocas, pulsa la flecha de borrar y reintenta.
+</div>
+
+<!-- 2. PANTALLA PRINCIPAL -->
+<h2>2. Pantalla principal</h2>
+
+<p>Despues de introducir el PIN correcto, veras tu pantalla de trabajo con toda la informacion del dia.</p>
+
+<figure class="screenshot">
+    <img src="img/02_principal.png" alt="Pantalla principal">
+    <figcaption>Pantalla principal — Estadisticas, camion, fecha y lista de paradas</figcaption>
+</figure>
+
+<h3>Cabecera</h3>
+<ul>
+    <li><strong>Tu nombre</strong> en rojo arriba a la izquierda.</li>
+    <li><strong>+ Parada:</strong> crear una nueva parada de recogida.</li>
+    <li><strong>Crear ruta:</strong> asignar viajes automaticamente a las paradas.</li>
+    <li><strong>Salir:</strong> cerrar sesion y volver al PIN.</li>
+</ul>
+
+<h3>Estadisticas (barra verde)</h3>
+<ul>
+    <li><strong>Hoy:</strong> sacas recogidas hoy (y paradas entre parentesis).</li>
+    <li><strong>Semana:</strong> sacas de esta semana.</li>
+    <li><strong>Mes:</strong> sacas del mes actual.</li>
+    <li><strong>Ano:</strong> sacas del ano.</li>
+    <li><strong>Km hoy / Km mes:</strong> kilometros estimados de las rutas (en azul).</li>
+</ul>
+
+<h3>Seleccion de camion</h3>
+<ul>
+    <li>Selector con tu camion habitual ya preseleccionado.</li>
+    <li>Puedes cambiarlo y pulsar <strong>OK</strong> para guardar.</li>
+    <li>Obligatorio antes de empezar la jornada.</li>
+</ul>
+
+<h3>Pestanas</h3>
+<ul>
+    <li><strong>Por recoger:</strong> paradas pendientes. El numero rojo indica las sacas totales.</li>
+    <li><strong>Recogidas:</strong> paradas ya recogidas.</li>
+    <li><strong>Otras &#9662;:</strong> submenu con "No estan" y "Todas".</li>
+</ul>
+
+<h3>Cada parada muestra</h3>
+<ul>
+    <li>Direccion (pulsa para ver detalle).</li>
+    <li>Sacas (azul), Marca (amarillo), Viaje (azul), Dias pendientes (naranja/rojo).</li>
+    <li>Barrio, telefono de contacto.</li>
+    <li>Pin de mapa (si tiene ubicacion GPS).</li>
+</ul>
+
+<!-- 3. BOTONES -->
+<h2>3. Botones de cada parada</h2>
+
+<p>Cada parada pendiente tiene estos botones en la fila de acciones:</p>
+
+<table class="icon-table">
+    <tr><td class="btn-col">SN / V1 / V2...</td><td>Selector de viaje. Asigna la parada a un viaje manualmente.</td></tr>
+    <tr><td class="btn-col">Bocadillo gris</td><td>Abre la pantalla de <strong>observaciones</strong> para escribir notas, cambiar sacas, marca y etiquetas.</td></tr>
+    <tr><td class="btn-col">Check verde &#10004;</td><td>Marcar como <strong>RECOGIDA</strong>. Se abre una pantalla para introducir las etiquetas antes de confirmar.</td></tr>
+    <tr><td class="btn-col">X roja &#10008;</td><td>Marcar como <strong>NO ESTA</strong>. El cliente no estaba en la direccion.</td></tr>
+    <tr><td class="btn-col">Flechas &#8593; &#8595;</td><td>Subir o bajar la parada en la lista para cambiar el orden.</td></tr>
+    <tr><td class="btn-col">&#9776; (arrastrar)</td><td>Manten pulsado y arrastra la parada hasta la posicion que quieras.</td></tr>
+    <tr><td class="btn-col">&#128205; (mapa)</td><td>Abre Google Maps mostrando la ubicacion exacta de la parada.</td></tr>
+</table>
+
+<!-- 4. VIAJES -->
+<h2>4. Viajes y rutas</h2>
+
+<p>Los viajes organizan las paradas en grupos. Cada viaje es un recorrido con el camion cargado.</p>
+
+<figure class="screenshot">
+    <img src="img/03_viaje1.png" alt="Vista de Viaje 1">
+    <figcaption>Vista de Viaje 1 — Salida, destino y botones de ruta</figcaption>
+</figure>
+
+<h3>Seleccionar un viaje</h3>
+<ul>
+    <li>Debajo de "Por recoger" veras las pestanas: <strong>Todos, Viaje 1, Viaje 2, Viaje 3, Viaje 4</strong>.</li>
+    <li>Pulsa en un viaje para ver solo las paradas de ese viaje.</li>
+    <li>Aparece la direccion de <strong>Salida</strong> y <strong>Destino</strong>.</li>
+</ul>
+
+<h3>Crear ruta automatica</h3>
+
+<div class="step">
+    <span class="step-num">1</span>
+    <span class="step-title">Pulsa "Crear ruta"</span>
+    <div class="step-text">Esta en la cabecera, al lado de "+ Parada".</div>
+</div>
+<div class="step">
+    <span class="step-num">2</span>
+    <span class="step-title">Indica cuantos viajes</span>
+    <div class="step-text">Te pregunta cuantos viajes vas a hacer hoy (de 1 a 4). La app reparte las paradas en esos viajes, agrupando por barrio y respetando la capacidad del camion.</div>
+</div>
+<div class="step">
+    <span class="step-num">3</span>
+    <span class="step-title">Revisa el resultado</span>
+    <div class="step-text">Te muestra un resumen: cuantas paradas y sacas en cada viaje, km estimados, y sacas sin asignar (si no caben todas).</div>
+</div>
+
+<h3>Puntos de salida y destino</h3>
+<ul>
+    <li><strong>Viaje 1:</strong> sale de la Nave de Getafe.</li>
+    <li><strong>Viajes 2, 3 y 4:</strong> salen del Vertedero Valdemingomez.</li>
+    <li><strong>Todos los viajes</strong> terminan en el Vertedero Valdemingomez.</li>
+</ul>
+
+<h3>Botones de ruta (solo en vista de viaje)</h3>
+<table class="icon-table">
+    <tr><td class="btn-col">&#128663; Ruta</td><td>Abre Google Maps con las paradas en el orden de la lista.</td></tr>
+    <tr><td class="btn-col">&#128663; Ruta optimizada</td><td>Abre Google Maps con el orden mas rapido calculado automaticamente por Google.</td></tr>
+</table>
+
+<div class="tip-green">
+    <strong>Consejo:</strong> Usa "Ruta optimizada" para ahorrar tiempo y combustible. Google calcula el mejor orden de paradas.
+</div>
+
+<!-- 5. MARCAR RECOGIDA -->
+<h2>5. Marcar una recogida</h2>
+
+<p>Cuando llegas a una parada y recoges las sacas:</p>
+
+<figure class="screenshot">
+    <img src="img/07_recogida.png" alt="Pantalla de confirmar recogida">
+    <figcaption>Pantalla de recogida — Introduce las etiquetas de cada saco</figcaption>
+</figure>
+
+<div class="step">
+    <span class="step-num">1</span>
+    <span class="step-title">Pulsa el check verde &#10004;</span>
+    <div class="step-text">Se abre una pantalla con la direccion, numero de sacas y marca.</div>
+</div>
+<div class="step">
+    <span class="step-num">2</span>
+    <span class="step-title">Revisa y edita si es necesario</span>
+    <div class="step-text">Puedes cambiar el numero de sacas con + y -, y cambiar la marca con el desplegable.</div>
+</div>
+<div class="step">
+    <span class="step-num">3</span>
+    <span class="step-title">Introduce las etiquetas</span>
+    <div class="step-text">Escribe el numero de etiqueta de cada saco. Hay un campo por saco.</div>
+</div>
+<div class="step">
+    <span class="step-num">4</span>
+    <span class="step-title">Pulsa "Confirmar Recogida"</span>
+    <div class="step-text">La parada se mueve a la pestana "Recogidas" y las sacas se suman a tus estadisticas del dia.</div>
+</div>
+
+<div class="tip">
+    <strong>Te equivocaste?</strong> Ve a la pestana "Recogidas", busca la parada y pulsa "Por recoger" para devolverla.
+</div>
+
+<!-- 6. DETALLE -->
+<h2>6. Ver detalle de una parada</h2>
+
+<p>Pulsa en el <strong>nombre de la direccion</strong> (texto subrayado) de cualquier parada para ver toda su informacion.</p>
+
+<figure class="screenshot">
+    <img src="img/05_detalle.png" alt="Pantalla de detalle">
+    <figcaption>Detalle de parada — Campos editables arriba, informacion abajo</figcaption>
+</figure>
+
+<h3>Campos editables (parte superior)</h3>
+<ul>
+    <li><strong>Sacas:</strong> cambiar con los botones + y -.</li>
+    <li><strong>Marca:</strong> cambiar con el desplegable.</li>
+    <li><strong>Etiquetas:</strong> un campo por cada saco para el numero de etiqueta.</li>
+    <li><strong>Observaciones:</strong> texto libre para notas del conductor.</li>
+</ul>
+
+<h3>Botones rapidos (parte superior)</h3>
+<ul>
+    <li><strong>Escribir Observacion:</strong> abre la pantalla de observaciones.</li>
+    <li><strong>Marcar Recogida:</strong> marca como recogida (pide etiquetas).</li>
+    <li><strong>Marcar No Esta:</strong> marca que el cliente no estaba.</li>
+</ul>
+
+<p><strong>No olvides pulsar "Guardar"</strong> para que los cambios se guarden en el servidor.</p>
+
+<!-- 7. OBSERVACIONES -->
+<h2>7. Escribir observaciones</h2>
+
+<p>Pulsa el <strong>bocadillo gris</strong> de una parada para abrir la pantalla de observaciones.</p>
+
+<figure class="screenshot">
+    <img src="img/06_observaciones.png" alt="Pantalla de observaciones">
+    <figcaption>Observaciones — Edita sacas, marca, notas y etiquetas</figcaption>
+</figure>
+
+<ul>
+    <li>Puedes cambiar: sacas (+/-), marca, observaciones (texto libre), etiquetas.</li>
+    <li>Pulsa <strong>"Guardar"</strong> cuando termines.</li>
+</ul>
+
+<!-- 8. NUEVA PARADA -->
+<h2>8. Anadir una parada</h2>
+
+<p>Pulsa <strong>"+ Parada"</strong> en la cabecera para crear una parada nueva.</p>
+
+<figure class="screenshot">
+    <img src="img/08_nueva_parada.png" alt="Formulario nueva parada">
+    <figcaption>Nueva parada — Rellena los campos y pulsa "Crear parada"</figcaption>
+</figure>
+
+<table class="field-table">
+    <tr><th>Campo</th><th>Descripcion</th><th>Obligatorio</th></tr>
+    <tr><td><strong>Direccion</strong></td><td>Calle y numero de la recogida.</td><td class="required">Si</td></tr>
+    <tr><td><strong>Barrio / CP</strong></td><td>Barrio o codigo postal.</td><td>No</td></tr>
+    <tr><td><strong>Sacas</strong></td><td>Numero de sacas (usa + y -).</td><td class="required">Si</td></tr>
+    <tr><td><strong>Marca</strong></td><td>Marca de los sacos.</td><td class="required">Si</td></tr>
+    <tr><td><strong>Viaje</strong></td><td>Asignar a V1, V2, V3 o V4 (o sin viaje).</td><td>No</td></tr>
+    <tr><td><strong>Telefono</strong></td><td>Telefono de contacto del cliente.</td><td>No</td></tr>
+    <tr><td><strong>Urgente</strong></td><td>Escribe SI si es urgente.</td><td>No</td></tr>
+    <tr><td><strong>Observaciones</strong></td><td>Notas adicionales.</td><td>No</td></tr>
+    <tr><td><strong>Etiquetas</strong></td><td>Se generan segun el numero de sacas.</td><td>No</td></tr>
+    <tr><td><strong>Fecha aviso</strong></td><td>Por defecto hoy.</td><td>No</td></tr>
+    <tr><td><strong>Avisador</strong></td><td>Por defecto tu nombre.</td><td>No</td></tr>
+</table>
+
+<!-- 9. RECOGIDAS -->
+<h2>9. Vista de recogidas</h2>
+
+<p>Pulsa la pestana <strong>"Recogidas"</strong> para ver las paradas que ya has recogido.</p>
+
+<figure class="screenshot">
+    <img src="img/04_recogidas.png" alt="Vista de recogidas">
+    <figcaption>Recogidas — Paradas con borde verde ya completadas</figcaption>
+</figure>
+
+<ul>
+    <li>Cada parada recogida tiene un borde verde a la izquierda.</li>
+    <li>Botones disponibles: Observaciones, "Por recoger" (devolver), "No esta".</li>
+</ul>
+
+<!-- 10. GOOGLE MAPS -->
+<h2>10. Google Maps</h2>
+
+<ul>
+    <li>Las paradas con ubicacion conocida muestran un <strong>pin rojo &#128205;</strong> al lado de la direccion.</li>
+    <li>Al pulsarlo se abre Google Maps mostrando la ubicacion exacta.</li>
+    <li>Desde la vista de viaje (V1, V2...) puedes abrir la <strong>ruta completa</strong> con todas las paradas.</li>
+</ul>
+
+<div class="tip-green">
+    <strong>Consejo:</strong> En el movil, Google Maps te da indicaciones de voz para llegar a cada parada.
+</div>
+
+<!-- 11. CERRAR SESION -->
+<h2>11. Cerrar sesion</h2>
+
+<ul>
+    <li>Pulsa <strong>"Salir"</strong> arriba a la derecha.</li>
+    <li>Volveras a la pantalla del PIN.</li>
+    <li>La proxima vez tendras que volver a introducir tu PIN.</li>
+</ul>
+
+<!-- CONSEJOS -->
+<h2>Consejos utiles</h2>
+
+<div class="tip-green">
+    <strong>Rendimiento:</strong> Si la app va lenta, cierra completamente y vuelve a abrir.
+</div>
+
+<div class="tip-green">
+    <strong>Conexion:</strong> Sin internet, la app no podra cargar las paradas.
+</div>
+
+<div class="tip-green">
+    <strong>Ruta diaria:</strong> Pulsa "Crear ruta" al empezar el dia para organizar automaticamente los viajes.
+</div>
+
+<div class="tip-green">
+    <strong>Ahorro:</strong> Usa "Ruta optimizada" en cada viaje para el camino mas corto.
+</div>
+
+<div class="tip">
+    <strong>Error al recoger?</strong> Ve a "Recogidas", busca la parada y pulsa "Por recoger" para devolverla a pendientes.
+</div>
+
+</div>
+
+<footer>
+    <p>SERVISACO — Sacos de Escombro Madrid &bull; Contacto oficina: 674 78 34 79</p>
+    <p>Manual version 1.0 — Abril 2026</p>
+</footer>
+
+</body>
+</html>

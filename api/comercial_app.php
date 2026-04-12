@@ -50,22 +50,21 @@ if ($action === 'comerciales') {
 // ── Login (verify PIN) ──────────────────────────────────────
 if ($action === 'login') {
     $input = getBody();
-    $nombre = trim($input['nombre'] ?? '');
     $pin    = trim($input['pin'] ?? '');
 
-    if (!$nombre || !$pin) {
-        jsonResponse(['error' => 'Falta nombre o PIN'], 400);
+    if (!$pin) {
+        jsonResponse(['error' => 'Falta PIN'], 400);
     }
 
-    $stmt = $pdo->prepare("SELECT user_id, pin FROM comerciales_pin WHERE nombre = :nombre AND activo = 1");
-    $stmt->execute([':nombre' => $nombre]);
+    $stmt = $pdo->prepare("SELECT user_id, nombre, pin FROM comerciales_pin WHERE pin = :pin AND activo = 1");
+    $stmt->execute([':pin' => $pin]);
     $row = $stmt->fetch();
 
-    if (!$row || $row['pin'] !== $pin) {
+    if (!$row) {
         jsonResponse(['ok' => false, 'error' => 'PIN incorrecto'], 401);
     }
 
-    jsonResponse(['ok' => true, 'nombre' => $nombre, 'user_id' => (int)$row['user_id']]);
+    jsonResponse(['ok' => true, 'nombre' => $row['nombre'], 'user_id' => (int)$row['user_id']]);
 }
 
 // ── Search customers ────────────────────────────────────────
