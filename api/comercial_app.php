@@ -277,4 +277,33 @@ if ($action === 'trash') {
     jsonResponse(['albaranes' => $stmt->fetchAll()]);
 }
 
+// ── Stock summary (read-only, per brand) ────────────────────
+if ($action === 'stock') {
+    $stmt = $pdo->query("
+        SELECT marca,
+            SUM(CASE WHEN tipo = 'entrada' THEN cantidad ELSE 0 END) AS entradas,
+            SUM(CASE WHEN tipo = 'salida'  THEN cantidad ELSE 0 END) AS salidas
+        FROM stock_movimientos
+        WHERE deleted_at IS NULL
+        GROUP BY marca
+        ORDER BY marca
+    ");
+    $rows = $stmt->fetchAll();
+    $brands = ['BF10', 'SERVISACO', 'ATUSACO', 'ATUSACO_LUISFER', 'ATUSACO_HERREROCON', 'ATUSACO_COSASCASA', 'ECOSACO', 'SACAS_BLANCAS', 'DISAKA', 'DGIL'];
+    $summary = [];
+    foreach ($brands as $b) {
+        $summary[$b] = ['marca' => $b, 'entradas' => 0, 'salidas' => 0, 'stock' => 0];
+    }
+    foreach ($rows as $r) {
+        $m = $r['marca'];
+        $summary[$m] = [
+            'marca'    => $m,
+            'entradas' => (int)$r['entradas'],
+            'salidas'  => (int)$r['salidas'],
+            'stock'    => (int)$r['entradas'] - (int)$r['salidas'],
+        ];
+    }
+    jsonResponse(['stock' => array_values($summary)]);
+}
+
 jsonResponse(['error' => 'Acción no válida'], 400);

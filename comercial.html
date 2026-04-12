@@ -19,16 +19,16 @@
 
     /* ═ Login ═ */
     /* ═ PIN ═ */
-    #pinScreen{background:var(--black);color:#fff}
-    .pin-hdr{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #333}
-    .btn-back{background:none;border:1px solid #333;color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    #pinScreen{background:var(--bg);color:var(--text)}
+    .pin-hdr{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+    .btn-back{background:none;border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .pin-dots{display:flex;gap:12px;margin-bottom:12px}
-    .pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid #333}
+    .pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:background .15s,border-color .15s}
     .pin-dot.filled{background:var(--red);border-color:var(--red)}
     .pin-error{color:var(--red);font-size:13px;min-height:20px;margin-bottom:16px}
     .pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
-    .pin-pad button{width:72px;height:54px;border-radius:10px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:22px;font-weight:600;cursor:pointer;font-family:var(--font)}
-    .pin-pad button:active{background:var(--red);border-color:var(--red)}
+    .pin-pad button{width:72px;height:54px;border-radius:10px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:22px;font-weight:600;cursor:pointer;font-family:var(--font);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .pin-pad button:active{background:var(--red);border-color:var(--red);color:#fff}
     .pin-empty{visibility:hidden}
 
     /* ═ Main app (light theme, admin style) ═ */
@@ -39,7 +39,7 @@
     .btn-sm:hover{background:rgba(255,255,255,.25)}
 
     /* Stats */
-    .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;max-width:900px;margin:0 auto;width:100%}
+    .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;max-width:900px;margin:0 auto;width:100%}
     .stat-card{background:var(--white);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow);border-top:3px solid var(--border)}
     .stat-card--blue{border-top-color:var(--blue)}.stat-card--green{border-top-color:var(--green)}.stat-card--red{border-top-color:var(--red)}
     .stat-val{font-size:24px;font-weight:800;color:var(--black)}
@@ -107,7 +107,18 @@
     .install-banner{display:none;background:var(--red);padding:12px 20px;text-align:center;cursor:pointer;font-weight:600;font-size:14px;color:#fff}
     .install-banner.show{display:block}
 
-    @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}.form-row label{min-width:140px}.data-table{font-size:12px}.data-table th,.data-table td{padding:8px 6px}}
+    /* Stock modal */
+    .stock-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
+    .stock-overlay.open{display:flex}
+    .stock-panel{background:var(--white);border-radius:12px;padding:24px;width:90%;max-width:420px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+    .stock-panel h2{font-size:18px;margin-bottom:16px;color:var(--black)}
+    .stock-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+    .stock-row:last-child{border-bottom:none}
+    .stock-marca{font-weight:600;font-size:14px}
+    .stock-qty{font-size:20px;font-weight:800}
+    .stock-qty.positive{color:var(--green)}.stock-qty.zero{color:var(--text-light)}.stock-qty.negative{color:var(--red)}
+
+    @media(max-width:600px){.stats-bar{grid-template-columns:repeat(3,1fr)}.form-row label{min-width:140px}.data-table{font-size:12px}.data-table th,.data-table td{padding:8px 6px}}
   </style>
 </head>
 <body>
@@ -118,8 +129,9 @@
   <!-- ═ PIN LOGIN ═ -->
   <div id="pinScreen" class="screen active">
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center">
-      <h1 style="font-size:28px;color:#fff;margin-bottom:4px;letter-spacing:1px">SERVI<span style="color:#DA291C">SACO</span></h1>
-      <p style="color:#888;font-size:13px;margin-bottom:32px">Comercial — Introduce tu PIN</p>
+      <h1 style="font-size:28px;color:var(--text);margin-bottom:4px;letter-spacing:1px">SERVI<span style="color:var(--red)">SACO</span></h1>
+      <p style="color:var(--red);font-size:15px;font-weight:600;margin-bottom:4px">Comercial</p>
+      <p style="color:#999;font-size:13px;margin-bottom:24px">Introduce tu PIN</p>
       <div class="pin-dots" id="pinDots"><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
       <p class="pin-error" id="pinError"></p>
       <div class="pin-pad">
@@ -136,6 +148,7 @@
     <div class="app-header">
       <span class="app-header__name" id="mainName">Comercial</span>
       <div class="app-header__actions">
+        <button class="btn-sm" onclick="openStock()">Stock</button>
         <a href="/manuales/manual-comercial.html" target="_blank" class="btn-sm" style="text-decoration:none">Ayuda</a>
         <button class="btn-sm" onclick="logout()">Salir</button>
       </div>
@@ -144,7 +157,6 @@
     <div class="stats-bar" id="statsBar">
       <div class="stat-card stat-card--blue"><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Albaranes</div></div>
       <div class="stat-card"><div class="stat-val" id="stSacas">0</div><div class="stat-lbl">Sacas</div></div>
-      <div class="stat-card stat-card--green"><div class="stat-val" id="stImporte">0 &euro;</div><div class="stat-lbl">Importe</div></div>
       <div class="stat-card stat-card--red"><div class="stat-val" id="stPagados">0/0</div><div class="stat-lbl">Pagados</div></div>
     </div>
 
@@ -168,7 +180,6 @@
             <th>Cliente</th>
             <th>Marca</th>
             <th>Sacas</th>
-            <th>Importe</th>
             <th>Pagado</th>
             <th>Acciones</th>
           </tr>
@@ -251,6 +262,15 @@
     </div>
   </div>
 
+  <!-- Stock modal -->
+  <div class="stock-overlay" id="stockOverlay" onclick="if(event.target===this)closeStock()">
+    <div class="stock-panel">
+      <h2>Stock por marca</h2>
+      <div id="stockBody"><p style="color:#999;text-align:center">Cargando...</p></div>
+      <button onclick="closeStock()" style="margin-top:16px;width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--white);font-size:14px;cursor:pointer;font-family:var(--font)">Cerrar</button>
+    </div>
+  </div>
+
 <script>
   var API = '/api/comercial_app.php';
   var currentUser = null;
@@ -307,12 +327,11 @@
         var s = data.stats || {};
         document.getElementById('stTotal').textContent = s.count || 0;
         document.getElementById('stSacas').textContent = s.sacas || 0;
-        document.getElementById('stImporte').textContent = (s.importe || 0).toFixed(2) + ' \u20ac';
         document.getElementById('stPagados').textContent = (s.pagados || 0) + '/' + (s.count || 0);
         renderTable();
       })
       .catch(function() {
-        document.getElementById('albBody').innerHTML = '<tr><td colspan="8" class="empty-msg">Error de conexion</td></tr>';
+        document.getElementById('albBody').innerHTML = '<tr><td colspan="7" class="empty-msg">Error de conexion</td></tr>';
       });
   }
 
@@ -332,7 +351,6 @@
         '<td>' + esc(a.cliente) + (a.direccion_envio ? '<br><small>' + esc(a.direccion_envio) + '</small>' : '') + '</td>' +
         '<td>' + esc(a.marca) + '</td>' +
         '<td style="text-align:center">' + a.num_sacas + '</td>' +
-        '<td>' + parseFloat(a.importe || 0).toFixed(2) + ' \u20ac<br><small>' + (pagoLabels[a.forma_pago] || a.forma_pago) + '</small></td>' +
         '<td><span class="badge-paid badge-paid--' + (paid ? 'yes' : 'no') + '">' + (paid ? 'Si' : 'No') + '</span></td>' +
         '<td>' +
           '<button class="btn-action btn-action--edit" onclick="openEdit(' + a.id + ')">Editar</button> ' +
@@ -506,6 +524,25 @@
   function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
   function escAttr(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
   function formatDate(d) { if (!d) return ''; var p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+
+  // ══ STOCK ══
+  function openStock() {
+    document.getElementById('stockOverlay').classList.add('open');
+    document.getElementById('stockBody').innerHTML = '<p style="color:#999;text-align:center">Cargando...</p>';
+    fetch(API + '?action=stock')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var items = (data.stock || []).filter(function(s) { return s.stock !== 0 || s.entradas > 0; });
+        if (!items.length) { document.getElementById('stockBody').innerHTML = '<p style="color:#999;text-align:center">Sin datos de stock</p>'; return; }
+        var marcaLabels = { BF10: 'BF10', SERVISACO: 'Servisaco', ATUSACO: 'Atusaco', ATUSACO_LUISFER: 'Atusaco Luisfer', ATUSACO_HERREROCON: 'Atusaco Herrerocon', ATUSACO_COSASCASA: 'Atusaco Cosas Casa', ECOSACO: 'Eco Saco', SACAS_BLANCAS: 'Sacas Blancas', DISAKA: 'Disaka', DGIL: 'D.Gil' };
+        document.getElementById('stockBody').innerHTML = items.map(function(s) {
+          var cls = s.stock > 0 ? 'positive' : (s.stock === 0 ? 'zero' : 'negative');
+          return '<div class="stock-row"><span class="stock-marca">' + (marcaLabels[s.marca] || s.marca) + '</span><span class="stock-qty ' + cls + '">' + s.stock + '</span></div>';
+        }).join('');
+      })
+      .catch(function() { document.getElementById('stockBody').innerHTML = '<p style="color:#c00;text-align:center">Error al cargar stock</p>'; });
+  }
+  function closeStock() { document.getElementById('stockOverlay').classList.remove('open'); }
 
   // ══ INIT ══
 
