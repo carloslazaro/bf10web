@@ -1022,7 +1022,7 @@
             }
             return '<tr>' +
                 '<td><strong>' + esc(a.albaran_code) + '</strong></td>' +
-                '<td>' + (a.fecha_entrega || '') + '</td>' +
+                '<td>' + fmtDate(a.fecha_entrega) + '</td>' +
                 '<td>' + esc(a.cliente) + '</td>' +
                 '<td>' + dirCell + '</td>' +
                 '<td><span style="color:' + (brandColors[a.marca] || '#333') + ';font-weight:600">' + esc(a.marca) + '</span></td>' +
@@ -1240,7 +1240,7 @@
                     '<div class="modal-section">' +
                         '<h3>Albarán</h3>' +
                         '<p><strong>Código:</strong> ' + esc(albaran.albaran_code) + '</p>' +
-                        '<p><strong>Fecha entrega:</strong> ' + esc(albaran.fecha_entrega) + '</p>' +
+                        '<p><strong>Fecha entrega:</strong> ' + fmtDate(albaran.fecha_entrega) + '</p>' +
                         '<p><strong>Marca:</strong> <span style="color:' + (brandColors[albaran.marca] || '#333') + ';font-weight:600">' + esc(albaran.marca) + '</span></p>' +
                         '<p><strong>Sacas:</strong> ' + albaran.num_sacas + '</p>' +
                         '<p><strong>Precio:</strong> ' + precioStr + '</p>' +
@@ -1832,8 +1832,8 @@
                 var empty = document.getElementById('users-empty');
                 if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
                 empty.style.display = 'none';
-                var roleLabels = { manager: 'Admin', comercial: 'Comercial', rutas: 'Conductor', avisador: 'Avisador', ceo: 'CEO' };
-                var roleColors = { manager: '#c62828', comercial: '#1565C0', rutas: '#2e7d32', avisador: '#E65100', ceo: '#6A1B9A' };
+                var roleLabels = { manager: 'Admin', comercial: 'Comercial', conductor: 'Conductor', rutas: 'Rutas', avisador: 'Avisador', ceo: 'CEO' };
+                var roleColors = { manager: '#c62828', comercial: '#1565C0', conductor: '#2e7d32', rutas: '#00897B', avisador: '#E65100', ceo: '#6A1B9A' };
                 tbody.innerHTML = rows.map(function (u) {
                     var pin = u.comercial_pin || u.conductor_pin || '—';
                     var pw = u.plain_password || '—';
@@ -2036,7 +2036,8 @@
                             '<option value="manager"' + (u && u.role === 'manager' ? ' selected' : '') + '>Admin</option>' +
                             (currentUserRole === 'ceo' ? '<option value="ceo"' + (u && u.role === 'ceo' ? ' selected' : '') + '>CEO</option>' : '') +
                             '<option value="comercial"' + (u && u.role === 'comercial' ? ' selected' : '') + '>Comercial</option>' +
-                            '<option value="rutas"' + (u && u.role === 'rutas' ? ' selected' : '') + '>Conductor</option>' +
+                            '<option value="conductor"' + (u && u.role === 'conductor' ? ' selected' : '') + '>Conductor</option>' +
+                            '<option value="rutas"' + (u && u.role === 'rutas' ? ' selected' : '') + '>Rutas</option>' +
                             '<option value="avisador"' + (u && u.role === 'avisador' ? ' selected' : '') + '>Avisador</option>' +
                         '</select>' +
                     '</label>' +

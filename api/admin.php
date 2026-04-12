@@ -892,7 +892,7 @@ if ($method === 'GET' && $action === 'users') {
         LEFT JOIN comerciales_pin cp ON cp.user_id = u.id
         LEFT JOIN conductores c ON c.nombre = u.name
         WHERE u.role != 'user'
-        ORDER BY FIELD(u.role, 'manager', 'comercial', 'rutas'), u.name
+        ORDER BY FIELD(u.role, 'manager', 'comercial', 'conductor', 'rutas', 'avisador'), u.name
     ")->fetchAll();
 
     jsonResponse(['users' => $users]);
@@ -915,7 +915,7 @@ if ($method === 'POST' && $action === 'user-create') {
     if (!$name) jsonResponse(['error' => 'Nombre requerido'], 400);
     if (!$email) jsonResponse(['error' => 'Email requerido'], 400);
     if (!$password) jsonResponse(['error' => 'Contraseña requerida'], 400);
-    if (!in_array($role, ['manager', 'comercial', 'rutas', 'user', 'avisador', 'ceo'])) jsonResponse(['error' => 'Rol inválido'], 400);
+    if (!in_array($role, ['manager', 'comercial', 'conductor', 'rutas', 'user', 'avisador', 'ceo'])) jsonResponse(['error' => 'Rol inválido'], 400);
 
     // Check duplicate email
     $chk = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -936,7 +936,7 @@ if ($method === 'POST' && $action === 'user-create') {
     }
 
     // Create PIN entry for conductor
-    if ($role === 'rutas' && $pin) {
+    if ($role === 'conductor' && $pin) {
         $pdo->prepare("INSERT INTO conductores (nombre, pin) VALUES (?, ?) ON DUPLICATE KEY UPDATE pin=VALUES(pin)")
             ->execute([$name, $pin]);
     }
@@ -990,7 +990,7 @@ if ($method === 'POST' && $action === 'user-update') {
     if (in_array($oldRole, $pinRoles) && !in_array($role, $pinRoles)) {
         $pdo->prepare("DELETE FROM comerciales_pin WHERE user_id = ?")->execute([$id]);
     }
-    if ($oldRole === 'rutas' && $role !== 'rutas') {
+    if (($oldRole === 'conductor' || $oldRole === 'rutas') && $role !== 'conductor') {
         $pdo->prepare("DELETE FROM conductores WHERE nombre = ?")->execute([$oldName]);
     }
 
@@ -1000,7 +1000,7 @@ if ($method === 'POST' && $action === 'user-update') {
         $pdo->prepare("INSERT INTO comerciales_pin (nombre, pin, user_id, activo) VALUES (?, ?, ?, 1)")
             ->execute([$name, $pin, $id]);
     }
-    if ($role === 'rutas' && $pin) {
+    if ($role === 'conductor' && $pin) {
         // Delete by old name AND new name to be safe
         $pdo->prepare("DELETE FROM conductores WHERE nombre = ? OR nombre = ?")->execute([$oldName, $name]);
         $pdo->prepare("INSERT INTO conductores (nombre, pin, activo) VALUES (?, ?, 1)")
