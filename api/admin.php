@@ -25,6 +25,7 @@ if ($method === 'GET' && $action === 'orders') {
 
     $status = sanitize($_GET['status'] ?? '');
     $source = sanitize($_GET['source'] ?? '');
+    $brand  = sanitize($_GET['brand'] ?? '');
     $q      = sanitize($_GET['q'] ?? '');
     $from   = sanitize($_GET['from'] ?? '');
     $to     = sanitize($_GET['to'] ?? '');
@@ -39,6 +40,10 @@ if ($method === 'GET' && $action === 'orders') {
     if ($source && in_array($source, ['web', 'whatsapp', 'admin'])) {
         $where[] = "o.source = ?";
         $params[] = $source;
+    }
+    if ($brand && isset(BRANDS[$brand])) {
+        $where[] = "o.brand = ?";
+        $params[] = $brand;
     }
     if ($q !== '') {
         $where[] = "(o.order_code LIKE ? OR o.name LIKE ? OR o.email LIKE ? OR o.phone LIKE ?)";

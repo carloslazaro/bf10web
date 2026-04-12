@@ -11,7 +11,7 @@
     var loginScreen = document.getElementById('login-screen');
     var dashboard = document.getElementById('dashboard');
 
-    var filters = { status: '', source: '', q: '', from: '', to: '' };
+    var filters = { status: '', source: '', brand: '', q: '', from: '', to: '' };
 
     var currentOrder = null;
 
@@ -146,7 +146,7 @@
         var statusLabel = { confirmado: 'Confirmado', pendiente_pago: 'Pendiente pago', enviado: 'Enviado', recogida: 'Recogida' };
 
         tbody.innerHTML = orders.map(function (o) {
-            var d = new Date(o.created_at).toLocaleDateString('es-ES');
+            var d = fmtDate(o.created_at);
             var src = o.source || 'web';
             var requestedInvoice = o.request_invoice == 1 || o.request_invoice === '1';
             var invCell = requestedInvoice
@@ -240,10 +240,10 @@
     function showModal(order) {
         var modal = document.getElementById('order-modal');
         var body = document.getElementById('modal-body');
-        var date = new Date(order.created_at).toLocaleString('es-ES');
+        var date = fmtDateTime(order.created_at);
         var statusLabel = { confirmado: 'Confirmado', pendiente_pago: 'Pendiente de pago', enviado: 'Enviado', recogida: 'Recogida (residuo en planta)' };
         var wantsInvoice = order.request_invoice == 1 || order.request_invoice === '1';
-        var paidStr = order.paid_at ? new Date(order.paid_at).toLocaleString('es-ES') : '';
+        var paidStr = order.paid_at ? fmtDateTime(order.paid_at) : '';
 
         body.innerHTML =
             '<div class="modal-tabs">' +
@@ -294,10 +294,10 @@
                         '<hr style="border:none;border-top:1px solid #eee;margin:14px 0;">' +
                         '<h4 style="margin:0 0 8px 0;">Certificado RCD</h4>' +
                         (parseInt(order.certificate_requested, 10) === 1
-                            ? '<p>✓ Cliente solicitó certificado' + (order.certificate_requested_at ? ' (' + new Date(order.certificate_requested_at).toLocaleDateString('es-ES') + ')' : '') + '</p>'
+                            ? '<p>✓ Cliente solicitó certificado' + (order.certificate_requested_at ? ' (' + fmtDate(order.certificate_requested_at) + ')' : '') + '</p>'
                             : '<p><em>No solicitado por el cliente.</em></p>') +
                         (order.certificate_issued_at
-                            ? '<p>📜 Emitido <strong>' + esc(order.certificate_number || '') + '</strong> el ' + new Date(order.certificate_issued_at).toLocaleDateString('es-ES') + '</p>'
+                            ? '<p>📜 Emitido <strong>' + esc(order.certificate_number || '') + '</strong> el ' + fmtDate(order.certificate_issued_at) + '</p>'
                             : '') +
                         '<p style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">' +
                             (order.status === 'recogida'
@@ -347,7 +347,7 @@
                 if (!events.length) { c.innerHTML = '<p><em>Sin eventos registrados.</em></p>'; return; }
                 c.innerHTML = '<div class="timeline">' + events.map(function (e) {
                     return '<div class="timeline-item">' +
-                        '<div class="timeline-item__time">' + new Date(e.created_at).toLocaleString('es-ES') + '</div>' +
+                        '<div class="timeline-item__time">' + fmtDateTime(e.created_at) + '</div>' +
                         '<div class="timeline-item__desc"><strong>' + esc(e.event_type) + '</strong> — ' + esc(e.description || '') + '</div>' +
                         '<div class="timeline-item__actor">' + esc(e.actor || 'sistema') + '</div>' +
                     '</div>';
@@ -430,7 +430,7 @@
                         ? '<span class="badge badge--sent">enviado</span>'
                         : '<span class="badge badge--no">' + esc(e.status) + '</span>';
                     return '<tr>' +
-                        '<td>' + new Date(e.created_at).toLocaleString('es-ES') + '</td>' +
+                        '<td>' + fmtDateTime(e.created_at) + '</td>' +
                         '<td>' + (e.order_id || '—') + '</td>' +
                         '<td>' + esc(e.to_email) + '</td>' +
                         '<td>' + esc(e.subject) + '</td>' +
@@ -455,6 +455,7 @@
     document.getElementById('btn-apply-filters').addEventListener('click', function () {
         filters.q      = document.getElementById('filter-q').value.trim();
         filters.source = document.getElementById('filter-source').value;
+        filters.brand  = document.getElementById('filter-brand').value;
         filters.from   = document.getElementById('filter-from').value;
         filters.to     = document.getElementById('filter-to').value;
         loadOrders();
@@ -462,9 +463,10 @@
     document.getElementById('btn-clear-filters').addEventListener('click', function () {
         document.getElementById('filter-q').value = '';
         document.getElementById('filter-source').value = '';
+        document.getElementById('filter-brand').value = '';
         document.getElementById('filter-from').value = '';
         document.getElementById('filter-to').value = '';
-        filters = { status: filters.status, source: '', q: '', from: '', to: '' };
+        filters = { status: filters.status, source: '', brand: '', q: '', from: '', to: '' };
         loadOrders();
     });
     document.getElementById('filter-q').addEventListener('keydown', function (e) {
@@ -494,7 +496,7 @@
             if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
             empty.style.display = 'none';
             tbody.innerHTML = rows.map(function (c) {
-                var last = c.last_order_at ? new Date(c.last_order_at).toLocaleDateString('es-ES') : '—';
+                var last = c.last_order_at ? fmtDate(c.last_order_at) : '—';
                 return '<tr>' +
                     '<td><strong>' + esc(c.name) + '</strong></td>' +
                     '<td>' + esc(c.phone) + '</td>' +
@@ -626,7 +628,7 @@
               albaranes.map(function (a) {
                   return '<tr>' +
                     '<td><strong>' + esc(a.albaran_code) + '</strong></td>' +
-                    '<td>' + new Date(a.fecha_entrega).toLocaleDateString('es-ES') + '</td>' +
+                    '<td>' + fmtDate(a.fecha_entrega) + '</td>' +
                     '<td>' + esc(a.marca) + '</td>' +
                     '<td>' + a.num_sacas + '</td>' +
                     '<td>' + money(a.importe) + '</td>' +
@@ -648,7 +650,7 @@
               orders.map(function (o) {
                   return '<tr>' +
                     '<td><strong>' + esc(o.order_code) + '</strong></td>' +
-                    '<td>' + new Date(o.created_at).toLocaleDateString('es-ES') + '</td>' +
+                    '<td>' + fmtDate(o.created_at) + '</td>' +
                     '<td>' + esc(o.brand || 'BF10') + '</td>' +
                     '<td>' + esc(o.package_name) + '</td>' +
                     '<td>' + money(o.package_price) + '</td>' +
@@ -677,8 +679,8 @@
                     '<p><strong>Pedidos web:</strong> ' + (c.orders_count || 0) + '</p>' +
                     '<p><strong>Albaranes:</strong> ' + (albaranes ? albaranes.length : 0) + '</p>' +
                     '<p><strong>Gasto total (web):</strong> ' + money(c.total_spent) + '</p>' +
-                    (c.first_order_at ? '<p><strong>Primer pedido:</strong> ' + new Date(c.first_order_at).toLocaleDateString('es-ES') + '</p>' : '') +
-                    (c.last_order_at  ? '<p><strong>Último pedido:</strong> ' + new Date(c.last_order_at).toLocaleDateString('es-ES') + '</p>' : '') +
+                    (c.first_order_at ? '<p><strong>Primer pedido:</strong> ' + fmtDate(c.first_order_at) + '</p>' : '') +
+                    (c.last_order_at  ? '<p><strong>Último pedido:</strong> ' + fmtDate(c.last_order_at) + '</p>' : '') +
                 '</div>' +
             '</div>' +
             '<h3 style="margin-top:24px">Albaranes</h3>' +
@@ -757,6 +759,16 @@
         if (m === 'cash')     return 'Efectivo';
         return m || '—';
     }
+    function fmtDate(s) {
+        if (!s) return '—';
+        var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return m ? m[3] + '/' + m[2] + '/' + m[1] : s;
+    }
+    function fmtDateTime(s) {
+        if (!s) return '—';
+        var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+        return m ? m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] + ':' + m[5] : s;
+    }
     function esc(str) {
         if (str === null || str === undefined) return '';
         var div = document.createElement('div');
@@ -833,7 +845,7 @@
         var motivoLabels = { compra: 'Compra', devolucion: 'Devolución', venta_albaran: 'Venta (albarán)', ajuste: 'Ajuste', otro: 'Otro' };
 
         tbody.innerHTML = rows.map(function (m) {
-            var fecha = m.created_at ? m.created_at.substring(0, 16).replace('T', ' ') : '';
+            var fecha = fmtDateTime(m.created_at);
             var num = '';
             if (m.numeracion_inicial && m.numeracion_final) num = m.numeracion_inicial + ' - ' + m.numeracion_final;
             else if (m.numeracion_inicial) num = m.numeracion_inicial + '';
@@ -1254,7 +1266,7 @@
                     '</div>' +
                 '</div>' +
                 '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid #eee">' +
-                    '<p style="color:#888;font-size:.82rem"><strong>Comercial:</strong> ' + esc(albaran.comercial_name || '—') + ' · <strong>Creado:</strong> ' + (albaran.created_at || '—') + '</p>' +
+                    '<p style="color:#888;font-size:.82rem"><strong>Comercial:</strong> ' + esc(albaran.comercial_name || '—') + ' · <strong>Creado:</strong> ' + fmtDateTime(albaran.created_at) + '</p>' +
                 '</div>' +
                 '<p style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">' +
                     '<button class="btn-action btn-primary" onclick="albDetailEdit()">✏️ Editar albarán</button>' +
@@ -1584,8 +1596,8 @@
                 '<td style="font-weight:600">' + p.cantidad + '</td>' +
                 '<td>' + esc(num || '—') + '</td>' +
                 '<td>' + esc(p.proveedor || '—') + '</td>' +
-                '<td>' + (p.fecha_pedido || '—') + '</td>' +
-                '<td>' + (p.fecha_prevista_entrega || '—') + '</td>' +
+                '<td>' + fmtDate(p.fecha_pedido) + '</td>' +
+                '<td>' + fmtDate(p.fecha_prevista_entrega) + '</td>' +
                 '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(p.comentarios || '') + '">' + esc(p.comentarios || '—') + '</td>' +
                 '<td style="white-space:nowrap">' + actions + '</td>' +
                 '</tr>';
@@ -1622,9 +1634,9 @@
                 '<td style="font-weight:600">' + p.cantidad + '</td>' +
                 '<td>' + esc(num || '—') + '</td>' +
                 '<td>' + esc(p.proveedor || '—') + '</td>' +
-                '<td>' + (p.fecha_pedido || '—') + '</td>' +
-                '<td>' + (p.fecha_prevista_entrega || '—') + '</td>' +
-                '<td><strong>' + (p.fecha_real_entrega || '—') + '</strong></td>' +
+                '<td>' + fmtDate(p.fecha_pedido) + '</td>' +
+                '<td>' + fmtDate(p.fecha_prevista_entrega) + '</td>' +
+                '<td><strong>' + fmtDate(p.fecha_real_entrega) + '</strong></td>' +
                 '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(p.comentarios || '') + '">' + esc(p.comentarios || '—') + '</td>' +
                 '<td style="white-space:nowrap">' + actions + '</td>' +
                 '</tr>';

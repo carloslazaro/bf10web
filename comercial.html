@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#111">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>BF10 Comercial</title>
+  <title>Servisaco — Comercial</title>
   <link rel="manifest" href="/manifest-comercial.json">
   <link rel="apple-touch-icon" href="/img/icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -112,14 +112,14 @@
 </head>
 <body>
 
-  <div class="install-banner" id="installBanner" onclick="installPWA()">Instalar App BF10 Comercial</div>
+  <div class="install-banner" id="installBanner" onclick="installPWA()">Instalar App Servisaco Comercial</div>
 
   <!-- ═ LOGIN ═ -->
   <!-- ═ PIN LOGIN ═ -->
   <div id="pinScreen" class="screen active">
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center">
-      <img src="/img/icon-192.png" alt="BF10" style="width:80px;margin-bottom:20px;border-radius:16px" onerror="this.style.background='#DA291C';this.style.display='block'">
-      <h1 style="font-size:22px;color:#fff;margin-bottom:4px">SACOS <span style="color:#DA291C">BF10</span></h1>
+      <img src="/img/icon-192.png" alt="Servisaco" style="width:80px;margin-bottom:20px;border-radius:16px" onerror="this.style.background='#DA291C';this.style.display='block'">
+      <h1 style="font-size:22px;color:#fff;margin-bottom:4px">SERVI<span style="color:#DA291C">SACO</span></h1>
       <p style="color:#888;font-size:13px;margin-bottom:32px">Comercial — Introduce tu PIN</p>
       <div class="pin-dots" id="pinDots"><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
       <p class="pin-error" id="pinError"></p>
@@ -137,6 +137,7 @@
     <div class="app-header">
       <span class="app-header__name" id="mainName">Comercial</span>
       <div class="app-header__actions">
+        <a href="/manuales/manual-comercial.html" target="_blank" class="btn-sm" style="text-decoration:none">Ayuda</a>
         <button class="btn-sm" onclick="logout()">Salir</button>
       </div>
     </div>
