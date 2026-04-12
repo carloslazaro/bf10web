@@ -223,6 +223,56 @@
     .submenu-item:active { background: var(--blue); color: #fff; }
     .submenu-item + .submenu-item { border-top: 1px solid var(--border); }
 
+    /* Mapa tab */
+    .tab-mapa { color: var(--blue); }
+
+    /* Map overlay */
+    .map-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: #fff;
+    }
+    .map-overlay.open { display: flex; flex-direction: column; }
+    .map-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--dark);
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .map-header button {
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .map-header strong { font-size: 15px; }
+    .map-header .map-count { margin-left: auto; font-size: 13px; opacity: .8; }
+    .map-filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .map-filter-bar select {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--card);
+    }
+    #mapCanvas { flex: 1; width: 100%; }
+
     /* Viaje subtabs */
     .viaje-bar {
       display: none;
@@ -822,9 +872,10 @@
     </div>
     <div class="tabs">
       <div class="tab active" data-filter="por_recoger" onclick="setFilter('por_recoger')">Por recoger <span class="count" id="cntPending">0</span></div>
-      <div class="tab" data-filter="recogida" onclick="setFilter('recogida')">Recogidas <span class="count" id="cntDone">0</span></div>
+      <div class="tab tab-mapa" onclick="openMap()">&#128205; Mapa</div>
       <div class="tab tab-otras" data-filter="otras" onclick="toggleOtras()">Otras &#9662;
         <div class="submenu" id="submenuOtras">
+          <div class="submenu-item" onclick="event.stopPropagation();setFilter('recogida');closeOtras()">Recogidas <span class="count" id="cntDone">0</span></div>
           <div class="submenu-item" onclick="event.stopPropagation();setFilter('no_estan');closeOtras()">No estan <span class="count" id="cntAbsent">0</span></div>
           <div class="submenu-item" onclick="event.stopPropagation();setFilter('todas');closeOtras()">Todas <span class="count" id="cntAll">0</span></div>
         </div>
@@ -848,6 +899,25 @@
       <div class="loading"><div class="spinner"></div></div>
     </div>
     <a class="help-footer" href="/manuales/manual-conductor.html" target="_blank" rel="noopener">&#10067; Ayuda — Manual del conductor</a>
+  </div>
+
+  <!-- ═══ MAP OVERLAY ═══ -->
+  <div class="map-overlay" id="mapOverlay">
+    <div class="map-header">
+      <button onclick="closeMap()">&#8592;</button>
+      <strong>&#128205; Mapa de paradas</strong>
+      <span class="map-count" id="mapCount"></span>
+    </div>
+    <div class="map-filter-bar">
+      <select id="mapFilterViaje" onchange="applyMapFilter()">
+        <option value="">Todos los viajes</option>
+        <option value="Viaje 1">Viaje 1</option>
+        <option value="Viaje 2">Viaje 2</option>
+        <option value="Viaje 3">Viaje 3</option>
+        <option value="Viaje 4">Viaje 4</option>
+      </select>
+    </div>
+    <div id="mapCanvas"></div>
   </div>
 
   <!-- ═══ SCREEN 3: DETAIL / OBSERVACIONES ═══ -->
@@ -1059,7 +1129,7 @@
       currentFilter = f;
       document.querySelectorAll('.tab').forEach(t => {
         const match = t.dataset.filter === f;
-        const isOtras = t.dataset.filter === 'otras' && (f === 'no_estan' || f === 'todas');
+        const isOtras = t.dataset.filter === 'otras' && (f === 'recogida' || f === 'no_estan' || f === 'todas');
         t.classList.toggle('active', match || isOtras);
       });
       const isPorRecoger = f === 'por_recoger';
@@ -2122,6 +2192,118 @@
     }
 
     function enc(str) { return encodeURIComponent(str); }
+
+    // ══════════════════════════════════════════════════════════
+    // MAP
+    // ══════════════════════════════════════════════════════════
+    let mapInstance = null;
+    let mapMarkers = [];
+    let mapInfoWindow = null;
+    let mapLoaded = false;
+
+    function openMap() {
+      document.getElementById('mapOverlay').classList.add('open');
+      // Sync viaje filter with current viaje selection
+      document.getElementById('mapFilterViaje').value = currentViaje || '';
+      if (!mapLoaded) {
+        loadMapScript();
+      } else {
+        applyMapFilter();
+      }
+    }
+
+    function closeMap() {
+      document.getElementById('mapOverlay').classList.remove('open');
+    }
+
+    function loadMapScript() {
+      if (window.google && window.google.maps) {
+        initConductorMap();
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&callback=initConductorMap';
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    }
+
+    function initConductorMap() {
+      mapInstance = new google.maps.Map(document.getElementById('mapCanvas'), {
+        center: { lat: 40.4168, lng: -3.7038 },
+        zoom: 11,
+        mapTypeControl: true,
+        streetViewControl: false
+      });
+      mapInfoWindow = new google.maps.InfoWindow();
+      mapLoaded = true;
+      applyMapFilter();
+    }
+    // Expose as global callback for Google Maps script
+    window.initConductorMap = initConductorMap;
+
+    function applyMapFilter() {
+      if (!mapInstance) return;
+      // Clear existing markers
+      mapMarkers.forEach(m => m.setMap(null));
+      mapMarkers = [];
+
+      const viajeFilter = document.getElementById('mapFilterViaje').value;
+      let stops = stopsData.por_recoger || [];
+
+      if (viajeFilter) {
+        stops = stops.filter(s => s.viaje === viajeFilter);
+      }
+
+      const bounds = new google.maps.LatLngBounds();
+      let count = 0;
+
+      stops.forEach(s => {
+        const lat = parseFloat(s.lat);
+        const lng = parseFloat(s.lng);
+        if (!lat || !lng) return;
+
+        const marker = new google.maps.Marker({
+          position: { lat, lng },
+          map: mapInstance,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#1565C0',
+            fillOpacity: 1,
+            strokeColor: '#0d47a1',
+            strokeWeight: 2,
+            scale: 9
+          },
+          title: s.direccion
+        });
+
+        marker.addListener('click', () => {
+          const dias = s.fecha_aviso ? calcDias(s.fecha_aviso) : 0;
+          const diasTxt = dias > 0 ? ` | ${dias}d` : '';
+          const viajeTxt = s.viaje ? ` | ${s.viaje}` : '';
+          mapInfoWindow.setContent(
+            '<div style="font-family:system-ui;max-width:280px;font-size:13px;line-height:1.6">' +
+            '<strong>' + esc(s.direccion || '') + '</strong><br>' +
+            '<span style="color:#666">' + esc(s.barrio_cp || '') + '</span><br>' +
+            (s.sacos || 0) + ' sacas | ' + esc(s.marca || '') + viajeTxt + diasTxt + '<br>' +
+            (s.tlf_aviso ? '<a href="tel:' + esc(s.tlf_aviso) + '" style="color:#1565C0;font-weight:600">' + esc(s.tlf_aviso) + '</a>' : '') +
+            '</div>'
+          );
+          mapInfoWindow.open(mapInstance, marker);
+        });
+
+        mapMarkers.push(marker);
+        bounds.extend(marker.getPosition());
+        count++;
+      });
+
+      document.getElementById('mapCount').textContent = count + ' paradas';
+
+      if (count > 0) {
+        mapInstance.fitBounds(bounds);
+        if (count === 1) mapInstance.setZoom(15);
+      }
+    }
 
     // Service worker
     if ('serviceWorker' in navigator) {
