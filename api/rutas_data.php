@@ -147,6 +147,14 @@ if ($method === 'GET' && $action === 'list') {
     $filter = $_GET['filter'] ?? '';
     if ($filter === 'pendientes') {
         $stmt = $pdo->query("SELECT * FROM rutas_data WHERE (estado = '' OR estado IS NULL) ORDER BY row_order ASC, id ASC");
+    } else if ($filter === 'sin_ruta') {
+        $stmt = $pdo->query("
+            SELECT * FROM rutas_data
+            WHERE (estado = '' OR estado IS NULL OR estado = 'por_recoger')
+              AND (conductor = '' OR conductor IS NULL)
+              AND NOT (UPPER(TRIM(direccion)) LIKE 'DIA %' AND (sacos IS NULL OR sacos = '' OR sacos = '0'))
+            ORDER BY row_order ASC, id ASC
+        ");
     } else if ($filter === 'recogidas') {
         $stmt = $pdo->query("SELECT * FROM rutas_data WHERE estado IS NOT NULL AND estado != '' ORDER BY row_order ASC, id ASC");
     } else {

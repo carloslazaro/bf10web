@@ -250,10 +250,10 @@ if ($action === 'paradas') {
         'recogida'    => $done,
         'no_estan'    => $absent,
         'counts'      => [
-            'total'       => count($all),
-            'por_recoger' => count($pending),
-            'recogida'    => count($done),
-            'no_estan'    => count($absent),
+            'total'       => array_sum(array_map(fn($s) => max(1,(int)($s['sacos']??1)), $all)),
+            'por_recoger' => array_sum(array_map(fn($s) => max(1,(int)($s['sacos']??1)), $pending)),
+            'recogida'    => array_sum(array_map(fn($s) => max(1,(int)($s['sacos']??1)), $done)),
+            'no_estan'    => array_sum(array_map(fn($s) => max(1,(int)($s['sacos']??1)), $absent)),
         ]
     ]);
 }
@@ -485,6 +485,9 @@ if ($action === 'crear_ruta') {
     $fecha = trim($d['fecha'] ?? '');
 
     $forzar = !empty($d['forzar']);
+    $maxViajes = (int)($d['max_viajes'] ?? 4);
+    if ($maxViajes < 1) $maxViajes = 1;
+    if ($maxViajes > 4) $maxViajes = 4;
 
     if (!$conductor) jsonResponse(['error' => 'Falta conductor'], 400);
 
@@ -551,7 +554,8 @@ if ($action === 'crear_ruta') {
     uasort($barrios, fn($a, $b) => $b['sacas'] <=> $a['sacas']);
 
     // ── Distribute barrios into viajes (max 13 sacas, min viajes) ──
-    $viajeSlots = [1 => 0, 2 => 0, 3 => 0, 4 => 0]; // sacas per viaje
+    $viajeSlots = [];
+    for ($v = 1; $v <= $maxViajes; $v++) $viajeSlots[$v] = 0;
     $viajes = []; // id => viaje number
 
     foreach ($barrios as $barrio => $data) {
@@ -559,7 +563,7 @@ if ($action === 'crear_ruta') {
 
         // Try to fit entire barrio in one viaje
         $assigned = false;
-        for ($v = 1; $v <= 4; $v++) {
+        for ($v = 1; $v <= $maxViajes; $v++) {
             if ($viajeSlots[$v] + $barrioSacas <= $MAX_SACAS) {
                 // Fits entirely in this viaje
                 foreach ($data['stops'] as $s) {
@@ -576,7 +580,7 @@ if ($action === 'crear_ruta') {
             foreach ($data['stops'] as $s) {
                 $sacas = max(1, (int)$s['sacos']);
                 $placed = false;
-                for ($v = 1; $v <= 4; $v++) {
+                for ($v = 1; $v <= $maxViajes; $v++) {
                     if ($viajeSlots[$v] + $sacas <= $MAX_SACAS) {
                         $viajes[$s['id']] = $v;
                         $viajeSlots[$v] += $sacas;
@@ -585,35 +589,48 @@ if ($action === 'crear_ruta') {
                     }
                 }
                 if (!$placed) {
-                    // All full, put in viaje 4
-                    $viajes[$s['id']] = 4;
-                    $viajeSlots[4] += $sacas;
+                    // All viajes full — leave as SN (unassigned)
+                    $viajes[$s['id']] = 0; // 0 = sin asignar
                 }
             }
         }
     }
 
-    // Compact: remove empty viajes (e.g., if viaje 1 and 3 used but not 2)
-    $usedViajes = array_unique(array_values($viajes));
+    // Separate assigned vs unassigned
+    $assigned = array_filter($viajes, fn($v) => $v > 0);
+    $unassigned = array_filter($viajes, fn($v) => $v === 0);
+
+    // Compact: renumber assigned viajes to 1,2,3... without gaps
+    $usedViajes = array_unique(array_values($assigned));
     sort($usedViajes);
     $remap = [];
     foreach ($usedViajes as $i => $v) {
         $remap[$v] = $i + 1;
     }
-    foreach ($viajes as $id => $v) {
-        $viajes[$id] = $remap[$v];
+    foreach ($assigned as $id => $v) {
+        $assigned[$id] = $remap[$v];
     }
 
     // Build result array
     $result = [];
-    foreach ($viajes as $id => $v) {
+    foreach ($assigned as $id => $v) {
         $result[] = ['id' => $id, 'viaje' => "Viaje $v"];
     }
 
-    // Update all stops
+    // Update assigned stops
     $upd = $pdo->prepare("UPDATE rutas_data SET viaje = :viaje WHERE id = :id");
     foreach ($result as $v) {
         $upd->execute([':viaje' => $v['viaje'], ':id' => $v['id']]);
+    }
+
+    // Clear viaje for unassigned stops
+    $sinAsignarSacas = 0;
+    foreach ($unassigned as $id => $v) {
+        $upd->execute([':viaje' => '', ':id' => $id]);
+        // Count sacas
+        foreach ($stops as $s) {
+            if ((int)$s['id'] === $id) { $sinAsignarSacas += max(1, (int)$s['sacos']); break; }
+        }
     }
 
     // Count per viaje + sacas per viaje
@@ -623,7 +640,7 @@ if ($action === 'crear_ruta') {
         $summary[$v['viaje']] = ($summary[$v['viaje']] ?? 0) + 1;
     }
     foreach ($remap as $old => $new) {
-        $sacasSummary["Viaje $new"] = $viajeSlots[$old];
+        if (isset($viajeSlots[$old])) $sacasSummary["Viaje $new"] = $viajeSlots[$old];
     }
 
     // Calculate km using Google Directions API
@@ -636,7 +653,7 @@ if ($action === 'crear_ruta') {
             ->execute([':c' => $conductor, ':f' => $fechaCache, ':km' => $kmTotal, ':det' => json_encode($summary)]);
     }
 
-    jsonResponse(['ok' => true, 'total' => count($result), 'viajes' => $summary, 'sacas' => $sacasSummary, 'capacidad' => $MAX_SACAS, 'km' => $kmTotal]);
+    jsonResponse(['ok' => true, 'total' => count($result), 'viajes' => $summary, 'sacas' => $sacasSummary, 'capacidad' => $MAX_SACAS, 'km' => $kmTotal, 'sin_asignar' => $sinAsignarSacas]);
 }
 
 // ── Helper: calculate km for a conductor's daily route ───────

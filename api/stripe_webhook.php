@@ -75,15 +75,22 @@ switch ($event['type']) {
                     );
                 }
 
+                // Mark any existing invoice for this order as paid
+                $pdo->prepare("
+                    UPDATE invoices SET payment_status = 'pagada', paid_at = NOW(), payment_method = 'tarjeta'
+                    WHERE order_id = ? AND (payment_status IS NULL OR payment_status = 'pendiente' OR payment_status = '')
+                ")->execute([$order['id']]);
+
                 // If invoice requested, generate PDF + send it
                 if (!empty($order['request_invoice'])) {
                     try {
                         $tmp = sys_get_temp_dir() . '/bf10_' . $orderCode . '.pdf';
                         $result = renderInvoicePdf($orderCode, 'F', $tmp);
                         if ($result && file_exists($tmp)) {
-                            @sendInvoiceEmail($order, $result['invoice'], $tmp);
-                            $pdo->prepare("UPDATE invoices SET sent_at = NOW() WHERE id = ?")
+                            // Mark as paid + sent
+                            $pdo->prepare("UPDATE invoices SET sent_at = NOW(), payment_status = 'pagada', paid_at = NOW(), payment_method = 'tarjeta' WHERE id = ?")
                                 ->execute([$result['invoice']['id']]);
+                            @sendInvoiceEmail($order, $result['invoice'], $tmp);
                             @unlink($tmp);
                         }
                     } catch (Exception $e) {

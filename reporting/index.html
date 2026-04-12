@@ -87,7 +87,7 @@
             <div class="section">
                 <h3>Rendimiento por conductor</h3>
                 <table>
-                    <thead><tr><th>Conductor</th><th style="text-align:center">Paradas</th><th style="text-align:center">Sacas</th><th style="text-align:center">Completadas</th><th>Progreso</th></tr></thead>
+                    <thead><tr><th>Conductor</th><th style="text-align:center">Paradas</th><th style="text-align:center">Sacas</th><th style="text-align:center">Completadas</th><th style="text-align:center">Km</th><th>Progreso</th></tr></thead>
                     <tbody id="perf-body"></tbody>
                 </table>
             </div>
@@ -195,11 +195,13 @@
                     var pct = r.total_paradas > 0 ? Math.round((r.completadas / r.total_paradas)*100) : 0;
                     var barW = Math.max(5, Math.round((r.total_sacas / maxSacas)*100));
                     var color = COLORS[i % COLORS.length];
+                    var km = parseFloat(r.km_total || 0);
                     return '<tr>' +
                         '<td><strong style="color:' + color + '">' + esc(r.conductor) + '</strong></td>' +
                         '<td style="text-align:center">' + r.total_paradas + '</td>' +
                         '<td style="text-align:center;font-weight:700">' + r.total_sacas + '</td>' +
                         '<td style="text-align:center;color:#43A047;font-weight:600">' + r.completadas + '</td>' +
+                        '<td style="text-align:center;color:#1565C0;font-weight:600">' + (km > 0 ? km.toFixed(1) : '—') + '</td>' +
                         '<td><div class="progress-wrap"><div class="progress-bar" style="width:' + pct + '%;background:' + color + '"></div></div><span style="font-size:11px;color:#888;margin-left:4px">' + pct + '%</span></td>' +
                         '</tr>';
                 }).join('');
@@ -256,10 +258,11 @@
         fetch(API + 'reporting.php?action=google-api-usage&month=' + month)
             .then(function(r){return r.json();})
             .then(function(d) {
+                if (d.error) { d = {total_calls:0, avg_response_ms:0, by_endpoint:[], by_day:[]}; }
                 // KPIs
                 var html = '';
-                html += '<div style="text-align:center;padding:12px;background:#E3F2FD;border-radius:8px"><div style="font-size:22px;font-weight:800;color:#1565C0">' + d.total_calls + '</div><div style="font-size:11px;color:#888">Llamadas totales</div></div>';
-                html += '<div style="text-align:center;padding:12px;background:#f5f5f5;border-radius:8px"><div style="font-size:22px;font-weight:800">' + d.avg_response_ms + ' ms</div><div style="font-size:11px;color:#888">Tiempo medio</div></div>';
+                html += '<div style="text-align:center;padding:12px;background:#E3F2FD;border-radius:8px"><div style="font-size:22px;font-weight:800;color:#1565C0">' + (d.total_calls || 0) + '</div><div style="font-size:11px;color:#888">Llamadas totales</div></div>';
+                html += '<div style="text-align:center;padding:12px;background:#f5f5f5;border-radius:8px"><div style="font-size:22px;font-weight:800">' + (d.avg_response_ms || 0) + ' ms</div><div style="font-size:11px;color:#888">Tiempo medio</div></div>';
                 var endpoints = d.by_endpoint || [];
                 var totalErrors = 0;
                 endpoints.forEach(function(e) { totalErrors += parseInt(e.errors) || 0; });

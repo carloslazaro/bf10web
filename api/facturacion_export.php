@@ -130,6 +130,61 @@ if ($method === 'POST' && $action === 'update-payment') {
     jsonResponse(['success' => true]);
 }
 
+// ── Generate payment link for a pending invoice ──
+if ($method === 'POST' && $action === 'generate-payment-link') {
+    require_once __DIR__ . '/stripe_helper.php';
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = (int)($data['id'] ?? 0);
+    if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+
+    $inv = $pdo->prepare("SELECT i.*, o.order_code, o.package_qty, o.email, o.id as oid FROM invoices i LEFT JOIN orders o ON o.id = i.order_id WHERE i.id = ?");
+    $inv->execute([$id]);
+    $invoice = $inv->fetch();
+    if (!$invoice) jsonResponse(['error' => 'Factura no encontrada'], 404);
+
+    if ($invoice['payment_status'] === 'pagada') {
+        jsonResponse(['error' => 'Factura ya pagada'], 400);
+    }
+
+    // If linked to an order with package, use standard Stripe checkout
+    if ($invoice['order_id'] && $invoice['oid'] && $invoice['package_qty']) {
+        $session = stripeCreateCheckoutSession([
+            'id' => $invoice['oid'],
+            'order_code' => $invoice['order_code'],
+            'package_qty' => $invoice['package_qty'],
+            'email' => $invoice['email'] ?: 'pedidos@sacosescombromadridbf10.es',
+        ]);
+        if (!empty($session['__error'])) {
+            jsonResponse(['error' => 'Error Stripe: ' . $session['__error']], 500);
+        }
+        $paymentUrl = $session['url'];
+    } else {
+        // For albaran invoices without order — create a generic Stripe payment link
+        $amountCents = (int)round((float)$invoice['total_amount'] * 100);
+        $session = stripeApi('checkout/sessions', [
+            'mode' => 'payment',
+            'payment_method_types[0]' => 'card',
+            'line_items[0][price_data][currency]' => 'eur',
+            'line_items[0][price_data][product_data][name]' => 'Factura ' . $invoice['invoice_number'],
+            'line_items[0][price_data][unit_amount]' => $amountCents,
+            'line_items[0][quantity]' => 1,
+            'metadata[invoice_id]' => $id,
+            'metadata[invoice_number]' => $invoice['invoice_number'],
+            'success_url' => SITE_URL . '/?factura=' . urlencode($invoice['invoice_number']) . '&pago=ok',
+            'cancel_url' => SITE_URL . '/?factura=' . urlencode($invoice['invoice_number']) . '&pago=cancelado',
+            'locale' => 'es',
+        ]);
+        if (!empty($session['__error'])) {
+            jsonResponse(['error' => 'Error Stripe: ' . $session['__error']], 500);
+        }
+        $paymentUrl = $session['url'];
+    }
+
+    // Save payment link to invoice
+    $pdo->prepare("UPDATE invoices SET payment_link = ? WHERE id = ?")->execute([$paymentUrl, $id]);
+    jsonResponse(['success' => true, 'payment_link' => $paymentUrl]);
+}
+
 // ── CSV General ──
 if ($method === 'GET' && $action === 'csv-general') {
     $from = sanitize($_GET['from'] ?? date('Y-01-01'));

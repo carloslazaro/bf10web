@@ -277,18 +277,136 @@ function logout() {
     }
 })();
 
+// ── Barrio matching map ──
+const BARRIO_ALIASES = {
+    // Pueblos — locality name → dropdown value
+    'alcobendas': 'Alcobendas',
+    'alcorcón': 'Alcorcon', 'alcorcon': 'Alcorcon',
+    'aravaca': 'Aravaca',
+    'arganda del rey': 'Arganda del Rey', 'arganda': 'Arganda del Rey',
+    'arroyomolinos': 'Arroyomolinos',
+    'boadilla del monte': 'Boadilla del Monte', 'boadilla': 'Boadilla del Monte',
+    'collado villalba': 'Collado Villalba',
+    'coslada': 'Coslada',
+    'fuenlabrada': 'Fuenlabrada',
+    'getafe': 'Getafe',
+    'perales del río': 'Getafe-Perales del Rio', 'perales del rio': 'Getafe-Perales del Rio',
+    'humanes de madrid': 'Humanes de Madrid', 'humanes': 'Humanes de Madrid',
+    'las rozas de madrid': 'Las Rozas de Madrid', 'las rozas': 'Las Rozas de Madrid',
+    'leganés': 'Leganes', 'leganes': 'Leganes', 'leganés': 'Leganes',
+    'majadahonda': 'Majadahonda',
+    'mejorada del campo': 'Mejorada del Campo', 'mejorada': 'Mejorada del Campo',
+    'móstoles': 'Mostoles', 'mostoles': 'Mostoles', 'móstoles': 'Mostoles',
+    'parque coimbra': 'Mostoles - Parque Coimbra',
+    'paracuellos de jarama': 'Paracuellos de Jarama', 'paracuellos': 'Paracuellos de Jarama',
+    'parla': 'Parla',
+    'pinto': 'Pinto',
+    'pozuelo de alarcón': 'Pozuelo de Alarcon', 'pozuelo de alarcon': 'Pozuelo de Alarcon', 'pozuelo': 'Pozuelo de Alarcon',
+    'rivas-vaciamadrid': 'Rivas-Vaciamadrid', 'rivas vaciamadrid': 'Rivas-Vaciamadrid', 'rivas': 'Rivas-Vaciamadrid',
+    'san agustín de guadalix': 'San Agustin de Guadalix', 'san agustin de guadalix': 'San Agustin de Guadalix',
+    'san fernando de henares': 'San Fernando de Henares', 'san fernando': 'San Fernando de Henares',
+    'san martín de la vega': 'San Martin de la Vega', 'san martin de la vega': 'San Martin de la Vega',
+    'san sebastián de los reyes': 'San Sebastian de los Reyes', 'san sebastian de los reyes': 'San Sebastian de los Reyes',
+    'tres cantos': 'Tres Cantos',
+    'valdemoro': 'Valdemoro',
+    'velilla de san antonio': 'Velilla de San Antonio', 'velilla': 'Velilla de San Antonio',
+    'villalbilla': 'Villalbilla',
+    'villaviciosa de odón': 'Villaviciosa de Odon', 'villaviciosa de odon': 'Villaviciosa de Odon', 'villaviciosa': 'Villaviciosa de Odon',
+    // Madrid barrios — sublocality / neighborhood
+    'arganzuela': 'Arganzuela',
+    'carabanchel': 'Carabanchel',
+    'centro': 'Centro',
+    'chamartín': 'Chamartin', 'chamartin': 'Chamartin',
+    'chamberí': 'Chamberi', 'chamberi': 'Chamberi',
+    'ciudad lineal': 'Ciudad Lineal',
+    'el pardo': 'El Pardo',
+    'fuencarral-el pardo': 'Fuencarral-Mirasierra', 'fuencarral': 'Fuencarral-Mirasierra', 'mirasierra': 'Fuencarral-Mirasierra',
+    'hortaleza': 'Hortaleza-Sanchinarro', 'sanchinarro': 'Hortaleza-Sanchinarro',
+    'las tablas': 'Las Tablas',
+    'moncloa-aravaca': 'Moncloa-Arguelles', 'moncloa': 'Moncloa-Arguelles', 'argüelles': 'Moncloa-Arguelles',
+    'moratalaz': 'Moratalaz',
+    'latina': 'Pta Angel-Batan-Aluche-Camp.', 'aluche': 'Pta Angel-Batan-Aluche-Camp.', 'batán': 'Pta Angel-Batan-Aluche-Camp.', 'campamento': 'Pta Angel-Batan-Aluche-Camp.', 'puerta del ángel': 'Pta Angel-Batan-Aluche-Camp.',
+    'retiro': 'Retiro',
+    'san blas-canillejas': 'S Blas-Canillejas-Barajas', 'san blas': 'S Blas-Canillejas-Barajas', 'canillejas': 'S Blas-Canillejas-Barajas', 'barajas': 'S Blas-Canillejas-Barajas',
+    'salamanca': 'Salamanca',
+    'tetuán': 'Tetuan', 'tetuan': 'Tetuan',
+    'usera': 'Usera',
+    'puente de vallecas': 'Vallecas', 'villa de vallecas': 'Vallecas', 'vallecas': 'Vallecas',
+    'vicálvaro': 'Vicalvaro', 'vicalvaro': 'Vicalvaro',
+    'villaverde': 'Villaverde',
+};
+
+function detectBarrio(place) {
+    if (!place || !place.address_components) return null;
+    var components = place.address_components;
+    // Try different component types in priority order
+    var candidates = [];
+    components.forEach(function(c) {
+        var name = (c.long_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        var nameRaw = (c.long_name || '').toLowerCase();
+        if (c.types.indexOf('sublocality_level_1') !== -1 || c.types.indexOf('sublocality') !== -1) {
+            candidates.unshift(nameRaw); // highest priority
+            candidates.unshift(name);
+        }
+        if (c.types.indexOf('neighborhood') !== -1) {
+            candidates.push(nameRaw);
+            candidates.push(name);
+        }
+        if (c.types.indexOf('locality') !== -1 && nameRaw !== 'madrid') {
+            candidates.push(nameRaw);
+            candidates.push(name);
+        }
+        if (c.types.indexOf('administrative_area_level_4') !== -1) {
+            candidates.push(nameRaw);
+            candidates.push(name);
+        }
+    });
+    // Try to match
+    for (var i = 0; i < candidates.length; i++) {
+        var key = candidates[i];
+        if (BARRIO_ALIASES[key]) return BARRIO_ALIASES[key];
+        // Partial match: check if any alias key is contained in candidate or vice versa
+        for (var alias in BARRIO_ALIASES) {
+            if (key.indexOf(alias) !== -1 || alias.indexOf(key) !== -1) {
+                return BARRIO_ALIASES[alias];
+            }
+        }
+    }
+    // If locality is Madrid but no barrio matched, use "Madrid - Otros barrios"
+    var isMadrid = components.some(function(c) {
+        return c.types.indexOf('locality') !== -1 && c.long_name.toLowerCase() === 'madrid';
+    });
+    if (isMadrid) return 'Madrid - Otros barrios';
+    return null;
+}
+
 // ── Google Places Autocomplete ──
 function initAutocomplete() {
     const input = document.getElementById('av-direccion');
     if (!input || !window.google) return;
     const ac = new google.maps.places.Autocomplete(input, {
         componentRestrictions: { country: 'es' },
-        fields: ['formatted_address']
+        fields: ['formatted_address', 'address_components']
     });
     ac.addListener('place_changed', () => {
         const place = ac.getPlace();
         if (place && place.formatted_address) {
             input.value = place.formatted_address;
+            // Auto-detect barrio
+            var barrio = detectBarrio(place);
+            if (barrio) {
+                var sel = document.getElementById('av-barrio');
+                for (var i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].value === barrio || sel.options[i].textContent === barrio) {
+                        sel.selectedIndex = i;
+                        // Flash the dropdown to indicate auto-selection
+                        sel.style.transition = 'background .3s';
+                        sel.style.background = '#C8E6C9';
+                        setTimeout(function() { sel.style.background = ''; }, 1500);
+                        break;
+                    }
+                }
+            }
         }
     });
 }
@@ -363,12 +481,15 @@ async function toggleHistory() {
             el.innerHTML = '<p style="color:var(--gray);font-size:13px">Sin avisos recientes</p>';
             return;
         }
-        el.innerHTML = data.avisos.map(a => `
+        el.innerHTML = data.avisos.map(a => {
+            var estado = a.estado || 'pendiente';
+            var estadoColor = estado === 'recogida' ? 'var(--green)' : 'var(--orange, #E65100)';
+            return `
             <div class="history-item">
-                <div class="hi-dir">${a.direccion || a.barrio_cp}</div>
+                <div class="hi-dir">${a.direccion || a.barrio_cp} <span style="font-size:11px;color:${estadoColor};font-weight:600">${estado.toUpperCase()}</span></div>
                 <div class="hi-meta">${a.sacos ? a.sacos + ' sacos' : ''} ${a.marca || ''} &middot; ${a.fecha_aviso || ''}</div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     } catch (e) {
         el.innerHTML = '<p style="color:var(--red);font-size:13px">Error al cargar</p>';
     }

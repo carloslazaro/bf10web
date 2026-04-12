@@ -982,22 +982,19 @@
 
         if (dia.selected) {
           select.value = dia.camion_id;
-          btn.textContent = 'Guardado';
-          btn.classList.add('saved');
         } else if (dia.habitual) {
           select.value = dia.habitual.id;
-          btn.textContent = 'OK';
-          btn.classList.remove('saved');
-        } else {
-          btn.textContent = 'OK';
-          btn.classList.remove('saved');
         }
+        btn.textContent = 'OK';
       } catch(e) {}
     }
 
     async function saveCamion() {
       const camionId = document.getElementById('camionSelect').value;
       if (!camionId) return;
+
+      const btn = document.getElementById('btnCamionOk');
+      btn.textContent = '...';
 
       const fecha = document.getElementById('dateInput').value || new Date().toISOString().split('T')[0];
       try {
@@ -1006,10 +1003,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'set_camion', conductor: currentDriver, camion_id: parseInt(camionId), fecha })
         });
-        const btn = document.getElementById('btnCamionOk');
-        btn.textContent = 'Guardado';
-        btn.classList.add('saved');
-      } catch(e) { alert('Error guardando camion'); }
+        btn.textContent = 'OK';
+      } catch(e) { alert('Error guardando camion'); btn.textContent = 'OK'; }
     }
 
     async function loadStats() {
@@ -1780,6 +1775,8 @@
       const sacos = document.getElementById('ns_sacos').value;
       const marca = document.getElementById('ns_marca').value;
 
+      const direccion = document.getElementById('ns_direccion').value.trim();
+      if (!direccion) { alert('La direccion es obligatoria'); return; }
       if (!sacos || !marca) { alert('Sacas y marca son obligatorios'); return; }
 
       btn.textContent = 'Creando...'; btn.classList.add('saving');
@@ -1819,32 +1816,46 @@
     // ══════════════════════════════════════════════════════════
     // CREAR RUTA AUTOMATICA
     // ══════════════════════════════════════════════════════════
-    async function crearRuta(forzar) {
+    async function crearRuta(forzar, maxViajes) {
+      // Ask how many trips if not provided
+      if (!maxViajes) {
+        const resp = prompt('Cuantos viajes vas a hacer hoy? (1-4)', '3');
+        if (!resp) return;
+        maxViajes = parseInt(resp);
+        if (isNaN(maxViajes) || maxViajes < 1 || maxViajes > 4) {
+          alert('Introduce un numero entre 1 y 4');
+          return;
+        }
+      }
+
       try {
         const fecha = document.getElementById('dateInput').value;
         const res = await fetch(API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'crear_ruta', conductor: currentDriver, fecha, forzar: !!forzar })
+          body: JSON.stringify({ action: 'crear_ruta', conductor: currentDriver, fecha, forzar: !!forzar, max_viajes: maxViajes })
         });
         const data = await res.json();
 
         // Server asks for confirmation (stops already have viaje)
         if (data.confirm) {
           if (confirm(data.msg + '\n\nQuieres sobreescribir los viajes?')) {
-            crearRuta(true); // retry with forzar=true
+            crearRuta(true, maxViajes);
           }
           return;
         }
 
         if (data.ok) {
-          let msg = 'Ruta creada: ' + data.total + ' paradas\n';
+          let msg = 'Ruta creada: ' + data.total + ' paradas asignadas\n';
           msg += 'Capacidad camion: ' + (data.capacidad || 13) + ' sacas\n';
           if (data.km) msg += 'Km estimados: ' + data.km + ' km\n';
           msg += '\n';
           for (const [v, n] of Object.entries(data.viajes || {})) {
             const sacas = (data.sacas || {})[v] || '?';
             msg += v + ': ' + n + ' paradas, ' + sacas + '/' + (data.capacidad || 13) + ' sacas\n';
+          }
+          if (data.sin_asignar > 0) {
+            msg += '\n' + data.sin_asignar + ' sacas sin asignar (no caben en ' + maxViajes + ' viajes)';
           }
           alert(msg);
           await loadStops();

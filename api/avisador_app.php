@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'my-avisos') {
     if (!$nombre) jsonResponse(['error' => 'Nombre requerido'], 400);
 
     $stmt = $pdo->prepare("
-        SELECT id, direccion, barrio_cp, sacos, urgen, tlf_aviso, marca, observaciones, fecha_aviso, created_at
+        SELECT id, direccion, barrio_cp, sacos, urgen, tlf_aviso, marca, observaciones, fecha_aviso, estado, updated_at
         FROM rutas_data
         WHERE avisador = ?
         ORDER BY id DESC

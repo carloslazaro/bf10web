@@ -156,6 +156,26 @@ if ($action === 'conductor-perf') {
         ")->fetchAll();
     }
 
+    // KM data from km_diarios
+    $kmStmt = $pdo->prepare("
+        SELECT UPPER(TRIM(conductor)) as conductor, COALESCE(SUM(km_total), 0) as km_total
+        FROM km_diarios
+        WHERE fecha BETWEEN ? AND ?
+        GROUP BY UPPER(TRIM(conductor))
+    ");
+    $kmStmt->execute([$from, $to]);
+    $kmMap = [];
+    foreach ($kmStmt->fetchAll() as $k) {
+        $kmMap[$k['conductor']] = round((float)$k['km_total'], 1);
+    }
+
+    // Merge km into performance data
+    foreach ($perf as &$p) {
+        $key = strtoupper(trim($p['conductor']));
+        $p['km_total'] = $kmMap[$key] ?? 0;
+    }
+    unset($p);
+
     jsonResponse(['performance' => $perf]);
 }
 

@@ -350,6 +350,7 @@
                     '<td>' + esc(r.payment_method || '-') + '</td>' +
                     '<td style="white-space:nowrap">' +
                         '<button onclick="showPaymentModal(' + r.id + ',\'' + esc(r.invoice_number) + '\',\'' + (r.payment_status||'pendiente') + '\',\'' + (r.payment_method||'') + '\')" style="padding:3px 8px;font-size:11px;border:1px solid #ddd;border-radius:4px;cursor:pointer;background:#fff" title="Estado de pago">Pago</button> ' +
+                        ((r.payment_status||'pendiente') !== 'pagada' ? '<button onclick="generatePaymentLink(' + r.id + ')" style="padding:3px 8px;font-size:11px;border:1px solid #7B1FA2;color:#7B1FA2;border-radius:4px;cursor:pointer;background:#fff" title="Generar enlace de pago Stripe">💳 Link</button> ' : '') +
                         (!isAlbaran ? '<button onclick="resendInvoice(\'' + esc(code) + '\')" style="padding:3px 8px;font-size:11px;border:1px solid #43A047;color:#43A047;border-radius:4px;cursor:pointer;background:#fff" title="Enviar factura por email">Enviar</button> ' : '') +
                         '<button onclick="refreshInvoiceClient(' + r.id + ')" style="padding:3px 8px;font-size:11px;border:1px solid #FF9800;color:#FF9800;border-radius:4px;cursor:pointer;background:#fff" title="Actualizar datos cliente">Datos</button> ' +
                         '<button onclick="showAbonoModal(' + r.id + ',\'' + esc(r.invoice_number) + '\',\'' + esc(r.cliente_nombre) + '\',\'' + esc(r.cliente_nif) + '\',' + parseFloat(r.base_amount) + ',\'' + (r.brand||'BF10') + '\')" style="padding:3px 8px;font-size:11px;border:1px solid #c62828;color:#c62828;border-radius:4px;cursor:pointer;background:#fff">Abonar</button> ' +
@@ -520,6 +521,29 @@
             } else { alert(d.error || 'Error'); }
         });
         return false;
+    }
+
+    // Generate payment link
+    function generatePaymentLink(invoiceId) {
+        if (!confirm('¿Generar enlace de pago Stripe para esta factura?')) return;
+        fetch(API + 'facturacion_export.php?action=generate-payment-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: invoiceId })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success && d.payment_link) {
+                // Copy to clipboard
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(d.payment_link);
+                    alert('Enlace de pago generado y copiado al portapapeles:\n\n' + d.payment_link);
+                } else {
+                    prompt('Enlace de pago generado. Copia este enlace:', d.payment_link);
+                }
+                loadFacturas();
+            } else {
+                alert(d.error || 'Error al generar enlace');
+            }
+        });
     }
 
     // Exports

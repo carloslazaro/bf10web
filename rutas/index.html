@@ -205,6 +205,7 @@
         </div>
         <div class="toolbar">
             <button class="filter-btn active" id="btn-pendientes">Por recoger</button>
+            <button class="filter-btn" id="btn-sin-ruta">Sin ruta</button>
             <button class="filter-btn" id="btn-recogidas">Recogidas</button>
             <button class="filter-btn" id="btn-todas">Todas</button>
             <div class="sep"></div>
@@ -497,8 +498,8 @@
         function applyZoneFilter() {
             var filtered = allRows;
 
-            // In "recogidas" mode, exclude day-header rows
-            if (currentFilter === 'recogidas') {
+            // In "recogidas" and "sin_ruta" modes, exclude day-header rows
+            if (currentFilter === 'recogidas' || currentFilter === 'sin_ruta') {
                 filtered = filtered.filter(function(r) { return !isDayRow(r); });
             }
 
@@ -512,7 +513,7 @@
 
             rows = filtered;
             renderTable();
-            var labels = { 'pendientes': 'por recoger', 'recogidas': 'recogidas', '': 'todas' };
+            var labels = { 'pendientes': 'por recoger', 'sin_ruta': 'sin ruta', 'recogidas': 'recogidas', '': 'todas' };
             var label = labels[currentFilter] || 'todas';
             if (currentZone) label += ' · ' + (currentZone === 'madrid' ? 'Madrid' : 'Pueblos');
             setStatus(rows.length + ' filas (' + label + ') — ' + new Date().toLocaleTimeString(), 'saved');
@@ -792,11 +793,13 @@
         function setStatusFilter(filter) {
             currentFilter = filter;
             document.getElementById('btn-pendientes').classList.toggle('active', filter === 'pendientes');
+            document.getElementById('btn-sin-ruta').classList.toggle('active', filter === 'sin_ruta');
             document.getElementById('btn-recogidas').classList.toggle('active', filter === 'recogidas');
             document.getElementById('btn-todas').classList.toggle('active', filter === '');
             loadData();
         }
         document.getElementById('btn-pendientes').addEventListener('click', function() { setStatusFilter('pendientes'); });
+        document.getElementById('btn-sin-ruta').addEventListener('click', function() { setStatusFilter('sin_ruta'); });
         document.getElementById('btn-recogidas').addEventListener('click', function() { setStatusFilter('recogidas'); });
         document.getElementById('btn-todas').addEventListener('click', function() { setStatusFilter(''); });
 
