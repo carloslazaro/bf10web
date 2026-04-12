@@ -1,11 +1,11 @@
 {
-  "name": "BF10 Conductor - Rutas",
-  "short_name": "BF10 Rutas",
-  "description": "App de rutas para conductores BF10",
+  "name": "SERVISACO Conductor - Rutas",
+  "short_name": "SERVISACO",
+  "description": "App de rutas para conductores SERVISACO",
   "start_url": "/conductor.html",
   "display": "standalone",
   "background_color": "#111111",
-  "theme_color": "#DA291C",
+  "theme_color": "#1565C0",
   "orientation": "portrait",
   "icons": [
     {
