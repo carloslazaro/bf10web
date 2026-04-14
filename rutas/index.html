@@ -57,7 +57,7 @@
         .toolbar .status.error { color: #c00; }
         .toolbar .sep { width: 1px; height: 24px; background: #ddd; }
 
-        .sheet-wrapper { overflow: auto; max-height: calc(100vh - 120px); }
+        .sheet-wrapper { overflow: auto; max-height: calc(100vh - 120px); padding-bottom: 120px; }
         .sheet-table { border-collapse: collapse; font-size: 12px; min-width: 100%; }
         .sheet-table th, .sheet-table td { border: 1px solid #d0d0d0; padding: 0; position: relative; white-space: nowrap; }
         .sheet-table th { background: #e8eaed; color: #555; font-weight: 600; font-size: 11px; text-align: center; padding: 6px 8px; position: sticky; top: 0; z-index: 10; user-select: none; }
@@ -143,7 +143,7 @@
         .print-table td { padding:5px 6px; border-bottom:1px solid #e8e8e8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .print-table tr:nth-child(even) { background:#f8fafc; }
         .print-table tr:hover { background:#eef3ff; }
-        .print-table .urgent { color:#c62828; font-weight:700; }
+        .print-table .urgent { color:#c62828; font-weight:700; background:#fff0f0; }
         /* Column widths */
         .print-table .col-n { width:30px; }
         .print-table .col-dir { width:22%; white-space:normal; word-break:break-word; }
@@ -221,13 +221,16 @@
             <button class="filter-btn zone-btn" id="btn-pueblos">Pueblos</button>
             <div class="sep"></div>
             <button class="btn-primary" id="btn-add-aviso">+ Aviso recogida</button>
+            <button id="btn-search-dir" title="Buscar por dirección">🔍 Buscar</button>
+            <button id="btn-download-excel" title="Descargar Excel de la vista actual">📥 Excel</button>
             <button id="btn-last-row">Ir a última fila</button>
             <div class="sep"></div>
             <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
             <button id="btn-print-route" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500">🖨️ Imprimir ruta</button>
             <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
-            <button style="background:#7B1FA2;color:#fff;border-color:#7B1FA2;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500" id="btn-crear-rutas" onclick="openCrearRutas()">🚛 Crear Rutas</button>
-            <button style="background:#455A64;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500" onclick="openHistorico()">📊 Histórico</button>
+            <!-- Crear Rutas y Histórico ocultos, accesibles por código 1982/1983 -->
+            <button style="display:none" id="btn-crear-rutas" onclick="openCrearRutas()">🚛 Crear Rutas</button>
+            <button style="display:none" id="btn-historico" onclick="openHistorico()">📊 Histórico</button>
             <span class="status" id="status-msg"></span>
             <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
         </div>
@@ -259,14 +262,12 @@
                             <th class="col-barrio">Barrio / CP</th>
                             <th class="col-sacos">Sacos</th>
                             <th class="col-urgen">Urgen</th>
+                            <th>Interior</th>
                             <th class="col-tlf">Tlf aviso</th>
                             <th class="col-cond">Conductor</th>
                             <th class="col-etiq">Etiquetas</th>
                             <th class="col-marca">Marca</th>
                             <th class="col-obs">Observaciones</th>
-                            <th class="col-avis">Avisador</th>
-                            <th class="col-hora">Hora</th>
-                            <th class="col-fecha">Fecha</th>
                         </tr>
                     </thead>
                     <tbody id="print-body"></tbody>
@@ -302,11 +303,17 @@
                         <select id="av-urgen">
                             <option value="">No</option>
                             <option value="SI">Sí</option>
+                            <option value="POLICIA">Policía</option>
+                            <option value="AYUNTAMIENTO">Ayuntamiento</option>
                         </select>
                     </label>
+                    <label style="flex-direction:row;align-items:center;gap:6px;min-width:auto"><input type="checkbox" id="av-interior" style="width:auto;margin:0"> Interior</label>
                 </div>
                 <div class="aviso-row">
                     <label>Teléfono aviso<input type="text" id="av-tlf"></label>
+                    <label>Teléfono 2<input type="text" id="av-tlf2"></label>
+                </div>
+                <div class="aviso-row">
                     <label>Marca
                         <select id="av-marca">
                             <option value="">—</option>
@@ -329,6 +336,22 @@
                     <button type="submit" class="aviso-btn aviso-btn--primary">Guardar aviso</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Duplicate detection modal -->
+    <div id="dup-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);align-items:center;justify-content:center">
+        <div style="background:#fff;border-radius:12px;padding:24px;width:540px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+            <h3 style="color:#E65100;margin-bottom:12px">⚠️ Posible duplicado</h3>
+            <p style="font-size:13px;color:#555;margin-bottom:16px">Se encontró un aviso reciente con la misma dirección:</p>
+            <div id="dup-existing" style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px"></div>
+            <p style="font-size:13px;font-weight:600;margin-bottom:8px">Tu nuevo aviso:</p>
+            <div id="dup-new" style="background:#E3F2FD;border:1px solid #64B5F6;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button id="dup-btn-new" style="flex:1;padding:10px;border-radius:6px;border:none;background:#2E7D32;color:#fff;font-weight:600;cursor:pointer;font-size:13px">Crear nuevo</button>
+                <button id="dup-btn-update" style="flex:1;padding:10px;border-radius:6px;border:none;background:#1565C0;color:#fff;font-weight:600;cursor:pointer;font-size:13px">Actualizar existente</button>
+                <button id="dup-btn-cancel" style="flex:1;padding:10px;border-radius:6px;border:1px solid #888;background:#fff;color:#333;font-weight:600;cursor:pointer;font-size:13px">Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -387,14 +410,14 @@
         }).catch(function() {});
 
         var FIELDS = [
-            'direccion', 'barrio_cp', 'sacos', 'urgen', 'tlf_aviso',
+            'direccion', 'barrio_cp', 'sacos', 'urgen', 'interior', 'tlf_aviso', 'telefono2',
             'conductor', 'etiquetas', 'marca', 'observaciones',
             'avisador', 'hora_aviso', 'fecha_aviso', 'fecha_recogida', 'fecha_de_ruta',
             'estado', 'orden', 'swap_pending', 'swap_orden',
             'etiqueta_1', 'etiqueta_2', 'etiqueta_3', 'etiqueta_4', 'etiqueta_5', 'etiqueta_6'
         ];
         var HEADERS = [
-            'DIRECCION', 'BARRIO/CP', 'SACOS', 'URGEN', 'TLF AVISO',
+            'DIRECCION', 'BARRIO/CP', 'SACOS', 'URGEN', 'INTERIOR', 'TLF AVISO', 'TLF 2',
             'CONDUCTOR', 'ETIQUETAS', 'MARCA', 'OBSERVACIONES',
             'AVISADOR', 'HORA AVISO', 'FECHA AVISO', 'FECHA RECOGIDA', 'FECHA_DE_RUTA',
             'ESTADO', 'ORDEN', 'SWAP_PENDING', 'SWAP_ORDEN',
@@ -403,7 +426,7 @@
 
         // ---------- Auth ----------
         fetch(AUTH + '?action=me').then(function(r) { return r.json(); }).then(function(d) {
-            if (d.user && (d.user.role === 'rutas' || d.user.role === 'manager' || d.user.role === 'ceo')) showDashboard(d.user);
+            if (d.user && (d.user.role === 'rutas' || d.user.role === 'manager' || d.user.role === 'ceo' || d.user.role === 'facturacion')) showDashboard(d.user);
         }).catch(function() {});
 
         document.getElementById('login-form').addEventListener('submit', function(e) {
@@ -417,7 +440,7 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email, password: pass }),
             }).then(function(r) { return r.json(); }).then(function(d) {
-                if (d.success && (d.user.role === 'rutas' || d.user.role === 'manager')) showDashboard(d.user);
+                if (d.success && (d.user.role === 'rutas' || d.user.role === 'manager' || d.user.role === 'ceo' || d.user.role === 'facturacion')) showDashboard(d.user);
                 else err.textContent = d.error || 'Acceso denegado.';
             }).catch(function() { err.textContent = 'Error de conexión'; })
             .finally(function() { btn.disabled = false; btn.textContent = 'Entrar'; });
@@ -546,7 +569,11 @@
                 bhtml += '<td class="row-header" data-id="' + r.id + '"><span class="row-drag" draggable="true" title="Arrastrar fila">⠿</span><span class="row-move row-up" data-id="' + r.id + '" title="Subir">▲</span><span class="row-num">' + (i + 1) + '</span><span class="row-move row-down" data-id="' + r.id + '" title="Bajar">▼</span><span class="row-add" data-addafter="' + r.id + '" title="Insertar fila debajo">+</span></td>';
                 for (var c = 0; c < FIELDS.length; c++) {
                     var val = r[FIELDS[c]] || '';
-                    bhtml += '<td data-idx="' + i + '" data-col="' + c + '"><div class="cell-view">' + esc(val) + '</div></td>';
+                    var cellStyle = '';
+                    if (FIELDS[c] === 'urgen' && val && val.toUpperCase() !== 'NO') {
+                        cellStyle = ' style="color:#c62828;font-weight:700"';
+                    }
+                    bhtml += '<td data-idx="' + i + '" data-col="' + c + '"' + cellStyle + '><div class="cell-view">' + esc(val) + '</div></td>';
                 }
                 bhtml += '</tr>';
             }
@@ -941,7 +968,9 @@
             avisoBarrioSelect.value = '';
             document.getElementById('av-sacos').value = '';
             document.getElementById('av-urgen').value = '';
+            document.getElementById('av-interior').checked = false;
             document.getElementById('av-tlf').value = '';
+            document.getElementById('av-tlf2').value = '';
             document.getElementById('av-etiquetas').value = '';
             avisoMarcaSelect.value = '';
             document.getElementById('av-observaciones').value = '';
@@ -957,6 +986,37 @@
         document.getElementById('aviso-close').addEventListener('click', closeAvisoModal);
         document.getElementById('aviso-overlay').addEventListener('click', closeAvisoModal);
 
+        function formatDupRow(r) {
+            return '<b>' + esc(r.direccion || '') + '</b><br>' +
+                'Barrio: ' + esc(r.barrio_cp || '—') + ' · Sacos: ' + esc(r.sacos || '—') + ' · Urgen: ' + esc(r.urgen || 'No') +
+                (r.interior === 'SI' ? ' · Interior' : '') + '<br>' +
+                'Tlf: ' + esc(r.tlf_aviso || '—') + (r.telefono2 ? ' / ' + esc(r.telefono2) : '') +
+                ' · Marca: ' + esc(r.marca || '—') + '<br>' +
+                'Avisador: ' + esc(r.avisador || '—') + ' · Fecha: ' + esc(r.fecha_aviso || '—') +
+                ' · Estado: ' + esc(r.estado || 'pendiente');
+        }
+
+        function doCreateAviso(payload) {
+            fetch(API + '?action=create-aviso', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) { closeAvisoModal(); loadData(); setStatus('Aviso de recogida creado', 'saved'); }
+                else { var e = document.getElementById('aviso-error'); e.textContent = d.error || 'Error'; e.style.display = 'block'; }
+            }).catch(function() { var e = document.getElementById('aviso-error'); e.textContent = 'Error de conexión'; e.style.display = 'block'; });
+        }
+
+        function doUpdateAviso(id, payload) {
+            payload.id = id;
+            fetch(API + '?action=update-aviso', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) { closeAvisoModal(); loadData(); setStatus('Aviso existente actualizado', 'saved'); }
+                else { var e = document.getElementById('aviso-error'); e.textContent = d.error || 'Error'; e.style.display = 'block'; }
+            }).catch(function() { var e = document.getElementById('aviso-error'); e.textContent = 'Error de conexión'; e.style.display = 'block'; });
+        }
+
         document.getElementById('aviso-form').addEventListener('submit', function(e) {
             e.preventDefault();
             var errEl = document.getElementById('aviso-error');
@@ -967,7 +1027,9 @@
                 barrio_cp: avisoBarrioSelect.value,
                 sacos: document.getElementById('av-sacos').value.trim(),
                 urgen: document.getElementById('av-urgen').value,
+                interior: document.getElementById('av-interior').checked ? 'SI' : '',
                 tlf_aviso: document.getElementById('av-tlf').value.trim(),
+                telefono2: document.getElementById('av-tlf2').value.trim(),
                 etiquetas: document.getElementById('av-etiquetas').value.trim(),
                 marca: avisoMarcaSelect.value,
                 observaciones: document.getElementById('av-observaciones').value.trim(),
@@ -981,26 +1043,90 @@
                 return;
             }
 
-            fetch(API + '?action=create-aviso', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                if (d.success) {
-                    closeAvisoModal();
-                    loadData();
-                    setStatus('Aviso de recogida creado', 'saved');
-                } else {
-                    errEl.textContent = d.error || 'Error al crear aviso';
-                    errEl.style.display = 'block';
+            // Check for duplicates before creating
+            if (payload.direccion) {
+                fetch(API + '?action=check-duplicate&direccion=' + encodeURIComponent(payload.direccion))
+                .then(function(r) { return r.json(); })
+                .then(function(cd) {
+                    if (cd.duplicates && cd.duplicates.length > 0) {
+                        var dup = cd.duplicates[0];
+                        document.getElementById('dup-existing').innerHTML = formatDupRow(dup);
+                        document.getElementById('dup-new').innerHTML = formatDupRow(payload);
+                        var modal = document.getElementById('dup-modal');
+                        modal.style.display = 'flex';
+
+                        var btnN = document.getElementById('dup-btn-new');
+                        var btnU = document.getElementById('dup-btn-update');
+                        var btnC = document.getElementById('dup-btn-cancel');
+                        var nN = btnN.cloneNode(true); var nU = btnU.cloneNode(true); var nC = btnC.cloneNode(true);
+                        btnN.replaceWith(nN); btnU.replaceWith(nU); btnC.replaceWith(nC);
+
+                        nN.addEventListener('click', function() { modal.style.display = 'none'; doCreateAviso(payload); });
+                        nU.addEventListener('click', function() { modal.style.display = 'none'; doUpdateAviso(dup.id, payload); });
+                        nC.addEventListener('click', function() { modal.style.display = 'none'; });
+                    } else {
+                        doCreateAviso(payload);
+                    }
+                }).catch(function() { doCreateAviso(payload); });
+            } else {
+                doCreateAviso(payload);
+            }
+        });
+
+        // ---------- Search by address ----------
+        document.getElementById('btn-search-dir').addEventListener('click', function() {
+            var term = prompt('Buscar por dirección:');
+            if (!term || !term.trim()) return;
+            var q = term.trim().toLowerCase();
+            var found = [];
+            for (var i = 0; i < rows.length; i++) {
+                if ((rows[i].direccion || '').toLowerCase().indexOf(q) !== -1) {
+                    found.push(i);
                 }
-            })
-            .catch(function() {
-                errEl.textContent = 'Error de conexión';
-                errEl.style.display = 'block';
-            });
+            }
+            if (!found.length) {
+                setStatus('No se encontraron filas con "' + term.trim() + '"', 'error');
+                return;
+            }
+            // Scroll to first match and highlight
+            var firstIdx = found[0];
+            var trs = document.getElementById('sheet-body').querySelectorAll('tr');
+            if (trs[firstIdx]) {
+                trs[firstIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                trs[firstIdx].style.background = '#FFF9C4';
+                setTimeout(function() { trs[firstIdx].style.background = ''; }, 3000);
+            }
+            setStatus(found.length + ' resultado(s) para "' + term.trim() + '"', 'saved');
+        });
+
+        // ---------- Download Excel of current filtered view ----------
+        document.getElementById('btn-download-excel').addEventListener('click', function() {
+            function csvVal(v) {
+                var s = String(v == null ? '' : v).replace(/\r?\n/g, ' ');
+                if (s.indexOf(';') !== -1 || s.indexOf('"') !== -1) return '"' + s.replace(/"/g, '""') + '"';
+                return s;
+            }
+            var sep = ';';
+            var headers = HEADERS.slice();
+            var lines = [headers.map(csvVal).join(sep)];
+            for (var i = 0; i < rows.length; i++) {
+                var r = rows[i];
+                var vals = [];
+                for (var c = 0; c < FIELDS.length; c++) {
+                    vals.push(r[FIELDS[c]] || '');
+                }
+                lines.push(vals.map(csvVal).join(sep));
+            }
+            var bom = '\uFEFF';
+            var blob = new Blob([bom + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            var label = currentFilter || 'todas';
+            if (currentZone) label += '_' + currentZone;
+            a.download = 'rutas_' + label + '_' + new Date().toISOString().slice(0,10) + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
         });
 
         // ---------- Hidden command input ----------
@@ -1026,6 +1152,10 @@
                             setStatus('Error: ' + (d.error || 'fallo'), 'error');
                         }
                     }).catch(function() { hideSync(); setStatus('Error de conexión', 'error'); });
+            } else if (code === '1982') {
+                openCrearRutas();
+            } else if (code === '1983') {
+                openHistorico();
             } else if (code === '4459') {
                 if (!confirm('Esto escribirá los datos actuales en el Excel, REEMPLAZANDO todo su contenido. ¿Continuar?')) return;
                 showSync('Guardando en Google Sheets...');
@@ -1094,7 +1224,7 @@
                 return s;
             }
             var sep = ';';
-            var headers = ['#','Dirección','Barrio/CP','Sacos','Urgen','Tlf aviso','Conductor','Etiquetas','Marca','Observaciones','Avisador','Hora aviso','Fecha aviso'];
+            var headers = ['#','Dirección','Barrio/CP','Sacos','Urgen','Interior','Tlf aviso','Tlf 2','Conductor','Etiquetas','Marca','Observaciones'];
             var lines = [headers.map(csvVal).join(sep)];
             for (var i = 0; i < filtered.length; i++) {
                 var r = filtered[i];
@@ -1104,14 +1234,13 @@
                     r.barrio_cp || '',
                     r.sacos || '',
                     r.urgen || '',
+                    r.interior || '',
                     r.tlf_aviso || '',
+                    r.telefono2 || '',
                     r.conductor || '',
                     r.etiquetas || '',
                     r.marca || '',
-                    r.observaciones || '',
-                    r.avisador || '',
-                    r.hora_aviso || '',
-                    r.fecha_aviso || ''
+                    r.observaciones || ''
                 ].map(csvVal).join(sep));
             }
             var bom = '\uFEFF';
@@ -1140,7 +1269,7 @@
             });
 
             if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:24px;color:#888">No hay paradas pendientes' + (conductor ? ' para este conductor' : '') + '</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:24px;color:#888">No hay paradas pendientes' + (conductor ? ' para este conductor' : '') + '</td></tr>';
                 countEl.textContent = '0 paradas';
                 return;
             }
@@ -1148,21 +1277,21 @@
             var html = '';
             for (var i = 0; i < filtered.length; i++) {
                 var r = filtered[i];
-                var urgentClass = (r.urgen || '').toUpperCase() === 'SI' ? ' class="urgent"' : '';
+                var urgenVal = (r.urgen || '').toUpperCase();
+                var isUrgent = urgenVal && urgenVal !== 'NO';
+                var urgentClass = isUrgent ? ' class="urgent"' : '';
                 html += '<tr>' +
                     '<td>' + (i + 1) + '</td>' +
-                    '<td><strong>' + esc(r.direccion) + '</strong></td>' +
+                    '<td style="font-size:13px"><strong>' + esc(r.direccion) + '</strong></td>' +
                     '<td>' + esc(r.barrio_cp) + '</td>' +
-                    '<td>' + esc(r.sacos) + '</td>' +
-                    '<td' + urgentClass + '>' + esc(r.urgen) + '</td>' +
+                    '<td style="font-size:14px;font-weight:700">' + esc(r.sacos) + '</td>' +
+                    '<td' + urgentClass + ' style="font-size:14px;font-weight:700">' + esc(r.urgen) + '</td>' +
+                    '<td>' + esc(r.interior || '') + '</td>' +
                     '<td>' + esc(r.tlf_aviso) + '</td>' +
                     '<td>' + esc(r.conductor) + '</td>' +
                     '<td>' + esc(r.etiquetas) + '</td>' +
                     '<td>' + esc(r.marca) + '</td>' +
                     '<td>' + esc(r.observaciones) + '</td>' +
-                    '<td>' + esc(r.avisador) + '</td>' +
-                    '<td>' + esc(r.hora_aviso) + '</td>' +
-                    '<td>' + esc(r.fecha_aviso) + '</td>' +
                 '</tr>';
             }
             tbody.innerHTML = html;
@@ -1180,13 +1309,128 @@
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&libraries=places&language=es"></script>
     <script>
+    // ── Barrio matching map ──
+    var BARRIO_ALIASES = {
+        'alcobendas': 'Alcobendas',
+        'alcorcón': 'Alcorcon', 'alcorcon': 'Alcorcon',
+        'aravaca': 'Aravaca',
+        'arganda del rey': 'Arganda del Rey', 'arganda': 'Arganda del Rey',
+        'arroyomolinos': 'Arroyomolinos',
+        'boadilla del monte': 'Boadilla del Monte', 'boadilla': 'Boadilla del Monte',
+        'collado villalba': 'Collado Villalba',
+        'coslada': 'Coslada',
+        'fuenlabrada': 'Fuenlabrada',
+        'getafe': 'Getafe',
+        'perales del río': 'Getafe-Perales del Rio', 'perales del rio': 'Getafe-Perales del Rio',
+        'humanes de madrid': 'Humanes de Madrid', 'humanes': 'Humanes de Madrid',
+        'las rozas de madrid': 'Las Rozas de Madrid', 'las rozas': 'Las Rozas de Madrid',
+        'leganés': 'Leganes', 'leganes': 'Leganes',
+        'majadahonda': 'Majadahonda',
+        'mejorada del campo': 'Mejorada del Campo', 'mejorada': 'Mejorada del Campo',
+        'móstoles': 'Mostoles', 'mostoles': 'Mostoles',
+        'parque coimbra': 'Mostoles - Parque Coimbra',
+        'paracuellos de jarama': 'Paracuellos de Jarama', 'paracuellos': 'Paracuellos de Jarama',
+        'parla': 'Parla',
+        'pinto': 'Pinto',
+        'pozuelo de alarcón': 'Pozuelo de Alarcon', 'pozuelo de alarcon': 'Pozuelo de Alarcon', 'pozuelo': 'Pozuelo de Alarcon',
+        'rivas-vaciamadrid': 'Rivas-Vaciamadrid', 'rivas vaciamadrid': 'Rivas-Vaciamadrid', 'rivas': 'Rivas-Vaciamadrid',
+        'san agustín de guadalix': 'San Agustin de Guadalix', 'san agustin de guadalix': 'San Agustin de Guadalix',
+        'san fernando de henares': 'San Fernando de Henares', 'san fernando': 'San Fernando de Henares',
+        'san martín de la vega': 'San Martin de la Vega', 'san martin de la vega': 'San Martin de la Vega',
+        'san sebastián de los reyes': 'San Sebastian de los Reyes', 'san sebastian de los reyes': 'San Sebastian de los Reyes',
+        'tres cantos': 'Tres Cantos',
+        'valdemoro': 'Valdemoro',
+        'velilla de san antonio': 'Velilla de San Antonio', 'velilla': 'Velilla de San Antonio',
+        'villalbilla': 'Villalbilla',
+        'villaviciosa de odón': 'Villaviciosa de Odon', 'villaviciosa de odon': 'Villaviciosa de Odon', 'villaviciosa': 'Villaviciosa de Odon',
+        'arganzuela': 'Arganzuela',
+        'carabanchel': 'Carabanchel',
+        'centro': 'Centro',
+        'chamartín': 'Chamartin', 'chamartin': 'Chamartin',
+        'chamberí': 'Chamberi', 'chamberi': 'Chamberi',
+        'ciudad lineal': 'Ciudad Lineal',
+        'el pardo': 'El Pardo',
+        'fuencarral-el pardo': 'Fuencarral-Mirasierra', 'fuencarral': 'Fuencarral-Mirasierra', 'mirasierra': 'Fuencarral-Mirasierra',
+        'hortaleza': 'Hortaleza-Sanchinarro', 'sanchinarro': 'Hortaleza-Sanchinarro',
+        'las tablas': 'Las Tablas',
+        'moncloa-aravaca': 'Moncloa-Arguelles', 'moncloa': 'Moncloa-Arguelles', 'argüelles': 'Moncloa-Arguelles',
+        'moratalaz': 'Moratalaz',
+        'latina': 'Pta Angel-Batan-Aluche-Camp.', 'aluche': 'Pta Angel-Batan-Aluche-Camp.', 'batán': 'Pta Angel-Batan-Aluche-Camp.', 'campamento': 'Pta Angel-Batan-Aluche-Camp.', 'puerta del ángel': 'Pta Angel-Batan-Aluche-Camp.',
+        'retiro': 'Retiro',
+        'san blas-canillejas': 'S Blas-Canillejas-Barajas', 'san blas': 'S Blas-Canillejas-Barajas', 'canillejas': 'S Blas-Canillejas-Barajas', 'barajas': 'S Blas-Canillejas-Barajas',
+        'salamanca': 'Salamanca',
+        'tetuán': 'Tetuan', 'tetuan': 'Tetuan',
+        'usera': 'Usera',
+        'puente de vallecas': 'Vallecas', 'villa de vallecas': 'Vallecas', 'vallecas': 'Vallecas',
+        'vicálvaro': 'Vicalvaro', 'vicalvaro': 'Vicalvaro',
+        'villaverde': 'Villaverde'
+    };
+
+    function detectBarrio(place) {
+        if (!place || !place.address_components) return null;
+        var components = place.address_components;
+        var candidates = [];
+        components.forEach(function(c) {
+            var name = (c.long_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            var nameRaw = (c.long_name || '').toLowerCase();
+            if (c.types.indexOf('sublocality_level_1') !== -1 || c.types.indexOf('sublocality') !== -1) {
+                candidates.unshift(nameRaw);
+                candidates.unshift(name);
+            }
+            if (c.types.indexOf('neighborhood') !== -1) {
+                candidates.push(nameRaw);
+                candidates.push(name);
+            }
+            if (c.types.indexOf('locality') !== -1 && nameRaw !== 'madrid') {
+                candidates.push(nameRaw);
+                candidates.push(name);
+            }
+            if (c.types.indexOf('administrative_area_level_4') !== -1) {
+                candidates.push(nameRaw);
+                candidates.push(name);
+            }
+        });
+        for (var i = 0; i < candidates.length; i++) {
+            var key = candidates[i];
+            if (BARRIO_ALIASES[key]) return BARRIO_ALIASES[key];
+            for (var alias in BARRIO_ALIASES) {
+                if (key.indexOf(alias) !== -1 || alias.indexOf(key) !== -1) {
+                    return BARRIO_ALIASES[alias];
+                }
+            }
+        }
+        var isMadrid = components.some(function(c) {
+            return c.types.indexOf('locality') !== -1 && c.long_name.toLowerCase() === 'madrid';
+        });
+        if (isMadrid) return 'Madrid - Otros barrios';
+        return null;
+    }
+
     function initAddressAutocomplete(input, opts) {
         if (!input || !window.google || !google.maps || !google.maps.places) return null;
-        var options = Object.assign({ componentRestrictions: { country: 'es' }, fields: ['formatted_address','geometry'] }, opts || {});
+        var options = Object.assign({ componentRestrictions: { country: 'es' }, fields: ['formatted_address','address_components','geometry'] }, opts || {});
         var ac = new google.maps.places.Autocomplete(input, options);
         ac.addListener('place_changed', function() {
             var place = ac.getPlace();
-            if (place && place.formatted_address) input.value = place.formatted_address;
+            if (place && place.formatted_address) {
+                input.value = place.formatted_address;
+                // Auto-detect barrio
+                var barrio = detectBarrio(place);
+                if (barrio) {
+                    var sel = document.getElementById('av-barrio');
+                    if (sel) {
+                        for (var i = 0; i < sel.options.length; i++) {
+                            if (sel.options[i].value === barrio || sel.options[i].textContent === barrio) {
+                                sel.selectedIndex = i;
+                                sel.style.transition = 'background .3s';
+                                sel.style.background = '#C8E6C9';
+                                setTimeout(function() { sel.style.background = ''; }, 1500);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         });
         input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { var pac = document.querySelector('.pac-container:not([style*="display: none"])'); if (pac) e.preventDefault(); } });
         return ac;
