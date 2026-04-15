@@ -12,7 +12,7 @@ require_once __DIR__ . '/google_sheets.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-if (!isLoggedIn() || (!isRutas() && !isManager())) {
+if (!isLoggedIn() || (!isRutas() && !isManager() && !isFacturacion())) {
     jsonResponse(['error' => 'Acceso denegado'], 403);
 }
 

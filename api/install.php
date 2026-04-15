@@ -77,7 +77,7 @@ try {
 
     if (!$stmt->fetch()) {
         $stmt = $pdo->prepare("INSERT INTO users (email, password_hash, name, phone, role) VALUES (?, ?, ?, ?, 'manager')");
-        $stmt->execute([$managerEmail, $managerPass, 'Administrador BF10', '674783479']);
+        $stmt->execute([$managerEmail, $managerPass, 'Administrador BF10', '685208252']);
         echo "<h3>✅ Cuenta de manager creada</h3>";
         echo "<p><strong>Email:</strong> admin@bf10.es</p>";
         echo "<p><strong>Contraseña:</strong> Bf10Admin2026!</p>";

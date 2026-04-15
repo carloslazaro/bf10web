@@ -19,7 +19,7 @@
     fetch(API + 'auth.php?action=me')
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            if (data.user && (data.user.role === 'manager' || data.user.role === 'ceo')) showDashboard(data.user);
+            if (data.user && (data.user.role === 'manager' || data.user.role === 'ceo' || data.user.role === 'facturacion')) showDashboard(data.user);
         })
         .catch(function () {});
 
@@ -59,6 +59,25 @@
         loginScreen.style.display = 'none';
         dashboard.style.display = 'block';
         document.getElementById('user-name').textContent = user.name;
+
+        // Facturación role: hide tabs not permitted, hide header links not needed
+        if (currentUserRole === 'facturacion') {
+            var hideTabs = ['stock', 'pedidos', 'orders'];
+            hideTabs.forEach(function (t) {
+                var btn = document.querySelector('.tab[data-tab="' + t + '"]');
+                if (btn) btn.style.display = 'none';
+            });
+            // Hide "Otros" dropdown entirely (usuarios, camiones, emails, ranking)
+            var otrosEl = document.querySelector('.tab-dropdown');
+            if (otrosEl) otrosEl.style.display = 'none';
+            // Hide Reporting header link
+            document.querySelectorAll('.dash-header__actions nav a').forEach(function (a) {
+                if (a.href.indexOf('reporting') !== -1) a.style.display = 'none';
+            });
+            // Update title
+            document.querySelector('.dash-header__title').textContent = 'Servisaco Facturación';
+        }
+
         loadStats();
         loadAlbaranes();
     }
@@ -1832,8 +1851,8 @@
                 var empty = document.getElementById('users-empty');
                 if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
                 empty.style.display = 'none';
-                var roleLabels = { manager: 'Admin', comercial: 'Comercial', conductor: 'Conductor', rutas: 'Rutas', avisador: 'Avisador', ceo: 'CEO' };
-                var roleColors = { manager: '#c62828', comercial: '#1565C0', conductor: '#2e7d32', rutas: '#00897B', avisador: '#E65100', ceo: '#6A1B9A' };
+                var roleLabels = { manager: 'Admin', facturacion: 'Facturación', comercial: 'Comercial', conductor: 'Conductor', rutas: 'Rutas', avisador: 'Avisador', ceo: 'CEO' };
+                var roleColors = { manager: '#c62828', facturacion: '#F57F17', comercial: '#1565C0', conductor: '#2e7d32', rutas: '#00897B', avisador: '#E65100', ceo: '#6A1B9A' };
                 tbody.innerHTML = rows.map(function (u) {
                     var pin = u.comercial_pin || u.conductor_pin || '—';
                     var pw = u.plain_password || '—';
@@ -1875,9 +1894,9 @@
                         '<td>' + camionInfo + '</td>' +
                         '<td>' + (activo ? '<span style="color:#43A047">Activo</span>' : '<span style="color:#c62828">Inactivo</span>') + '</td>' +
                         '<td>' +
-                            '<button class="btn btn--sm" onclick="showConductorModal(' + c.id + ')">Editar</button> ' +
-                            '<button class="btn btn--sm" onclick="showZonasModal(\'' + esc(c.nombre).replace(/'/g, "\\'") + '\')">Zonas</button> ' +
-                            '<button class="btn btn--sm" onclick="toggleConductorActivo(' + c.id + ')">' + (activo ? 'Desactivar' : 'Activar') + '</button>' +
+                            '<button class="btn-action btn-edit" onclick="showConductorModal(' + c.id + ')">Editar</button> ' +
+                            '<button class="btn-action" onclick="showZonasModal(\'' + esc(c.nombre).replace(/'/g, "\\'") + '\')">Zonas</button> ' +
+                            '<button class="btn-action' + (activo ? ' btn-danger' : ' btn-edit') + '" onclick="toggleConductorActivo(' + c.id + ')">' + (activo ? 'Desactivar' : 'Activar') + '</button>' +
                         '</td>' +
                     '</tr>';
                 }).join('');
@@ -1952,7 +1971,7 @@
                 document.getElementById('conductor-modal-title').textContent = 'Editar Conductor';
             }
         }
-        document.getElementById('conductor-modal').style.display = 'flex';
+        document.getElementById('conductor-modal').style.display = '';
     };
 
     document.getElementById('conductor-form').addEventListener('submit', function (e) {
@@ -2035,6 +2054,7 @@
                         '<select name="role">' +
                             '<option value="manager"' + (u && u.role === 'manager' ? ' selected' : '') + '>Admin</option>' +
                             (currentUserRole === 'ceo' ? '<option value="ceo"' + (u && u.role === 'ceo' ? ' selected' : '') + '>CEO</option>' : '') +
+                            '<option value="facturacion"' + (u && u.role === 'facturacion' ? ' selected' : '') + '>Facturación</option>' +
                             '<option value="comercial"' + (u && u.role === 'comercial' ? ' selected' : '') + '>Comercial</option>' +
                             '<option value="conductor"' + (u && u.role === 'conductor' ? ' selected' : '') + '>Conductor</option>' +
                             '<option value="rutas"' + (u && u.role === 'rutas' ? ' selected' : '') + '>Rutas</option>' +
@@ -2384,7 +2404,7 @@
         var title = document.getElementById('zonas-modal-title');
         var body = document.getElementById('zonas-body');
         title.textContent = 'Zonas habituales — ' + conductorNombre;
-        modal.style.display = 'flex';
+        modal.style.display = '';
         modal.dataset.conductor = conductorNombre.toUpperCase();
         body.innerHTML = '<p style="color:#888;text-align:center;padding:20px">Cargando...</p>';
 

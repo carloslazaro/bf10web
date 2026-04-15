@@ -79,7 +79,7 @@ if ($method === 'GET' && $action === 'orders') {
 // GET /admin.php?action=stats
 // ====================================================================
 if ($method === 'GET' && $action === 'stats') {
-    requireManager();
+    requireManagerOrFacturacion();
     $pdo = getDB();
 
     $stats = [];
@@ -648,7 +648,7 @@ if ($method === 'POST' && $action === 'create-order') {
 // Optional ?q= search by name/phone/email/nif
 // ====================================================================
 if ($method === 'GET' && $action === 'customers') {
-    requireManager();
+    requireManagerOrFacturacion();
     $pdo = getDB();
     $q = sanitize($_GET['q'] ?? '');
 
@@ -677,7 +677,7 @@ if ($method === 'GET' && $action === 'customers') {
 // Returns customer + all their orders
 // ====================================================================
 if ($method === 'GET' && $action === 'customer-detail') {
-    requireManager();
+    requireManagerOrFacturacion();
     $id = (int)($_GET['id'] ?? 0);
     if (!$id) jsonResponse(['error' => 'id requerido'], 400);
 
@@ -722,7 +722,7 @@ if ($method === 'GET' && $action === 'customer-detail') {
 // Returns the list of brands available for the create-order form
 // ====================================================================
 if ($method === 'GET' && $action === 'brands') {
-    requireManager();
+    requireManagerOrFacturacion();
     $out = [];
     foreach (BRANDS as $code => $b) {
         $out[] = [
@@ -892,7 +892,7 @@ if ($method === 'GET' && $action === 'users') {
         LEFT JOIN comerciales_pin cp ON cp.user_id = u.id
         LEFT JOIN conductores c ON c.nombre = u.name
         WHERE u.role != 'user'
-        ORDER BY FIELD(u.role, 'manager', 'comercial', 'conductor', 'rutas', 'avisador'), u.name
+        ORDER BY FIELD(u.role, 'manager', 'facturacion', 'comercial', 'conductor', 'rutas', 'avisador'), u.name
     ")->fetchAll();
 
     jsonResponse(['users' => $users]);
@@ -915,7 +915,7 @@ if ($method === 'POST' && $action === 'user-create') {
     if (!$name) jsonResponse(['error' => 'Nombre requerido'], 400);
     if (!$email) jsonResponse(['error' => 'Email requerido'], 400);
     if (!$password) jsonResponse(['error' => 'Contraseña requerida'], 400);
-    if (!in_array($role, ['manager', 'comercial', 'conductor', 'rutas', 'user', 'avisador', 'ceo'])) jsonResponse(['error' => 'Rol inválido'], 400);
+    if (!in_array($role, ['manager', 'comercial', 'conductor', 'rutas', 'user', 'avisador', 'ceo', 'facturacion'])) jsonResponse(['error' => 'Rol inválido'], 400);
 
     // Check duplicate email
     $chk = $pdo->prepare("SELECT id FROM users WHERE email = ?");

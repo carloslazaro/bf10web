@@ -168,12 +168,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
                         <option value="">—</option>
                         <option value="SI">SI</option>
                         <option value="NO">NO</option>
+                        <option value="POLICIA">Policía</option>
+                        <option value="AYUNTAMIENTO">Ayuntamiento</option>
                     </select>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Telefono aviso *</label>
-                <input type="tel" id="av-tlf" placeholder="674..." required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Telefono aviso *</label>
+                    <input type="tel" id="av-tlf" placeholder="685..." required>
+                </div>
+                <div class="form-group">
+                    <label>Telefono 2</label>
+                    <input type="tel" id="av-tlf2" placeholder="Opcional">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label style="flex-direction:row;align-items:center;gap:8px;cursor:pointer">
+                        <input type="checkbox" id="av-interior" style="width:auto"> Interior (sacas en interior)
+                    </label>
+                </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -208,6 +223,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Duplicate detection modal -->
+<div id="dup-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:12px;padding:24px;width:500px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+        <h3 style="color:#E65100;margin-bottom:12px">⚠️ Posible duplicado</h3>
+        <p style="font-size:13px;color:#555;margin-bottom:16px">Se encontró un aviso reciente con la misma dirección:</p>
+        <div id="dup-existing" style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px"></div>
+        <p style="font-size:13px;font-weight:600;margin-bottom:8px">Tu nuevo aviso:</p>
+        <div id="dup-new" style="background:#E3F2FD;border:1px solid #64B5F6;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="dup-btn-new" style="flex:1;padding:10px;border-radius:6px;border:1px solid #2E7D32;background:#2E7D32;color:#fff;font-weight:600;cursor:pointer;font-size:13px">Crear nuevo aviso</button>
+            <button id="dup-btn-update" style="flex:1;padding:10px;border-radius:6px;border:1px solid #1565C0;background:#1565C0;color:#fff;font-weight:600;cursor:pointer;font-size:13px">Actualizar existente</button>
+            <button id="dup-btn-cancel" style="flex:1;padding:10px;border-radius:6px;border:1px solid #888;background:#fff;color:#333;font-weight:600;cursor:pointer;font-size:13px">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&libraries=places"></script>
 <script>
@@ -412,52 +443,118 @@ function initAutocomplete() {
     });
 }
 
-// ── Submit aviso ──
-async function submitAviso(e) {
-    e.preventDefault();
-    const dir = document.getElementById('av-direccion').value.trim();
-    const barrio = document.getElementById('av-barrio').value;
-    const sacos = document.getElementById('av-sacos').value.trim();
-    const tlf = document.getElementById('av-tlf').value.trim();
-    const marca = document.getElementById('av-marca').value;
-    if (!dir || !barrio || !sacos || !tlf || !marca) {
-        showToast('Rellena todos los campos obligatorios', true);
-        return false;
-    }
+// ── Build payload from form ──
+function buildAvisoPayload() {
+    return {
+        direccion: document.getElementById('av-direccion').value.trim(),
+        barrio_cp: document.getElementById('av-barrio').value,
+        sacos: document.getElementById('av-sacos').value.trim(),
+        urgen: document.getElementById('av-urgen').value,
+        interior: document.getElementById('av-interior').checked ? 'SI' : '',
+        tlf_aviso: document.getElementById('av-tlf').value.trim(),
+        telefono2: (document.getElementById('av-tlf2') || {}).value ? document.getElementById('av-tlf2').value.trim() : '',
+        marca: document.getElementById('av-marca').value,
+        observaciones: document.getElementById('av-observaciones').value.trim(),
+        fecha_aviso: document.getElementById('av-fecha').value,
+        avisador: currentUser
+    };
+}
 
+function formatDupRow(r) {
+    return '<b>' + (r.direccion || '') + '</b><br>' +
+        'Barrio: ' + (r.barrio_cp || '—') + ' · Sacos: ' + (r.sacos || '—') + ' · Urgen: ' + (r.urgen || 'No') +
+        (r.interior === 'SI' ? ' · Interior' : '') + '<br>' +
+        'Tlf: ' + (r.tlf_aviso || '—') + (r.telefono2 ? ' / ' + r.telefono2 : '') +
+        ' · Marca: ' + (r.marca || '—') + '<br>' +
+        'Avisador: ' + (r.avisador || '—') + ' · Fecha: ' + (r.fecha_aviso || '—') +
+        ' · Estado: ' + (r.estado || 'pendiente');
+}
+
+// ── Send create request ──
+async function doCreateAviso(payload) {
     const btn = document.getElementById('btnSubmit');
-    btn.disabled = true;
-    btn.textContent = 'Enviando...';
-
+    btn.disabled = true; btn.textContent = 'Enviando...';
     try {
         const res = await fetch(API + '?action=create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                direccion: dir,
-                barrio_cp: barrio,
-                sacos: document.getElementById('av-sacos').value.trim(),
-                urgen: document.getElementById('av-urgen').value,
-                tlf_aviso: document.getElementById('av-tlf').value.trim(),
-                marca: document.getElementById('av-marca').value,
-                observaciones: document.getElementById('av-observaciones').value.trim(),
-                fecha_aviso: document.getElementById('av-fecha').value,
-                avisador: currentUser
-            })
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (data.success) {
             showToast('Aviso creado correctamente');
             document.getElementById('avisoForm').reset();
             document.getElementById('av-fecha').value = new Date().toISOString().slice(0, 10);
-        } else {
-            showToast(data.error || 'Error al crear aviso', true);
-        }
-    } catch (err) {
-        showToast('Error de conexion', true);
+        } else { showToast(data.error || 'Error al crear aviso', true); }
+    } catch (err) { showToast('Error de conexion', true); }
+    btn.disabled = false; btn.textContent = 'Crear Aviso';
+}
+
+// ── Send update request ──
+async function doUpdateAviso(id, payload) {
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true; btn.textContent = 'Actualizando...';
+    try {
+        payload.id = id;
+        const res = await fetch(API + '?action=update-aviso', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Aviso existente actualizado');
+            document.getElementById('avisoForm').reset();
+            document.getElementById('av-fecha').value = new Date().toISOString().slice(0, 10);
+        } else { showToast(data.error || 'Error al actualizar', true); }
+    } catch (err) { showToast('Error de conexion', true); }
+    btn.disabled = false; btn.textContent = 'Crear Aviso';
+}
+
+// ── Submit aviso with duplicate detection ──
+async function submitAviso(e) {
+    e.preventDefault();
+    var payload = buildAvisoPayload();
+    if (!payload.direccion || !payload.barrio_cp || !payload.sacos || !payload.tlf_aviso || !payload.marca) {
+        showToast('Rellena todos los campos obligatorios', true);
+        return false;
     }
-    btn.disabled = false;
-    btn.textContent = 'Crear Aviso';
+
+    // Check duplicates first
+    try {
+        var checkRes = await fetch(API + '?action=check-duplicate&direccion=' + encodeURIComponent(payload.direccion));
+        var checkData = await checkRes.json();
+        if (checkData.duplicates && checkData.duplicates.length > 0) {
+            var dup = checkData.duplicates[0];
+            document.getElementById('dup-existing').innerHTML = formatDupRow(dup);
+            document.getElementById('dup-new').innerHTML = formatDupRow(payload);
+            document.getElementById('dup-modal').style.display = 'flex';
+
+            // Wire up buttons (remove old listeners by replacing elements)
+            var btnNew = document.getElementById('dup-btn-new');
+            var btnUpd = document.getElementById('dup-btn-update');
+            var btnCan = document.getElementById('dup-btn-cancel');
+            var newBtnNew = btnNew.cloneNode(true);
+            var newBtnUpd = btnUpd.cloneNode(true);
+            var newBtnCan = btnCan.cloneNode(true);
+            btnNew.replaceWith(newBtnNew);
+            btnUpd.replaceWith(newBtnUpd);
+            btnCan.replaceWith(newBtnCan);
+
+            newBtnNew.addEventListener('click', function() {
+                document.getElementById('dup-modal').style.display = 'none';
+                doCreateAviso(payload);
+            });
+            newBtnUpd.addEventListener('click', function() {
+                document.getElementById('dup-modal').style.display = 'none';
+                doUpdateAviso(dup.id, payload);
+            });
+            newBtnCan.addEventListener('click', function() {
+                document.getElementById('dup-modal').style.display = 'none';
+            });
+            return false;
+        }
+    } catch (err) { /* If check fails, proceed normally */ }
+
+    doCreateAviso(payload);
     return false;
 }
 

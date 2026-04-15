@@ -37,9 +37,10 @@
     })();
 
     const packages = {
-        10: { name: '10 sacas', price: 450.00 },
-        25: { name: '25 sacas', price: 1012.50 },
-        50: { name: '50 sacas', price: 1912.50 },
+        1:  { name: '1 saca (TEST)', price: 1.00 },
+        10: { name: '10 sacas', price: 470.00 },
+        25: { name: '25 sacas', price: 1057.50 },
+        50: { name: '50 sacas', price: 1997.50 },
     };
 
     // Elements
@@ -228,7 +229,7 @@
             }
         })
         .catch(function () {
-            showError('Error de conexión. Inténtalo de nuevo o llámanos al 674 78 34 79.');
+            showError('Error de conexión. Inténtalo de nuevo o llámanos al 685 20 82 52.');
         })
         .finally(function () {
             submitBtn.disabled = false;

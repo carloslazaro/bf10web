@@ -239,11 +239,11 @@
                 <p class="dash-empty" id="users-empty" style="display:none">No hay usuarios</p>
             </section>
 
-            <section class="dash-orders" style="margin-top:24px">
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                    <h3 style="margin:0">Conductores (tabla conductores)</h3>
-                    <button class="btn btn--sm btn--primary" onclick="showConductorModal()">+ Nuevo Conductor</button>
-                </div>
+            <section class="dash-orders" style="margin-top:32px">
+                <section class="filter-bar" style="margin-bottom:0">
+                    <h3 style="margin:0">Conductores</h3>
+                    <button class="btn-action btn-primary" onclick="showConductorModal()">+ Nuevo Conductor</button>
+                </section>
                 <div class="dash-table-wrapper">
                     <table class="dash-table">
                         <thead>
@@ -793,9 +793,9 @@
                         </label>
                         <label>Pack *
                             <select name="package_qty" required>
-                                <option value="10">10 sacas — 450,00 €</option>
-                                <option value="25">25 sacas — 1.012,50 €</option>
-                                <option value="50">50 sacas — 1.912,50 €</option>
+                                <option value="10">10 sacas — 470,00 €</option>
+                                <option value="25">25 sacas — 1.057,50 €</option>
+                                <option value="50">50 sacas — 1.997,50 €</option>
                             </select>
                         </label>
                         <label>Forma de pago *
@@ -940,16 +940,15 @@
         initAddressAutocomplete(document.querySelector('#create-form input[name="address"]'));
     });
     </script>
-    <style>.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2000;justify-content:center;align-items:center}.modal-overlay .modal{position:relative;z-index:2001}</style>
-
     <!-- Conductor Modal -->
-    <div class="modal-overlay" id="conductor-modal">
-        <div class="modal" style="max-width:440px">
-            <div class="modal-header">
-                <h3 id="conductor-modal-title">Nuevo Conductor</h3>
-                <button class="modal-close" onclick="document.getElementById('conductor-modal').style.display='none'">&times;</button>
+    <div class="modal" id="conductor-modal" style="display:none">
+        <div class="modal__overlay" onclick="document.getElementById('conductor-modal').style.display='none'"></div>
+        <div class="modal__content" style="max-width:480px">
+            <div class="modal__header">
+                <h2 class="modal__title" id="conductor-modal-title">Nuevo Conductor</h2>
+                <button class="modal__close" onclick="document.getElementById('conductor-modal').style.display='none'">&times;</button>
             </div>
-            <form id="conductor-form">
+            <form id="conductor-form" class="modal__body">
                 <input type="hidden" id="conductor-f-id">
                 <div class="form-row">
                     <label>Nombre<input type="text" id="conductor-f-nombre" required placeholder="Nombre del conductor"></label>
@@ -965,17 +964,18 @@
                         <input type="checkbox" id="conductor-f-activo" checked> Activo
                     </label>
                 </div>
-                <button class="btn btn--primary" type="submit" style="width:100%;margin-top:8px">Guardar</button>
+                <button type="submit" class="btn-modal-save">Guardar</button>
             </form>
         </div>
     </div>
 
     <!-- Zonas Habituales Modal -->
-    <div class="modal-overlay" id="zonas-modal">
-        <div class="modal" style="max-width:560px">
-            <div class="modal-header">
-                <h3 id="zonas-modal-title">Zonas habituales</h3>
-                <button class="modal-close" onclick="document.getElementById('zonas-modal').style.display='none'">&times;</button>
+    <div class="modal" id="zonas-modal" style="display:none">
+        <div class="modal__overlay" onclick="document.getElementById('zonas-modal').style.display='none'"></div>
+        <div class="modal__content" style="max-width:560px">
+            <div class="modal__header">
+                <h2 class="modal__title" id="zonas-modal-title">Zonas habituales</h2>
+                <button class="modal__close" onclick="document.getElementById('zonas-modal').style.display='none'">&times;</button>
             </div>
             <div id="zonas-body" style="padding:16px;max-height:60vh;overflow-y:auto">
             </div>

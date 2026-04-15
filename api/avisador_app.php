@@ -59,7 +59,9 @@ if ($action === 'create') {
     $barrio_cp     = trim($data['barrio_cp'] ?? '');
     $sacos         = trim($data['sacos'] ?? '');
     $urgen         = trim($data['urgen'] ?? '');
+    $interior      = trim($data['interior'] ?? '');
     $tlf_aviso     = trim($data['tlf_aviso'] ?? '');
+    $telefono2     = trim($data['telefono2'] ?? '');
     $marca         = trim($data['marca'] ?? '');
     $observaciones = trim($data['observaciones'] ?? '');
     $fecha_aviso   = trim($data['fecha_aviso'] ?? date('Y-m-d'));
@@ -73,13 +75,55 @@ if ($action === 'create') {
     $newOrder = $maxOrder + 1;
 
     $stmt = $pdo->prepare("
-        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, tlf_aviso, marca, observaciones, fecha_aviso, avisador)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, avisador)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->execute([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $tlf_aviso, $marca, $observaciones, $fecha_aviso, $avisador]);
+    $stmt->execute([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $interior, $tlf_aviso, $telefono2, $marca, $observaciones, $fecha_aviso, $avisador]);
     $newId = (int)$pdo->lastInsertId();
 
     jsonResponse(['success' => true, 'id' => $newId]);
+}
+
+// ── Update existing aviso ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'update-aviso') {
+    $data = getBody();
+    $id = (int)($data['id'] ?? 0);
+    if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+
+    $fields = ['sacos', 'urgen', 'interior', 'tlf_aviso', 'telefono2', 'marca', 'observaciones', 'avisador', 'barrio_cp'];
+    $sets = [];
+    $params = [];
+    foreach ($fields as $f) {
+        if (array_key_exists($f, $data)) {
+            $sets[] = "`$f` = ?";
+            $params[] = trim($data[$f] ?? '');
+        }
+    }
+    if (!$sets) jsonResponse(['error' => 'Nada que actualizar'], 400);
+
+    $sets[] = "fecha_aviso = ?";
+    $params[] = date('Y-m-d');
+
+    $params[] = $id;
+    $pdo->prepare("UPDATE rutas_data SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
+    jsonResponse(['success' => true]);
+}
+
+// ── Check duplicate address (last 7 days) ──
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'check-duplicate') {
+    $dir = trim($_GET['direccion'] ?? '');
+    if (!$dir) jsonResponse(['duplicates' => []]);
+
+    $stmt = $pdo->prepare("
+        SELECT id, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, avisador, estado
+        FROM rutas_data
+        WHERE LOWER(TRIM(direccion)) = LOWER(TRIM(?))
+          AND fecha_aviso >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        ORDER BY id DESC
+        LIMIT 5
+    ");
+    $stmt->execute([$dir]);
+    jsonResponse(['duplicates' => $stmt->fetchAll()]);
 }
 
 // ── My avisos (last 50 by this avisador) ──

@@ -239,19 +239,28 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 16px;
-      background: var(--dark);
-      color: #fff;
+      padding: 12px 16px;
+      background: #fff;
+      color: #333;
       flex-shrink: 0;
+      z-index: 10;
+      position: relative;
+      border-bottom: 1px solid #ddd;
     }
     .map-header button {
-      background: rgba(255,255,255,.15);
+      background: none;
       border: none;
-      color: #fff;
-      font-size: 18px;
-      padding: 6px 12px;
+      color: var(--primary);
+      font-size: 24px;
+      padding: 8px 14px;
       border-radius: 8px;
       cursor: pointer;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
     }
     .map-header strong { font-size: 15px; }
     .map-header .map-count { margin-left: auto; font-size: 13px; opacity: .8; }
@@ -318,6 +327,9 @@
     .ruta-info span { display: flex; align-items: center; gap: 6px; }
     .ruta-label { color: var(--text-light); font-weight: 600; min-width: 50px; }
     .ruta-addr { color: var(--text); }
+    .overflow-banner { padding: 10px 16px; background: #FFF3E0; color: #E65100; font-size: 13px; font-weight: 600; text-align: center; border-bottom: 1px solid #FFB74D; }
+    .ruta-salida { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .ruta-salida select { flex: 1; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: var(--card); }
     .ruta-buttons { display: flex; gap: 8px; }
     .ruta-btn {
       flex: 1;
@@ -367,12 +379,22 @@
     }
     .stop-card.recogida { border-left: 4px solid var(--green); background: #f0fdf4; }
     .stop-card.no_estan { border-left: 4px solid var(--red); background: #fef2f2; }
-    .stop-card.por_recoger { border-left: 4px solid #FFC107; }
+    .stop-card.por_recoger { border-left: 4px solid #9E9E9E; }
+    .stop-card.por_recoger.viaje-1 { border-left-color: #1565C0; }
+    .stop-card.por_recoger.viaje-2 { border-left-color: #2E7D32; }
+    .stop-card.por_recoger.viaje-3 { border-left-color: #F9A825; }
+    .stop-card.por_recoger.viaje-4 { border-left-color: #6A1B9A; }
+    .stop-card.por_recoger.priority { border-left-color: #c62828; }
 
     .stop-address { font-size: 14px; font-weight: 600; margin-bottom: 6px; line-height: 1.3; display: flex; align-items: flex-start; gap: 6px; color: var(--text); }
     .stop-address-text { flex: 1; cursor: pointer; text-decoration: underline; text-decoration-color: #ddd; }
     .btn-maps { flex-shrink: 0; width: 26px; height: 26px; border: none; border-radius: 6px; background: rgba(21,101,192,.08); color: var(--blue); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .btn-maps:active { opacity: 0.7; }
+    .btn-waze { flex-shrink: 0; width: 26px; height: 26px; border: none; border-radius: 6px; background: rgba(51,171,249,.1); color: #33ABF9; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-waze:active { opacity: 0.7; }
+    .btn-sv { flex-shrink: 0; width: 26px; height: 26px; border: none; border-radius: 6px; background: rgba(251,192,45,.15); color: #E6A100; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-sv:active { opacity: 0.7; }
+    .streetview-frame { width: 100%; height: 180px; border: none; border-radius: 8px; margin-top: 6px; }
     .stop-meta {
       display: flex;
       flex-wrap: wrap;
@@ -389,7 +411,7 @@
     }
     .badge.sacas { color: #1565C0; background: #E3F2FD; }
     .badge.marca { color: #F57F17; background: #FFF8E1; }
-    .badge.urgente { color: #c62828; background: #FFEBEE; }
+    .badge.urgente { color: #fff; background: #c62828; font-weight: 700; }
     .badge.dias { color: #E65100; background: #FFF3E0; }
     .badge.dias-old { color: #c62828; background: #FFEBEE; }
 
@@ -399,6 +421,16 @@
       gap: 4px;
       align-items: center;
       flex-wrap: nowrap;
+    }
+    .stop-obs {
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: #FFF8E1;
+      border-left: 3px solid #F9A825;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #5D4037;
+      line-height: 1.4;
     }
     .act-btn {
       width: 36px;
@@ -890,11 +922,20 @@
     </div>
     <div class="ruta-bar" id="rutaBar">
       <div class="ruta-info" id="rutaInfo"></div>
+      <div class="ruta-salida">
+        <span class="ruta-label">Salida:</span>
+        <select id="salidaSelect" onchange="updateSalida()">
+          <option value="nave">Nave Getafe</option>
+          <option value="vertedero">Vertedero Valdemingomez</option>
+          <option value="custom">Otra ubicacion...</option>
+        </select>
+      </div>
       <div class="ruta-buttons">
         <button class="ruta-btn" onclick="openRuta(false)">&#128663; Ruta</button>
         <button class="ruta-btn ruta-opt" onclick="openRuta(true)">&#128663; Ruta optimizada</button>
       </div>
     </div>
+    <div class="overflow-banner" id="overflowBanner" style="display:none"></div>
     <div class="stops-list" id="stopsList">
       <div class="loading"><div class="spinner"></div></div>
     </div>
@@ -1143,13 +1184,6 @@
       renderStops();
     }
 
-    const RUTA_NOMBRES = {
-      'Viaje 1': { salida: 'Nave Getafe', destino: 'Vertedero Valdemingomez' },
-      'Viaje 2': { salida: 'Vertedero Valdemingomez', destino: 'Vertedero Valdemingomez' },
-      'Viaje 3': { salida: 'Vertedero Valdemingomez', destino: 'Vertedero Valdemingomez' },
-      'Viaje 4': { salida: 'Vertedero Valdemingomez', destino: 'Vertedero Valdemingomez' },
-    };
-
     function setViaje(v) {
       currentViaje = v;
       document.querySelectorAll('.viaje-chip').forEach(c =>
@@ -1159,10 +1193,14 @@
       rutaBar.classList.toggle('show', v !== '');
 
       if (v) {
-        const nombres = RUTA_NOMBRES[v] || { salida: '—', destino: '—' };
+        // Reset salida selector to default for this viaje
+        const sel = document.getElementById('salidaSelect');
+        if (sel) {
+          sel.value = (v === 'Viaje 1') ? 'nave' : 'vertedero';
+          customSalida = null;
+        }
         document.getElementById('rutaInfo').innerHTML = `
-          <span><span class="ruta-label">Salida:</span><span class="ruta-addr">${esc(nombres.salida)}</span></span>
-          <span><span class="ruta-label">Destino:</span><span class="ruta-addr">${esc(nombres.destino)}</span></span>
+          <span><span class="ruta-label">Destino:</span><span class="ruta-addr">Vertedero Valdemingomez</span></span>
         `;
       }
 
@@ -1212,6 +1250,18 @@
       document.getElementById('cntPending').textContent = c.por_recoger;
       document.getElementById('cntDone').textContent = c.recogida;
       document.getElementById('cntAbsent').textContent = c.no_estan;
+
+      // Show overflow warning if there are stops without viaje
+      const sinViaje = (stopsData.por_recoger || []).filter(s => !s.viaje);
+      const banner = document.getElementById('overflowBanner');
+      if (banner) {
+        if (sinViaje.length > 0) {
+          banner.innerHTML = `&#9888; ${sinViaje.length} parada${sinViaje.length > 1 ? 's' : ''} sin viaje asignado`;
+          banner.style.display = 'block';
+        } else {
+          banner.style.display = 'none';
+        }
+      }
     }
 
     function isPending(s) {
@@ -1227,6 +1277,11 @@
       return null;
     }
 
+    function isPriority(s) {
+      const u = (s.urgen || '').toUpperCase();
+      return u === 'URGT' || u === 'POLI' || u === 'AYTO';
+    }
+
     function renderStops() {
       const list = document.getElementById('stopsList');
       let filtered = stopsData[currentFilter] || [];
@@ -1234,6 +1289,15 @@
       // Apply viaje filter on por_recoger
       if (currentFilter === 'por_recoger' && currentViaje) {
         filtered = filtered.filter(s => s.viaje === currentViaje);
+      }
+
+      // Priority stops (urgente/policia/ayuntamiento) without viaje go first
+      if (currentFilter === 'por_recoger') {
+        filtered = [...filtered].sort((a, b) => {
+          const aPri = isPriority(a) && !a.viaje ? 1 : 0;
+          const bPri = isPriority(b) && !b.viaje ? 1 : 0;
+          return bPri - aPri;
+        });
       }
 
       if (filtered.length === 0) {
@@ -1287,21 +1351,23 @@
           }
         }
 
+        const viajeClass = isPriority(s) ? 'priority' : s.viaje ? 'viaje-' + s.viaje.replace('Viaje ', '') : '';
+
         return `
-          <div class="stop-card ${estado}" data-id="${s.id}">
+          <div class="stop-card ${estado} ${viajeClass}" data-id="${s.id}">
             <div class="stop-card-row">
               ${dragHandle}
               <div class="stop-card-content">
                 <div class="stop-address">
                   <span class="stop-address-text" onclick="openSummary(${s.id})">${esc(s.direccion)}</span>
-                  ${s.lat && s.lng ? `<button class="btn-maps" onclick="openMapsCoords(${s.lat},${s.lng})" title="Ver en Maps">&#128205;</button>` : ''}
+                  ${s.lat && s.lng ? `<button class="btn-maps" onclick="openMapsCoords(${s.lat},${s.lng})" title="Google Maps">&#128205;</button><button class="btn-waze" onclick="openWaze(${s.lat},${s.lng})" title="Waze">W</button><button class="btn-sv" onclick="toggleStreetView(this,${s.lat},${s.lng})" title="Street View">&#128065;</button>` : ''}
                 </div>
                 <div class="stop-meta">
                   <span class="badge sacas">Sacas: ${s.sacos || '?'}</span>
                   ${s.marca ? `<span class="badge marca">${esc(s.marca)}</span>` : ''}
                   ${s.viaje ? `<span class="badge viaje">${esc(s.viaje)}</span>` : ''}
                   ${diasBadge}
-                  ${s.urgen ? '<span class="badge urgente">URGENTE</span>' : ''}
+                  ${isPriority(s) ? `<span class="badge urgente">${({'URGT':'URGENTE','POLI':'POLICIA','AYTO':'AYUNTAMIENTO'})[s.urgen.toUpperCase()] || s.urgen}</span>` : ''}
                   ${s.barrio_cp ? `<span>${esc(s.barrio_cp)}</span>` : ''}
                   ${s.tlf_aviso ? `<span><a href="tel:${s.tlf_aviso}" style="color:var(--blue);text-decoration:none">${s.tlf_aviso}</a></span>` : ''}
                 </div>
@@ -1315,6 +1381,7 @@
                   </select>` : ''}
                   ${buttons}
                 </div>
+                ${s.observaciones && s.observaciones.trim() ? `<div class="stop-obs">&#128172; ${esc(s.observaciones)}</div>` : ''}
               </div>
             </div>
           </div>
@@ -2096,18 +2163,63 @@
     });
 
     // Rutas config
-    const RUTA_SALIDAS = {
-      'Viaje 1': { lat: 40.35119, lng: -3.562747 },       // Salida V1
-      'Viaje 2': { lat: 40.335487, lng: -3.5917364 },     // Vertedero
-      'Viaje 3': { lat: 40.335487, lng: -3.5917364 },
-      'Viaje 4': { lat: 40.335487, lng: -3.5917364 },
+    const PUNTOS_FIJOS = {
+      nave: { lat: 40.35119, lng: -3.562747, nombre: 'Nave Getafe' },
+      vertedero: { lat: 40.335487, lng: -3.5917364, nombre: 'Vertedero Valdemingomez' }
     };
-    const RUTA_FIN = { lat: 40.335487, lng: -3.5917364 }; // Vertedero Valdemingomez
+    let customSalida = null; // { lat, lng } set by geolocation
+    const RUTA_FIN = PUNTOS_FIJOS.vertedero;
 
-    function openRuta(optimize) {
+    function getSalida() {
+      const sel = document.getElementById('salidaSelect');
+      if (!sel) return PUNTOS_FIJOS.nave;
+      const v = sel.value;
+      if (v === 'custom' && customSalida) return customSalida;
+      return PUNTOS_FIJOS[v] || PUNTOS_FIJOS.nave;
+    }
+
+    function updateSalida() {
+      const sel = document.getElementById('salidaSelect');
+      if (sel.value === 'custom') {
+        if (!navigator.geolocation) {
+          alert('Tu navegador no soporta geolocalizacion');
+          sel.value = 'nave';
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            customSalida = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            // Update info display
+            const info = document.getElementById('rutaInfo');
+            if (info) info.innerHTML = `
+              <span><span class="ruta-label">Salida:</span><span class="ruta-addr">Mi ubicacion actual</span></span>
+              <span><span class="ruta-label">Destino:</span><span class="ruta-addr">${esc(RUTA_FIN.nombre || 'Vertedero')}</span></span>
+            `;
+          },
+          () => {
+            alert('No se pudo obtener tu ubicacion. Activa el GPS.');
+            sel.value = 'nave';
+            updateSalidaInfo();
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        customSalida = null;
+        updateSalidaInfo();
+      }
+    }
+
+    function updateSalidaInfo() {
+      const salida = getSalida();
+      const info = document.getElementById('rutaInfo');
+      if (info) info.innerHTML = `
+        <span><span class="ruta-label">Destino:</span><span class="ruta-addr">${esc(RUTA_FIN.nombre || 'Vertedero')}</span></span>
+      `;
+    }
+
+    async function openRuta(optimize) {
       if (!currentViaje) return;
 
-      // Get stops with coords for current viaje
       const stops = (stopsData.por_recoger || []).filter(s =>
         s.viaje === currentViaje && s.lat && s.lng && s.lat !== '' && s.lng !== ''
       );
@@ -2117,30 +2229,103 @@
         return;
       }
 
-      const salida = RUTA_SALIDAS[currentViaje] || RUTA_FIN;
+      const salida = getSalida();
 
-      if (optimize) {
-        // Use Google Maps direct URL format: /maps/dir/origin/stop1/stop2/.../destination
-        // This format handles optimize better
-        const points = [
-          `${salida.lat},${salida.lng}`,
-          ...stops.map(s => `${s.lat},${s.lng}`),
-          `${RUTA_FIN.lat},${RUTA_FIN.lng}`
-        ];
-        const url = 'https://www.google.com/maps/dir/' + points.join('/');
-        window.open(url, '_blank');
-      } else {
-        // Normal route: API URL with explicit origin/destination
-        const origin = `${salida.lat},${salida.lng}`;
-        const destination = `${RUTA_FIN.lat},${RUTA_FIN.lng}`;
-        const waypointsStr = stops.map(s => `${s.lat},${s.lng}`).join('|');
-        const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsStr}&travelmode=driving`;
-        window.open(url, '_blank');
+      // 10 or fewer: open directly in Google Maps (no API call needed)
+      if (stops.length <= 10) {
+        if (optimize) {
+          const points = [
+            `${salida.lat},${salida.lng}`,
+            ...stops.map(s => `${s.lat},${s.lng}`),
+            `${RUTA_FIN.lat},${RUTA_FIN.lng}`
+          ];
+          window.open('https://www.google.com/maps/dir/' + points.join('/'), '_blank');
+        } else {
+          const waypointsStr = stops.map(s => `${s.lat},${s.lng}`).join('|');
+          window.open(`https://www.google.com/maps/dir/?api=1&origin=${salida.lat},${salida.lng}&destination=${RUTA_FIN.lat},${RUTA_FIN.lng}&waypoints=${waypointsStr}&travelmode=driving`, '_blank');
+        }
+        return;
       }
+
+      // More than 10: use Directions API to optimize and split into chunks
+      try {
+        const resp = await fetch(API.replace('driver.php', 'directions.php'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            origin: salida,
+            destination: RUTA_FIN,
+            waypoints: stops.map(s => ({ lat: parseFloat(s.lat), lng: parseFloat(s.lng), id: s.id })),
+            optimize
+          })
+        });
+        const data = await resp.json();
+        if (data.error) { alert('Error: ' + data.error); return; }
+
+        if (data.chunks.length === 1) {
+          window.open(data.chunks[0].url, '_blank');
+        } else {
+          showRutaChunks(data.chunks);
+        }
+      } catch (e) {
+        alert('Error calculando ruta: ' + e.message);
+      }
+    }
+
+    function showRutaChunks(chunks) {
+      // Remove previous overlay if exists
+      const old = document.getElementById('rutaChunksOverlay');
+      if (old) old.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'rutaChunksOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;';
+      const box = document.createElement('div');
+      box.style.cssText = 'background:#fff;border-radius:16px;padding:24px;max-width:320px;width:90%;text-align:center;';
+      box.innerHTML = `<h3 style="margin:0 0 8px">Ruta dividida en ${chunks.length} tramos</h3>
+        <p style="font-size:13px;color:#666;margin:0 0 16px">Google Maps admite max. 10 paradas por tramo</p>`;
+
+      chunks.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.style.cssText = 'display:block;width:100%;padding:14px;margin:8px 0;border:none;border-radius:10px;background:var(--blue);color:#fff;font-size:15px;font-weight:600;cursor:pointer;';
+        btn.textContent = `${c.label} (${c.stops} paradas)`;
+        btn.onclick = () => window.open(c.url, '_blank');
+        box.appendChild(btn);
+      });
+
+      const closeBtn = document.createElement('button');
+      closeBtn.style.cssText = 'margin-top:12px;padding:10px 24px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#666;font-size:14px;cursor:pointer;';
+      closeBtn.textContent = 'Cerrar';
+      closeBtn.onclick = () => overlay.remove();
+      box.appendChild(closeBtn);
+
+      overlay.appendChild(box);
+      overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
     }
 
     function openMapsCoords(lat, lng) {
       window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+    }
+
+    function openWaze(lat, lng) {
+      window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`, '_blank');
+    }
+
+    function toggleStreetView(btn, lat, lng) {
+      const card = btn.closest('.stop-card');
+      const existing = card.querySelector('.streetview-frame');
+      if (existing) {
+        existing.remove();
+        return;
+      }
+      const iframe = document.createElement('iframe');
+      iframe.className = 'streetview-frame';
+      iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBgmkvCN-ZzZkxtdPQEyl4OaVvq10qu340&location=${lat},${lng}&heading=0&pitch=0&fov=90`;
+      iframe.loading = 'lazy';
+      iframe.allowFullscreen = true;
+      const content = card.querySelector('.stop-card-content');
+      content.appendChild(iframe);
     }
 
     function openMaps(direccion, barrio) {
@@ -2305,9 +2490,25 @@
       }
     }
 
-    // Service worker
+    // Service worker with auto-update detection
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw-conductor.js').catch(() => {});
+      navigator.serviceWorker.register('/sw-conductor.js').then(reg => {
+        // Check for updates every 5 minutes
+        setInterval(() => reg.update(), 5 * 60 * 1000);
+        // When a new SW is waiting, reload to activate it
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated') {
+              // New version active — reload silently if user is not mid-action
+              if (document.getElementById('appScreen').classList.contains('active')
+                  && !document.querySelector('.detail-overlay.open')) {
+                window.location.reload();
+              }
+            }
+          });
+        });
+      }).catch(() => {});
     }
 
     // Install PWA prompt

@@ -268,7 +268,7 @@
             if (data.success || data.invoice) {
                 window.open(API + 'invoices.php?action=download&code=' + encodeURIComponent(code), '_blank');
             } else {
-                alert(data.error || 'No se pudo emitir la factura. Llámanos al 674 78 34 79.');
+                alert(data.error || 'No se pudo emitir la factura. Llámanos al 685 20 82 52.');
             }
         })
         .catch(function () { alert('Error de conexión'); });

@@ -11,7 +11,7 @@ define('DB_PASS', 'N@tur2026');
 define('SITE_URL', 'https://sacosescombromadridbf10.es');
 define('SITE_NAME', 'BF10 - Sacos de Escombro Madrid');
 define('CONTACT_EMAIL', 'pedidos@sacosescombromadridbf10.es');
-define('CONTACT_PHONE', '674 78 34 79');
+define('CONTACT_PHONE', '685 20 82 52');
 
 // Bank transfer details
 define('BANK_IBAN', 'ES00 0000 0000 0000 0000 0000'); // TODO: poner IBAN real
@@ -33,7 +33,7 @@ define('BRANDS', [
         'address'      => 'Calle Totana, 8 - Puerta Dcha',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => 'sacosescombromadridbf10.es',
         'invoice_prefix' => 'BF10',
@@ -49,7 +49,7 @@ define('BRANDS', [
         'address'      => 'Calle Totana, 8 - Puerta Dcha',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => 'servisaco.es',
         'invoice_prefix' => 'SVC',
@@ -65,7 +65,7 @@ define('BRANDS', [
         'address'      => 'Calle Totana, 8 - Puerta Dcha',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => 'atusaco.es',
         'invoice_prefix' => 'ATU',
@@ -81,7 +81,7 @@ define('BRANDS', [
         'address'      => 'Calle Totana, 8 - Puerta Dcha',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => 'atusaco.es',
         'invoice_prefix' => 'ATU',
@@ -97,7 +97,7 @@ define('BRANDS', [
         'address'      => 'Calle Totana, 8 - Puerta Dcha',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => 'atusaco.es',
         'invoice_prefix' => 'ATU',
@@ -113,7 +113,7 @@ define('BRANDS', [
         'address'      => 'Calle Totana, 8 - Puerta Dcha',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => 'atusaco.es',
         'invoice_prefix' => 'ATU',
@@ -129,7 +129,7 @@ define('BRANDS', [
         'address'      => 'Calle Totana, 8 - Puerta Dcha',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => 'ecosaco.es',
         'invoice_prefix' => 'ECO',
@@ -145,7 +145,7 @@ define('BRANDS', [
         'address'      => 'Por definir',
         'city'         => '28033 Madrid',
         'country'      => 'España',
-        'phone'        => '674 78 34 79',
+        'phone'        => '685 20 82 52',
         'email'        => 'pedidos@sacosescombromadridbf10.es',
         'web'          => '',
         'invoice_prefix' => 'SB',
@@ -162,13 +162,14 @@ function getBrand($code) {
 }
 
 // Packages
-// Base price: 45€/saca. Volume discounts: 10% off (25), 15% off (50).
-// 25: 25 * 45 * 0.90 = 1012.50  (40,50€/saca)
-// 50: 50 * 45 * 0.85 = 1912.50  (38,25€/saca)
+// Base price: 47€/saca. Volume discounts: 10% off (25), 15% off (50).
+// 25: 25 * 47 * 0.90 = 1057.50  (42,30€/saca)
+// 50: 50 * 47 * 0.85 = 1997.50  (39,95€/saca)
 define('PACKAGES', [
-    10 => ['name' => '10 sacas', 'price' => 450.00,  'unit' => 45.00,  'discount' => 0,  'description' => 'Pedido mínimo — 10 sacas a 45€/saca'],
-    25 => ['name' => '25 sacas', 'price' => 1012.50, 'unit' => 40.50,  'discount' => 10, 'description' => 'Pack estándar — 25 sacas con 10% de descuento (40,50€/saca)'],
-    50 => ['name' => '50 sacas', 'price' => 1912.50, 'unit' => 38.25,  'discount' => 15, 'description' => 'Pack profesional — 50 sacas con 15% de descuento (38,25€/saca)'],
+    1  => ['name' => '1 saca (TEST)', 'price' => 1.00, 'unit' => 1.00, 'discount' => 0, 'description' => 'Test — 1 saca a 1€'],
+    10 => ['name' => '10 sacas', 'price' => 470.00,  'unit' => 47.00,  'discount' => 0,  'description' => 'Pedido mínimo — 10 sacas a 47€/saca'],
+    25 => ['name' => '25 sacas', 'price' => 1057.50, 'unit' => 42.30,  'discount' => 10, 'description' => 'Pack estándar — 25 sacas con 10% de descuento (42,30€/saca)'],
+    50 => ['name' => '50 sacas', 'price' => 1997.50, 'unit' => 39.95,  'discount' => 15, 'description' => 'Pack profesional — 50 sacas con 15% de descuento (39,95€/saca)'],
 ]);
 
 // Load secrets (API keys). File is gitignored.
@@ -239,8 +240,19 @@ function isManager() {
     return isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['manager', 'ceo']);
 }
 
+// Check if user is facturacion
+function isFacturacion() {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'facturacion';
+}
+
 function requireManager() {
     if (!isLoggedIn() || !isManager()) {
+        jsonResponse(['error' => 'Acceso denegado'], 403);
+    }
+}
+
+function requireManagerOrFacturacion() {
+    if (!isLoggedIn() || (!isManager() && !isFacturacion())) {
         jsonResponse(['error' => 'Acceso denegado'], 403);
     }
 }

@@ -19,7 +19,7 @@ const COMPANY_CIF        = 'B26764688';
 const COMPANY_ADDR       = 'Calle Totana, 8 - Puerta Dcha';
 const COMPANY_CITY       = '28033 Madrid';
 const COMPANY_COUNTRY    = 'España';
-const COMPANY_PHONE      = '674 78 34 79';
+const COMPANY_PHONE      = '685 20 82 52';
 const COMPANY_EMAIL      = 'pedidos@sacosescombromadridbf10.es';
 const COMPANY_WEB        = 'sacosescombromadridbf10.es';
 

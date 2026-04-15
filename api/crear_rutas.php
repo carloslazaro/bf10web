@@ -8,7 +8,7 @@
  */
 require_once __DIR__ . '/config.php';
 
-if (!isManager()) {
+if (!isManager() && !isFacturacion()) {
     jsonResponse(['error' => 'Acceso denegado'], 403);
 }
 
@@ -36,39 +36,49 @@ function getCamionCapacity($pdo, $conductorNombre) {
     return 13;
 }
 
-// ── Assign barrios to viajes algorithm ──
-// Priority: urgentes first, then oldest within same barrio group
-function assignViajes($paradas, $capacidad, $maxViajes) {
-    // Group by barrio
-    $barrios = [];
+// ── Helper: check if a stop is priority (urgente/policia/ayuntamiento) ──
+function isPriorityStop($p) {
+    $u = strtoupper(trim($p['urgen'] ?? ''));
+    return in_array($u, ['URGT', 'POLI', 'AYTO']);
+}
+
+// ── Helper: calculate centroid of a group of stops ──
+function calcCentroid($paradas) {
+    $sumLat = 0; $sumLng = 0; $n = 0;
     foreach ($paradas as $p) {
-        $barrio = trim($p['barrio_cp']) ?: '(sin barrio)';
-        if (!isset($barrios[$barrio])) {
-            $barrios[$barrio] = ['paradas' => [], 'total_sacas' => 0];
+        if (!empty($p['lat']) && !empty($p['lng'])) {
+            $sumLat += (float)$p['lat'];
+            $sumLng += (float)$p['lng'];
+            $n++;
         }
-        $barrios[$barrio]['paradas'][] = $p;
-        $barrios[$barrio]['total_sacas'] += max((int)$p['sacos'], 1);
     }
+    if ($n === 0) return null;
+    return ['lat' => $sumLat / $n, 'lng' => $sumLng / $n];
+}
 
-    // Within each barrio: sort urgentes first, then by id ASC (oldest first)
-    foreach ($barrios as &$bd) {
-        usort($bd['paradas'], function($a, $b) {
-            $aUrg = !empty($a['urgen']) && strtolower($a['urgen']) !== 'no' ? 1 : 0;
-            $bUrg = !empty($b['urgen']) && strtolower($b['urgen']) !== 'no' ? 1 : 0;
-            if ($aUrg !== $bUrg) return $bUrg - $aUrg; // urgentes first
-            return (int)$a['id'] - (int)$b['id']; // oldest first
-        });
+// ── Helper: haversine distance in km ──
+function haversine($lat1, $lng1, $lat2, $lng2) {
+    $R = 6371;
+    $dLat = deg2rad($lat2 - $lat1);
+    $dLng = deg2rad($lng2 - $lng1);
+    $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng/2) * sin($dLng/2);
+    return $R * 2 * atan2(sqrt($a), sqrt(1 - $a));
+}
+
+// ── Assign barrios to viajes algorithm v2 ──
+// Priority stops (URGT/POLI/AYTO) forced into viajes 1-3
+// Geographic clustering using centroids to group nearby barrios
+function assignViajes($paradas, $capacidad, $maxViajes) {
+    // ── Step 1: Separate priority stops from normal stops ──
+    $priorityStops = [];
+    $normalStops = [];
+    foreach ($paradas as $p) {
+        if (isPriorityStop($p)) {
+            $priorityStops[] = $p;
+        } else {
+            $normalStops[] = $p;
+        }
     }
-    unset($bd);
-
-    // Sort barrios: those with urgentes first, then by total sacas DESC
-    uasort($barrios, function($a, $b) {
-        $aHasUrg = 0; $bHasUrg = 0;
-        foreach ($a['paradas'] as $p) if (!empty($p['urgen']) && strtolower($p['urgen']) !== 'no') { $aHasUrg = 1; break; }
-        foreach ($b['paradas'] as $p) if (!empty($p['urgen']) && strtolower($p['urgen']) !== 'no') { $bHasUrg = 1; break; }
-        if ($aHasUrg !== $bHasUrg) return $bHasUrg - $aHasUrg;
-        return $b['total_sacas'] - $a['total_sacas'];
-    });
 
     // Initialize viajes
     $viajes = [];
@@ -77,20 +87,93 @@ function assignViajes($paradas, $capacidad, $maxViajes) {
     }
     $overflow = [];
 
-    foreach ($barrios as $barrioData) {
-        $assigned = false;
-        for ($v = 1; $v <= $maxViajes; $v++) {
-            if ($viajes[$v]['sacas'] + $barrioData['total_sacas'] <= $capacidad) {
-                foreach ($barrioData['paradas'] as $p) {
-                    $viajes[$v]['paradas'][] = $p;
-                    $viajes[$v]['sacas'] += max((int)$p['sacos'], 1);
-                }
-                $assigned = true;
+    // ── Step 2: Place priority stops first into viajes 1-3 ──
+    $maxPriorityViaje = min($maxViajes, 3);
+    foreach ($priorityStops as $p) {
+        $sacas = max((int)$p['sacos'], 1);
+        $placed = false;
+        // Try viajes 1-3 (least loaded first)
+        for ($v = 1; $v <= $maxPriorityViaje; $v++) {
+            if ($viajes[$v]['sacas'] + $sacas <= $capacidad) {
+                $viajes[$v]['paradas'][] = $p;
+                $viajes[$v]['sacas'] += $sacas;
+                $placed = true;
                 break;
             }
         }
-        if (!$assigned) {
-            // Split paradas individually — urgentes first
+        // If viajes 1-3 full, try viaje 4 as last resort
+        if (!$placed && $maxViajes > $maxPriorityViaje) {
+            for ($v = $maxPriorityViaje + 1; $v <= $maxViajes; $v++) {
+                if ($viajes[$v]['sacas'] + $sacas <= $capacidad) {
+                    $viajes[$v]['paradas'][] = $p;
+                    $viajes[$v]['sacas'] += $sacas;
+                    $placed = true;
+                    break;
+                }
+            }
+        }
+        if (!$placed) $overflow[] = $p;
+    }
+
+    // ── Step 3: Group normal stops by barrio ──
+    $barrios = [];
+    foreach ($normalStops as $p) {
+        $barrio = trim($p['barrio_cp']) ?: '(sin barrio)';
+        if (!isset($barrios[$barrio])) {
+            $barrios[$barrio] = ['paradas' => [], 'total_sacas' => 0, 'centroid' => null];
+        }
+        $barrios[$barrio]['paradas'][] = $p;
+        $barrios[$barrio]['total_sacas'] += max((int)$p['sacos'], 1);
+    }
+
+    // Sort within each barrio by oldest first
+    foreach ($barrios as &$bd) {
+        usort($bd['paradas'], function($a, $b) {
+            return (int)$a['id'] - (int)$b['id'];
+        });
+        $bd['centroid'] = calcCentroid($bd['paradas']);
+    }
+    unset($bd);
+
+    // ── Step 4: Geographic clustering — assign barrios to viajes by proximity ──
+    // Calculate centroid of each viaje (from priority stops already placed)
+    // Then assign barrios to nearest viaje that has capacity
+    $barrioList = array_values($barrios);
+    $barrioKeys = array_keys($barrios);
+
+    // Sort barrios by size DESC (largest first for better bin-packing)
+    array_multisort(array_column($barrioList, 'total_sacas'), SORT_DESC, $barrioList, $barrioKeys);
+
+    foreach ($barrioList as $idx => $barrioData) {
+        // Find best viaje: nearest centroid with capacity
+        $bestViaje = null;
+        $bestDist = PHP_FLOAT_MAX;
+
+        for ($v = 1; $v <= $maxViajes; $v++) {
+            if ($viajes[$v]['sacas'] + $barrioData['total_sacas'] > $capacidad) continue;
+
+            $vjCentroid = calcCentroid($viajes[$v]['paradas']);
+            if ($vjCentroid && $barrioData['centroid']) {
+                $dist = haversine($vjCentroid['lat'], $vjCentroid['lng'],
+                                  $barrioData['centroid']['lat'], $barrioData['centroid']['lng']);
+            } else {
+                // No centroid available — prefer least loaded
+                $dist = $viajes[$v]['sacas'];
+            }
+
+            if ($dist < $bestDist) {
+                $bestDist = $dist;
+                $bestViaje = $v;
+            }
+        }
+
+        if ($bestViaje !== null) {
+            foreach ($barrioData['paradas'] as $p) {
+                $viajes[$bestViaje]['paradas'][] = $p;
+                $viajes[$bestViaje]['sacas'] += max((int)$p['sacos'], 1);
+            }
+        } else {
+            // Barrio doesn't fit as block — split individually
             foreach ($barrioData['paradas'] as $p) {
                 $sacas = max((int)$p['sacos'], 1);
                 $placed = false;
@@ -107,7 +190,7 @@ function assignViajes($paradas, $capacidad, $maxViajes) {
         }
     }
 
-    // Compact
+    // ── Step 5: Compact — remove empty viajes and renumber ──
     $compacted = [];
     $vNum = 1;
     for ($v = 1; $v <= $maxViajes; $v++) {
@@ -218,7 +301,7 @@ if ($method === 'POST' && $action === 'generate') {
     // ── Step 1: Get unassigned pending stops, urgentes first then oldest ──
     // Exclude organizer rows (direccion starts with "DIA" and no sacos)
     $unassigned = $pdo->query("
-        SELECT id, direccion, barrio_cp, sacos, urgen, marca,
+        SELECT id, direccion, barrio_cp, sacos, urgen, marca, lat, lng,
                CASE WHEN urgen != '' AND LOWER(urgen) != 'no' THEN 1 ELSE 0 END as is_urgent
         FROM rutas_data
         WHERE (conductor = '' OR conductor IS NULL)
@@ -286,7 +369,7 @@ if ($method === 'POST' && $action === 'generate') {
 
     foreach ($conductorList as $nombre => $cfg) {
         $stmt = $pdo->prepare("
-            SELECT id, direccion, barrio_cp, sacos, urgen, marca
+            SELECT id, direccion, barrio_cp, sacos, urgen, marca, lat, lng
             FROM rutas_data
             WHERE UPPER(conductor) = ?
               AND (estado = '' OR estado IS NULL OR estado = 'por_recoger')

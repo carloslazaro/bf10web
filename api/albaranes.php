@@ -18,8 +18,8 @@ header('Content-Type: application/json; charset=utf-8');
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
-// All endpoints require logged-in comercial (or manager)
-if (!isLoggedIn() || (!isComercial() && !isManager())) {
+// All endpoints require logged-in comercial, manager, or facturacion
+if (!isLoggedIn() || (!isComercial() && !isManager() && !isFacturacion())) {
     jsonResponse(['error' => 'Acceso denegado'], 403);
 }
 

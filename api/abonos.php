@@ -9,7 +9,7 @@
  */
 require_once __DIR__ . '/config.php';
 
-if (!isLoggedIn() || (!isManager() && !isComercial())) {
+if (!isLoggedIn() || (!isManager() && !isComercial() && !isFacturacion())) {
     jsonResponse(['error' => 'Acceso denegado'], 403);
 }
 

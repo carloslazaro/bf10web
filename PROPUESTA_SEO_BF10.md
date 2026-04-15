@@ -54,7 +54,7 @@ BF10: sacos de escombro en la Comunidad de Madrid. Precio claro desde 49,99€ c
 
 ### Meta description (propuesta)
 ```
-Sacos de escombro en Madrid para reformas y obras. Entrega a domicilio en 24-48h y recogida incluida desde 29€. Ideales para reformistas, albañiles y empresas de construcción. Gestión legal de residuos con certificado. Pedido mínimo 10 sacos. ☎ 674 78 34 79
+Sacos de escombro en Madrid para reformas y obras. Entrega a domicilio en 24-48h y recogida incluida desde 29€. Ideales para reformistas, albañiles y empresas de construcción. Gestión legal de residuos con certificado. Pedido mínimo 10 sacos. ☎ 685 20 82 52
 ```
 **Razón:** Incluye keywords principales + público objetivo + certificado (diferenciador) + teléfono directo.
 
@@ -218,7 +218,7 @@ Respuesta: Los sacos de escombro (también llamados big bags o telesacos) tienen
   "name": "BF10 - Sacos de Escombro Madrid",
   "description": "Servicio de entrega y recogida de sacos de escombro en la Comunidad de Madrid para reformas, obras y construcción",
   "url": "https://carloslazaro.github.io/bf10web/",
-  "telephone": "+34674783479",
+  "telephone": "+34685208252",
   "email": "atusaco48h@gmail.com",
   "areaServed": "Comunidad de Madrid",
   "priceRange": "€€",

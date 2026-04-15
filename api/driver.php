@@ -33,7 +33,9 @@ if (!$action && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // Helper to get JSON body (already parsed or fresh)
 function getJsonBody() {
     if (isset($_REQUEST['_json'])) return $_REQUEST['_json'];
-    return getJsonBody();
+    $body = json_decode(file_get_contents('php://input'), true);
+    $_REQUEST['_json'] = $body;
+    return $body;
 }
 
 // ── List drivers ─────────────────────────────────────────────

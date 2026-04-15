@@ -15,7 +15,7 @@ require_once __DIR__ . '/google_sheets.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-if (!isLoggedIn() || (!isRutas() && !isManager())) {
+if (!isLoggedIn() || (!isRutas() && !isManager() && !isFacturacion())) {
     jsonResponse(['error' => 'Acceso denegado'], 403);
 }
 
@@ -96,11 +96,13 @@ function geocodeAddress($direccion, $barrio) {
 
 // Column mapping: DB field → sheet column index (0-based)
 // Index 6 = 'etiquetas' in Excel — parsed into etiqueta_1..15 during import
+// $COLUMNS maps Excel column positions (A, B, C...) to DB fields.
+// 'interior' and 'telefono2' are DB-only fields, NOT in the Excel.
 $COLUMNS = [
     'direccion', 'barrio_cp', 'sacos', 'urgen', 'tlf_aviso',
     'conductor', '_etiquetas_raw_', 'marca', 'observaciones', 'fecha_recogida',
     'avisador', 'hora_aviso', 'fecha_aviso', '_skip_', 'fecha_de_ruta',
-    'estado', 'orden', 'swap_pending', 'swap_orden', 'viaje',
+    'estado', 'orden', 'swap_pending', 'swap_orden',
     'etiqueta_1', 'etiqueta_2', 'etiqueta_3', 'etiqueta_4', 'etiqueta_5', 'etiqueta_6',
     'etiqueta_7', 'etiqueta_8', 'etiqueta_9', 'etiqueta_10', 'etiqueta_11',
     'etiqueta_12', 'etiqueta_13', 'etiqueta_14', 'etiqueta_15',
@@ -170,7 +172,9 @@ if ($method === 'POST' && $action === 'update-cell') {
     $field = $data['field'] ?? '';
     $value = $data['value'] ?? '';
 
-    if (!$id || !in_array($field, $COLUMNS)) {
+    // Allow editing both Excel-mapped columns and DB-only fields
+    $editableFields = array_merge($COLUMNS, ['interior', 'telefono2']);
+    if (!$id || !in_array($field, $editableFields) || $field === '_skip_' || $field === '_etiquetas_raw_') {
         jsonResponse(['error' => 'ID y campo válido requeridos'], 400);
     }
 
@@ -276,9 +280,12 @@ if ($method === 'POST' && $action === 'import-from-sheets') {
         $dbColumns[] = $col;
         $sheetIndexes[] = $idx;
     }
+    // Add 'etiquetas' as extra DB column (populated from _etiquetas_raw_ Excel column)
+    $dbColumns[] = 'etiquetas';
     $colList = implode(', ', array_map(function($c) { return "`$c`"; }, $dbColumns));
     $placeholders = implode(', ', array_fill(0, count($dbColumns), '?'));
     $ins = $pdo->prepare("INSERT INTO rutas_data (row_order, $colList) VALUES (?, $placeholders)");
+    $etiquetasDbIdx = count($dbColumns) - 1; // index of 'etiquetas' in $dbColumns
 
     // Find etiqueta_1..15 positions in $dbColumns for overwriting parsed values
     $etiquetaDbIndexes = [];
@@ -336,6 +343,9 @@ if ($method === 'POST' && $action === 'import-from-sheets') {
         foreach ($sheetIndexes as $sheetCol) {
             $params[] = isset($row[$sheetCol]) ? $row[$sheetCol] : '';
         }
+        // Add raw etiquetas string to 'etiquetas' DB field
+        $rawEtiq = ($etiquetasRawSheetIdx !== null && isset($row[$etiquetasRawSheetIdx])) ? trim($row[$etiquetasRawSheetIdx]) : '';
+        $params[] = $rawEtiq;
 
         // If fecha_recogida is filled, set estado = 'recogida'
         $fechaRecogida = trim($params[$idxFechaRecogida + 1] ?? ''); // +1 for row_order offset
@@ -476,6 +486,23 @@ if ($method === 'POST' && $action === 'restore-backup') {
     jsonResponse(['success' => true, 'restored_rows' => count($rows)]);
 }
 
+// ---------- GET: Check duplicate address (last 7 days) ----------
+if ($method === 'GET' && $action === 'check-duplicate') {
+    $dir = trim($_GET['direccion'] ?? '');
+    if (!$dir) jsonResponse(['duplicates' => []]);
+
+    $stmt = $pdo->prepare("
+        SELECT id, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, avisador, estado
+        FROM rutas_data
+        WHERE LOWER(TRIM(direccion)) = LOWER(TRIM(?))
+          AND fecha_aviso >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        ORDER BY id DESC
+        LIMIT 5
+    ");
+    $stmt->execute([$dir]);
+    jsonResponse(['duplicates' => $stmt->fetchAll()]);
+}
+
 // ---------- POST: Create aviso de recogida ----------
 if ($method === 'POST' && $action === 'create-aviso') {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -484,7 +511,9 @@ if ($method === 'POST' && $action === 'create-aviso') {
     $barrio_cp     = trim($data['barrio_cp'] ?? '');
     $sacos         = trim($data['sacos'] ?? '');
     $urgen         = trim($data['urgen'] ?? '');
+    $interior      = trim($data['interior'] ?? '');
     $tlf_aviso     = trim($data['tlf_aviso'] ?? '');
+    $telefono2     = trim($data['telefono2'] ?? '');
     $marca         = trim($data['marca'] ?? '');
     $observaciones = trim($data['observaciones'] ?? '');
     $fecha_aviso   = trim($data['fecha_aviso'] ?? date('Y-m-d'));
@@ -499,10 +528,10 @@ if ($method === 'POST' && $action === 'create-aviso') {
     $newOrder = $maxOrder + 1;
 
     $stmt = $pdo->prepare("
-        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, tlf_aviso, marca, observaciones, fecha_aviso, avisador)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, avisador)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->execute([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $tlf_aviso, $marca, $observaciones, $fecha_aviso, $avisador]);
+    $stmt->execute([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $interior, $tlf_aviso, $telefono2, $marca, $observaciones, $fecha_aviso, $avisador]);
     $newId = (int)$pdo->lastInsertId();
 
     // Geocode the new aviso
@@ -514,6 +543,32 @@ if ($method === 'POST' && $action === 'create-aviso') {
     }
 
     jsonResponse(['success' => true, 'id' => $newId]);
+}
+
+// ---------- POST: Update existing aviso ----------
+if ($method === 'POST' && $action === 'update-aviso') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = (int)($data['id'] ?? 0);
+    if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+
+    $fields = ['sacos', 'urgen', 'interior', 'tlf_aviso', 'telefono2', 'marca', 'observaciones', 'avisador', 'barrio_cp'];
+    $sets = [];
+    $params = [];
+    foreach ($fields as $f) {
+        if (array_key_exists($f, $data)) {
+            $sets[] = "`$f` = ?";
+            $params[] = trim($data[$f] ?? '');
+        }
+    }
+    if (!$sets) jsonResponse(['error' => 'Nada que actualizar'], 400);
+
+    // Always update fecha_aviso to today
+    $sets[] = "fecha_aviso = ?";
+    $params[] = date('Y-m-d');
+
+    $params[] = $id;
+    $pdo->prepare("UPDATE rutas_data SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
+    jsonResponse(['success' => true]);
 }
 
 // ---------- GET: Map data (lightweight) ----------
