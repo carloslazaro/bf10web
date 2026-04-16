@@ -239,6 +239,27 @@ if ($method === 'POST' && $action === 'reorder') {
     jsonResponse(['success' => true]);
 }
 
+// ---------- POST: Sort by conductor > barrio > direccion ----------
+if ($method === 'POST' && $action === 'sort-by-barrio') {
+    // Get all rows ordered by conductor, barrio_cp, direccion
+    $rows = $pdo->query("
+        SELECT id FROM rutas_data
+        ORDER BY
+            COALESCE(NULLIF(TRIM(conductor), ''), 'ZZZZZ') ASC,
+            COALESCE(NULLIF(TRIM(barrio_cp), ''), 'ZZZZZ') ASC,
+            COALESCE(NULLIF(TRIM(direccion), ''), 'ZZZZZ') ASC
+    ")->fetchAll(PDO::FETCH_COLUMN);
+
+    $update = $pdo->prepare("UPDATE rutas_data SET row_order = ? WHERE id = ?");
+    $pdo->beginTransaction();
+    foreach ($rows as $i => $id) {
+        $update->execute([$i, $id]);
+    }
+    $pdo->commit();
+
+    jsonResponse(['success' => true, 'sorted' => count($rows)]);
+}
+
 // ---------- POST: Delete row ----------
 if ($method === 'POST' && $action === 'delete-row') {
     $data = json_decode(file_get_contents('php://input'), true);

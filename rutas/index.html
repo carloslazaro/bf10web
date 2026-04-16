@@ -236,6 +236,7 @@
                 <button id="search-close" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:14px;font-weight:700" title="Cerrar (Esc)">✕</button>
             </div>
             <button id="btn-download-excel" title="Descargar Excel de la vista actual">📥 Excel</button>
+            <button id="btn-sort-barrio" title="Ordenar por conductor → barrio → dirección">🔤 Ordenar por barrio</button>
             <button id="btn-last-row">Ir a última fila</button>
             <div class="sep"></div>
             <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
@@ -1042,6 +1043,21 @@
         document.getElementById('btn-first-row').addEventListener('click', function() {
             var wrapper = document.getElementById('sheet-wrapper');
             wrapper.scrollTop = 0;
+        });
+        document.getElementById('btn-sort-barrio').addEventListener('click', function() {
+            if (!confirm('¿Ordenar todas las paradas por conductor → barrio → dirección?\nEsto reorganiza el orden de las filas en la base de datos.')) return;
+            setStatus('Ordenando...', 'saving');
+            fetch(API + '?action=sort-by-barrio', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: '{}',
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) {
+                    setStatus('Ordenado (' + d.sorted + ' filas)', 'saved');
+                    loadData();
+                } else {
+                    setStatus('Error: ' + (d.error || 'fallo'), 'error');
+                }
+            }).catch(function() { setStatus('Error de conexión', 'error'); });
         });
 
         // ---------- Drag & Drop rows ----------
