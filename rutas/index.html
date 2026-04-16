@@ -285,7 +285,6 @@
                             <th class="col-urgen">Urgen</th>
                             <th>Interior</th>
                             <th class="col-tlf">Tlf aviso</th>
-                            <th class="col-cond">Conductor</th>
                             <th class="col-etiq">Etiquetas</th>
                             <th class="col-marca">Marca</th>
                             <th class="col-obs">Observaciones</th>
@@ -1675,7 +1674,7 @@
                 return s;
             }
             var sep = ';';
-            var headers = ['#','Dirección','Barrio/CP','Sacos','Urgen','Interior','Tlf aviso','Tlf 2','Conductor','Etiquetas','Marca','Observaciones'];
+            var headers = ['#','Dirección','Barrio/CP','Sacos','Urgen','Interior','Tlf aviso','Tlf 2','Etiquetas','Marca','Observaciones'];
             var lines = [headers.map(csvVal).join(sep)];
             for (var i = 0; i < filtered.length; i++) {
                 var r = filtered[i];
@@ -1688,7 +1687,6 @@
                     r.interior || '',
                     r.tlf_aviso || '',
                     r.telefono2 || '',
-                    r.conductor || '',
                     r.etiquetas || '',
                     r.marca || '',
                     r.observaciones || ''
@@ -1720,7 +1718,7 @@
             });
 
             if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:24px;color:#888">No hay paradas pendientes' + (conductor ? ' para este conductor' : '') + '</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:#888">No hay paradas pendientes' + (conductor ? ' para este conductor' : '') + '</td></tr>';
                 countEl.textContent = '0 paradas';
                 return;
             }
@@ -1746,7 +1744,6 @@
                     '<td' + urgentClass + ' style="font-size:14px;font-weight:700">' + esc(r.urgen) + '</td>' +
                     '<td>' + esc(r.interior || '') + '</td>' +
                     '<td>' + esc(r.tlf_aviso) + '</td>' +
-                    '<td>' + esc(r.conductor) + '</td>' +
                     '<td>' + esc(r.etiquetas) + '</td>' +
                     '<td>' + esc(r.marca) + '</td>' +
                     '<td>' + esc(r.observaciones) + '</td>' +
