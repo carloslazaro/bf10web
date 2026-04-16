@@ -229,6 +229,10 @@
             <select id="filter-conductor" style="padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff;cursor:pointer">
                 <option value="">Todos conductores</option>
             </select>
+            <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
+            <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
+        </div>
+        <div class="toolbar" style="padding-top:0;border-top:none;">
             <button class="btn-primary" id="btn-add-aviso">+ Aviso recogida</button>
             <button id="btn-search-dir" title="Buscar parada (Ctrl+F)">🔍 Buscar</button>
             <div id="search-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#1565C0;padding:8px 16px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;align-items:center;gap:10px;">
@@ -239,16 +243,13 @@
                 <button id="search-close" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:14px;font-weight:700" title="Cerrar (Esc)">✕</button>
             </div>
             <button id="btn-download-excel" title="Descargar Excel de la vista actual">📥 Excel</button>
-            <button id="btn-sort-barrio" title="Ordenar por conductor → barrio → dirección">🔤 Ordenar por barrio</button>
+            <button id="btn-sort-barrio" title="Ordenar por conductor → barrio → dirección">🔤 Ordenar</button>
             <button id="btn-last-row">Ir a última fila</button>
-            <div class="sep"></div>
-            <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
             <button id="btn-print-route" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500">🖨️ Imprimir ruta</button>
-            <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
+            <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
             <!-- Crear Rutas y Histórico ocultos, accesibles por código 1982/1983 -->
             <button style="display:none" id="btn-crear-rutas" onclick="openCrearRutas()">🚛 Crear Rutas</button>
             <button style="display:none" id="btn-historico" onclick="openHistorico()">📊 Histórico</button>
-            <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
         </div>
         <div class="status-bar"><span class="status" id="status-msg"></span></div>
         <div class="sheet-wrapper" id="sheet-wrapper">
