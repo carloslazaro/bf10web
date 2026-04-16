@@ -77,7 +77,7 @@ function geocodeAddress($direccion, $barrio) {
     if (($data['status'] ?? '') === 'OK' && !empty($data['results'])) {
         $r = $data['results'][0];
         $locType = $r['geometry']['location_type'] ?? '';
-        if (in_array($locType, ['ROOFTOP', 'RANGE_INTERPOLATED'])) {
+        if (in_array($locType, ['ROOFTOP', 'RANGE_INTERPOLATED', 'GEOMETRIC_CENTER'])) {
             $lat = $r['geometry']['location']['lat'];
             $lng = $r['geometry']['location']['lng'];
         }
