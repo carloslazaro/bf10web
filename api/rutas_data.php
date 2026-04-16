@@ -527,11 +527,25 @@ if ($method === 'POST' && $action === 'create-aviso') {
     $maxOrder = (int)$pdo->query("SELECT COALESCE(MAX(row_order),0) FROM rutas_data")->fetchColumn();
     $newOrder = $maxOrder + 1;
 
+    // Build etiqueta fields
+    $etiquetaCols = '';
+    $etiquetaPlaceholders = '';
+    $etiquetaValues = [];
+    $etiquetasDisplay = trim($data['etiquetas'] ?? '');
+    for ($ei = 1; $ei <= 15; $ei++) {
+        $v = trim($data["etiqueta_$ei"] ?? '');
+        if ($v !== '') {
+            $etiquetaCols .= ", etiqueta_$ei";
+            $etiquetaPlaceholders .= ', ?';
+            $etiquetaValues[] = $v;
+        }
+    }
+
     $stmt = $pdo->prepare("
-        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, avisador)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, avisador, etiquetas$etiquetaCols)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?$etiquetaPlaceholders)
     ");
-    $stmt->execute([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $interior, $tlf_aviso, $telefono2, $marca, $observaciones, $fecha_aviso, $avisador]);
+    $stmt->execute(array_merge([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $interior, $tlf_aviso, $telefono2, $marca, $observaciones, $fecha_aviso, $avisador, $etiquetasDisplay], $etiquetaValues));
     $newId = (int)$pdo->lastInsertId();
 
     // Geocode the new aviso

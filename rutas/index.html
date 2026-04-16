@@ -149,7 +149,7 @@
         .print-table .col-dir { width:22%; white-space:normal; word-break:break-word; }
         .print-table .col-barrio { width:12%; }
         .print-table .col-sacos { width:42px; text-align:center; }
-        .print-table .col-urgen { width:42px; text-align:center; }
+        .print-table .col-urgen { width:90px; text-align:center; }
         .print-table .col-tlf { width:9%; }
         .print-table .col-cond { width:9%; }
         .print-table .col-etiq { width:8%; }
@@ -220,6 +220,9 @@
             <button class="filter-btn zone-btn" id="btn-madrid">Madrid</button>
             <button class="filter-btn zone-btn" id="btn-pueblos">Pueblos</button>
             <div class="sep"></div>
+            <select id="filter-conductor" style="padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff;cursor:pointer">
+                <option value="">Todos conductores</option>
+            </select>
             <button class="btn-primary" id="btn-add-aviso">+ Aviso recogida</button>
             <button id="btn-search-dir" title="Buscar por dirección">🔍 Buscar</button>
             <button id="btn-download-excel" title="Descargar Excel de la vista actual">📥 Excel</button>
@@ -295,6 +298,7 @@
                         <select id="av-barrio">
                             <option value="">— Seleccionar —</option>
                         </select>
+                        <input type="text" id="av-barrio-custom" placeholder="Escribe un barrio nuevo..." style="display:none;margin-top:4px">
                     </label>
                 </div>
                 <div class="aviso-row">
@@ -321,7 +325,10 @@
                     </label>
                 </div>
                 <div class="aviso-row">
-                    <label>Etiquetas<input type="text" id="av-etiquetas"></label>
+                    <label style="width:100%">Etiquetas <small id="av-etiq-hint" style="color:#888"></small>
+                        <div id="av-etiquetas-wrap" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px"></div>
+                        <input type="hidden" id="av-etiquetas">
+                    </label>
                 </div>
                 <div class="aviso-row">
                     <label class="aviso-wide">Observaciones<textarea id="av-observaciones" rows="2"></textarea></label>
@@ -404,10 +411,25 @@
         var barriosPueblosSet = {};
         barriosPueblos.forEach(function(b) { barriosPueblosSet[b.toLowerCase()] = true; });
 
+        var currentConductor = ''; // conductor filter for main view
+
         // Load conductores list
         fetch('../api/driver.php?action=conductores').then(function(r) { return r.json(); }).then(function(d) {
             conductoresList = d.conductores || [];
+            // Populate conductor filter in toolbar
+            var cSel = document.getElementById('filter-conductor');
+            conductoresList.forEach(function(c) {
+                var opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                cSel.appendChild(opt);
+            });
         }).catch(function() {});
+
+        document.getElementById('filter-conductor').addEventListener('change', function() {
+            currentConductor = this.value;
+            applyZoneFilter();
+        });
 
         var FIELDS = [
             'direccion', 'barrio_cp', 'sacos', 'urgen', 'interior', 'tlf_aviso', 'telefono2',
@@ -542,11 +564,20 @@
                 });
             }
 
+            // Conductor filter
+            if (currentConductor) {
+                filtered = filtered.filter(function(r) {
+                    if (isDayRow(r)) return false;
+                    return (r.conductor || '').toLowerCase() === currentConductor.toLowerCase();
+                });
+            }
+
             rows = filtered;
             renderTable();
             var labels = { 'pendientes': 'por recoger', 'sin_ruta': 'sin ruta', 'recogidas': 'recogidas', '': 'todas' };
             var label = labels[currentFilter] || 'todas';
             if (currentZone) label += ' · ' + (currentZone === 'madrid' ? 'Madrid' : 'Pueblos');
+            if (currentConductor) label += ' · ' + currentConductor;
             setStatus(rows.length + ' filas (' + label + ') — ' + new Date().toLocaleTimeString(), 'saved');
         }
 
@@ -954,6 +985,20 @@
             opt.textContent = b;
             avisoBarrioSelect.appendChild(opt);
         });
+        var optOtro = document.createElement('option');
+        optOtro.value = '__custom__';
+        optOtro.textContent = '+ Escribir otro barrio...';
+        avisoBarrioSelect.appendChild(optOtro);
+        var avBarrioCustom = document.getElementById('av-barrio-custom');
+        avisoBarrioSelect.addEventListener('change', function() {
+            if (this.value === '__custom__') {
+                avBarrioCustom.style.display = '';
+                avBarrioCustom.focus();
+            } else {
+                avBarrioCustom.style.display = 'none';
+                avBarrioCustom.value = '';
+            }
+        });
         // Populate marca dropdown
         var avisoMarcaSelect = document.getElementById('av-marca');
         marcasList.forEach(function(m) {
@@ -971,7 +1016,10 @@
             document.getElementById('av-interior').checked = false;
             document.getElementById('av-tlf').value = '';
             document.getElementById('av-tlf2').value = '';
-            document.getElementById('av-etiquetas').value = '';
+            avEtiqWrap.innerHTML = '';
+            avEtiqHint.textContent = '';
+            avBarrioCustom.style.display = 'none';
+            avBarrioCustom.value = '';
             avisoMarcaSelect.value = '';
             document.getElementById('av-observaciones').value = '';
             document.getElementById('av-fecha-aviso').value = new Date().toISOString().split('T')[0];
@@ -980,6 +1028,28 @@
             avisoModal.style.display = 'flex';
         }
         function closeAvisoModal() { avisoModal.style.display = 'none'; }
+
+        // Dynamic etiqueta inputs based on sacos count
+        var avSacosInput = document.getElementById('av-sacos');
+        var avEtiqWrap = document.getElementById('av-etiquetas-wrap');
+        var avEtiqHint = document.getElementById('av-etiq-hint');
+        function buildEtiquetaInputs() {
+            var n = parseInt(avSacosInput.value) || 0;
+            if (n > 15) n = 15;
+            avEtiqWrap.innerHTML = '';
+            if (n <= 0) { avEtiqHint.textContent = ''; return; }
+            avEtiqHint.textContent = '(' + n + ' etiqueta' + (n > 1 ? 's' : '') + ')';
+            for (var i = 0; i < n; i++) {
+                var inp = document.createElement('input');
+                inp.type = 'text';
+                inp.placeholder = 'Etiq ' + (i + 1);
+                inp.className = 'av-etiq-input';
+                inp.style.cssText = 'width:110px;padding:4px 6px;border:1px solid #ccc;border-radius:4px;font-size:13px';
+                avEtiqWrap.appendChild(inp);
+            }
+        }
+        avSacosInput.addEventListener('input', buildEtiquetaInputs);
+        avSacosInput.addEventListener('change', buildEtiquetaInputs);
 
         document.getElementById('btn-add-aviso').addEventListener('click', openAvisoModal);
         document.getElementById('aviso-cancel').addEventListener('click', closeAvisoModal);
@@ -1024,18 +1094,25 @@
 
             var payload = {
                 direccion: document.getElementById('av-direccion').value.trim(),
-                barrio_cp: avisoBarrioSelect.value,
+                barrio_cp: avisoBarrioSelect.value === '__custom__' ? avBarrioCustom.value.trim() : avisoBarrioSelect.value,
                 sacos: document.getElementById('av-sacos').value.trim(),
                 urgen: document.getElementById('av-urgen').value,
                 interior: document.getElementById('av-interior').checked ? 'SI' : '',
                 tlf_aviso: document.getElementById('av-tlf').value.trim(),
                 telefono2: document.getElementById('av-tlf2').value.trim(),
-                etiquetas: document.getElementById('av-etiquetas').value.trim(),
+                etiquetas: Array.from(avEtiqWrap.querySelectorAll('.av-etiq-input')).map(function(el) { return el.value.trim(); }).filter(Boolean).join(' '),
                 marca: avisoMarcaSelect.value,
                 observaciones: document.getElementById('av-observaciones').value.trim(),
                 fecha_aviso: document.getElementById('av-fecha-aviso').value,
                 avisador: document.getElementById('av-avisador').value.trim(),
             };
+
+            // Add individual etiquetas to payload
+            var etiqInputs = avEtiqWrap.querySelectorAll('.av-etiq-input');
+            for (var ei = 0; ei < etiqInputs.length; ei++) {
+                var etVal = etiqInputs[ei].value.trim();
+                if (etVal) payload['etiqueta_' + (ei + 1)] = etVal;
+            }
 
             if (!payload.direccion && !payload.barrio_cp) {
                 errEl.textContent = 'Dirección o barrio son obligatorios';
@@ -1088,13 +1165,16 @@
                 setStatus('No se encontraron filas con "' + term.trim() + '"', 'error');
                 return;
             }
-            // Scroll to first match and highlight
-            var firstIdx = found[0];
+            // Highlight ALL matches and scroll to first
             var trs = document.getElementById('sheet-body').querySelectorAll('tr');
-            if (trs[firstIdx]) {
-                trs[firstIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                trs[firstIdx].style.background = '#FFF9C4';
-                setTimeout(function() { trs[firstIdx].style.background = ''; }, 3000);
+            found.forEach(function(idx) {
+                if (trs[idx]) {
+                    trs[idx].style.background = '#FFF9C4';
+                    setTimeout(function() { trs[idx].style.background = ''; }, 5000);
+                }
+            });
+            if (trs[found[0]]) {
+                trs[found[0]].scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             setStatus(found.length + ' resultado(s) para "' + term.trim() + '"', 'saved');
         });
@@ -1273,6 +1353,13 @@
                 countEl.textContent = '0 paradas';
                 return;
             }
+
+            // Sort: Madrid barrios first, then pueblos
+            filtered.sort(function(a, b) {
+                var aIsMadrid = barriosMadridSet[(a.barrio_cp || '').trim().toLowerCase()] ? 0 : 1;
+                var bIsMadrid = barriosMadridSet[(b.barrio_cp || '').trim().toLowerCase()] ? 0 : 1;
+                return aIsMadrid - bIsMadrid;
+            });
 
             var html = '';
             for (var i = 0; i < filtered.length; i++) {
@@ -2100,7 +2187,7 @@
                     // Populate conductor filter
                     var sel = document.getElementById('map-filter-conductor');
                     var current = sel.value;
-                    sel.innerHTML = '<option value="all">Todos los conductores</option>';
+                    sel.innerHTML = '<option value="all">Todos los conductores</option><option value="__none__">Sin conductor</option>';
                     mapConductores.forEach(function(c) {
                         sel.innerHTML += '<option value="' + c + '">' + c + '</option>';
                     });
@@ -2125,7 +2212,8 @@
             var filtered = mapStops.filter(function(s) {
                 if (estado === 'pendiente' && s.estado && s.estado !== '' && s.estado !== 'por_recoger') return false;
                 if (estado === 'recogida' && s.estado !== 'recogida') return false;
-                if (conductor !== 'all' && s.conductor !== conductor) return false;
+                if (conductor === '__none__' && (s.conductor || '').trim() !== '') return false;
+                if (conductor !== 'all' && conductor !== '__none__' && s.conductor !== conductor) return false;
                 return true;
             });
 
