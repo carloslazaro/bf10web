@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { margin: 0; height: 100%; overflow: hidden; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a1a1a; }
 
         .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1565C0, #0D47A1); }
@@ -57,7 +58,8 @@
         .toolbar .status.error { color: #c00; }
         .toolbar .sep { width: 1px; height: 24px; background: #ddd; }
 
-        .sheet-wrapper { overflow: auto; max-height: calc(100vh - 120px); padding-bottom: 120px; }
+        #dashboard { display: flex; flex-direction: column; height: 100vh; }
+        .sheet-wrapper { overflow: auto; flex: 1; min-height: 0; padding-bottom: 40px; }
         .sheet-table { border-collapse: collapse; font-size: 12px; min-width: 100%; }
         .sheet-table th, .sheet-table td { border: 1px solid #d0d0d0; padding: 0; position: relative; white-space: nowrap; }
         .sheet-table th { background: #e8eaed; color: #555; font-weight: 600; font-size: 11px; text-align: center; padding: 6px 8px; position: sticky; top: 0; z-index: 10; user-select: none; }
