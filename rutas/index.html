@@ -76,6 +76,7 @@
         .row-header .row-add:hover { background: #1565C0; color: #fff; }
         .new-row-placeholder td { background: #f9f9f9; cursor: pointer; border-bottom: 2px dashed #ccc; }
         .new-row-placeholder:hover td { background: #e3f2fd; }
+        .pac-container { z-index: 10000 !important; }
         .sheet-table tr.day-row td { background: #1565C0 !important; }
         .sheet-table tr.day-row td .cell-view { color: #fff; font-weight: 700; }
         .sheet-table tr.day-row td.row-header { background: #0D47A1 !important; color: #fff; }
@@ -705,6 +706,53 @@
                     return '<option value="' + esc(m) + '"' + (m === val ? ' selected' : '') + '>' + esc(m) + '</option>';
                 }).join('');
                 el.value = val;
+            } else if (field === 'direccion') {
+                el = document.createElement('input');
+                el.className = 'cell-input';
+                el.type = 'text';
+                el.value = (initialValue !== undefined) ? initialValue : val;
+                // Attach Google Places Autocomplete
+                (function(inputEl, rowIdx) {
+                    setTimeout(function() {
+                        if (!window.google || !google.maps || !google.maps.places) return;
+                        var ac = new google.maps.places.Autocomplete(inputEl, {
+                            componentRestrictions: { country: 'es' },
+                            fields: ['formatted_address', 'address_components', 'geometry']
+                        });
+                        ac.addListener('place_changed', function() {
+                            var place = ac.getPlace();
+                            if (!place || !place.formatted_address) return;
+                            inputEl.value = place.formatted_address;
+                            var rowId = rows[rowIdx].id;
+                            // Detect and save barrio
+                            var barrio = detectBarrio(place);
+                            if (barrio) {
+                                rows[rowIdx].barrio_cp = barrio;
+                                saveCell(rowId, 'barrio_cp', barrio, inputEl.closest('tr').querySelector('td[data-col="1"]') || document.createElement('td'));
+                                // Update barrio cell visually
+                                var barrioCol = FIELDS.indexOf('barrio_cp');
+                                var barrioTd = document.querySelector('td[data-idx="' + rowIdx + '"][data-col="' + barrioCol + '"]');
+                                if (barrioTd) {
+                                    barrioTd.innerHTML = '<div class="cell-view">' + esc(barrio) + '</div>';
+                                    barrioTd.style.transition = 'background .3s';
+                                    barrioTd.style.background = '#C8E6C9';
+                                    setTimeout(function() { barrioTd.style.background = ''; }, 1500);
+                                }
+                            }
+                            // Save lat/lng if available
+                            if (place.geometry && place.geometry.location) {
+                                var lat = place.geometry.location.lat();
+                                var lng = place.geometry.location.lng();
+                                saveCell(rowId, 'lat', lat, document.createElement('td'));
+                                saveCell(rowId, 'lng', lng, document.createElement('td'));
+                            }
+                            // Commit the direccion edit
+                            if (editingCell && editingCell.field === 'direccion') {
+                                commitEdit();
+                            }
+                        });
+                    }, 100);
+                })(el, idx);
             } else if (field === 'urgen') {
                 el = document.createElement('select');
                 el.className = 'cell-input';
@@ -728,7 +776,12 @@
             editingCell = { idx: idx, col: col, field: field, input: el, td: td, original: val };
 
             el.addEventListener('keydown', function(ev) {
-                if (ev.key === 'Enter') { ev.preventDefault(); commitEdit(); editCellAt(idx + 1, col); }
+                if (ev.key === 'Enter') {
+                    // Don't commit if Google Places dropdown is open
+                    var pac = document.querySelector('.pac-container:not([style*="display: none"])');
+                    if (pac && pac.offsetHeight > 0) { ev.preventDefault(); return; }
+                    ev.preventDefault(); commitEdit(); editCellAt(idx + 1, col);
+                }
                 else if (ev.key === 'Tab') { ev.preventDefault(); commitEdit(); editCellAt(idx, col + (ev.shiftKey ? -1 : 1)); }
                 else if (ev.key === 'Escape') { cancelEdit(); }
             });

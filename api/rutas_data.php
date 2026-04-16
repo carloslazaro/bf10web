@@ -173,7 +173,7 @@ if ($method === 'POST' && $action === 'update-cell') {
     $value = $data['value'] ?? '';
 
     // Allow editing both Excel-mapped columns and DB-only fields
-    $editableFields = array_merge($COLUMNS, ['interior', 'telefono2']);
+    $editableFields = array_merge($COLUMNS, ['interior', 'telefono2', 'lat', 'lng']);
     if (!$id || !in_array($field, $editableFields) || $field === '_skip_' || $field === '_etiquetas_raw_') {
         jsonResponse(['error' => 'ID y campo válido requeridos'], 400);
     }
