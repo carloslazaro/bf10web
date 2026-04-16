@@ -93,69 +93,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
                 <input type="text" id="av-direccion" placeholder="Calle, numero..." autocomplete="off" required>
             </div>
             <div class="form-group">
-                <label>Barrio / CP *</label>
-                <select id="av-barrio" required>
-                    <option value="">— Seleccionar —</option>
-                    <optgroup label="Madrid">
-                        <option>Arganzuela</option>
-                        <option>Carabanchel</option>
-                        <option>Carabanchel Alto-Aguillas-4 Vientos</option>
-                        <option>Centro</option>
-                        <option>Chamartin</option>
-                        <option>Chamberi</option>
-                        <option>Ciudad Lineal</option>
-                        <option>El Pardo</option>
-                        <option>Fuencarral-Mirasierra</option>
-                        <option>Hortaleza-Sanchinarro</option>
-                        <option>Las Tablas</option>
-                        <option>Moncloa-Arguelles</option>
-                        <option>Moratalaz</option>
-                        <option>Pta Angel-Batan-Aluche-Camp.</option>
-                        <option>Retiro</option>
-                        <option>S Blas-Canillejas-Barajas</option>
-                        <option>Salamanca</option>
-                        <option>Tetuan</option>
-                        <option>Usera</option>
-                        <option>Vallecas</option>
-                        <option>Vicalvaro</option>
-                        <option>Villaverde</option>
-                        <option>Madrid - Otros barrios</option>
-                    </optgroup>
-                    <optgroup label="Pueblos">
-                        <option>Alcobendas</option>
-                        <option>Alcorcon</option>
-                        <option>Aravaca</option>
-                        <option>Arganda del Rey</option>
-                        <option>Arroyomolinos</option>
-                        <option>Boadilla del Monte</option>
-                        <option>Collado Villalba</option>
-                        <option>Coslada</option>
-                        <option>Fuenlabrada</option>
-                        <option>Getafe</option>
-                        <option>Getafe-Perales del Rio</option>
-                        <option>Humanes de Madrid</option>
-                        <option>Las Rozas de Madrid</option>
-                        <option>Leganes</option>
-                        <option>Majadahonda</option>
-                        <option>Mejorada del Campo</option>
-                        <option>Mostoles</option>
-                        <option>Mostoles - Parque Coimbra</option>
-                        <option>Paracuellos de Jarama</option>
-                        <option>Parla</option>
-                        <option>Pinto</option>
-                        <option>Pozuelo de Alarcon</option>
-                        <option>Rivas-Vaciamadrid</option>
-                        <option>San Agustin de Guadalix</option>
-                        <option>San Fernando de Henares</option>
-                        <option>San Martin de la Vega</option>
-                        <option>San Sebastian de los Reyes</option>
-                        <option>Tres Cantos</option>
-                        <option>Valdemoro</option>
-                        <option>Velilla de San Antonio</option>
-                        <option>Villalbilla</option>
-                        <option>Villaviciosa de Odon</option>
-                    </optgroup>
-                </select>
+                <label>Barrio / Municipio</label>
+                <input type="text" id="av-barrio" placeholder="Se rellena automáticamente al elegir dirección" autocomplete="off">
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -371,40 +310,39 @@ const BARRIO_ALIASES = {
 function detectBarrio(place) {
     if (!place || !place.address_components) return null;
     var components = place.address_components;
-    // Try different component types in priority order
-    var candidates = [];
+    // Collect candidates with their raw display names
+    var candidates = []; // {key: normalized, display: original}
     components.forEach(function(c) {
         var name = (c.long_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         var nameRaw = (c.long_name || '').toLowerCase();
+        var display = c.long_name || '';
         if (c.types.indexOf('sublocality_level_1') !== -1 || c.types.indexOf('sublocality') !== -1) {
-            candidates.unshift(nameRaw); // highest priority
-            candidates.unshift(name);
+            candidates.unshift({key: nameRaw, norm: name, display: display});
         }
         if (c.types.indexOf('neighborhood') !== -1) {
-            candidates.push(nameRaw);
-            candidates.push(name);
+            candidates.push({key: nameRaw, norm: name, display: display});
         }
         if (c.types.indexOf('locality') !== -1 && nameRaw !== 'madrid') {
-            candidates.push(nameRaw);
-            candidates.push(name);
+            candidates.push({key: nameRaw, norm: name, display: display});
         }
         if (c.types.indexOf('administrative_area_level_4') !== -1) {
-            candidates.push(nameRaw);
-            candidates.push(name);
+            candidates.push({key: nameRaw, norm: name, display: display});
         }
     });
-    // Try to match
+    // Try alias match first
     for (var i = 0; i < candidates.length; i++) {
-        var key = candidates[i];
-        if (BARRIO_ALIASES[key]) return BARRIO_ALIASES[key];
-        // Partial match: check if any alias key is contained in candidate or vice versa
+        var c = candidates[i];
+        if (BARRIO_ALIASES[c.key]) return BARRIO_ALIASES[c.key];
+        if (BARRIO_ALIASES[c.norm]) return BARRIO_ALIASES[c.norm];
         for (var alias in BARRIO_ALIASES) {
-            if (key.indexOf(alias) !== -1 || alias.indexOf(key) !== -1) {
+            if (c.key.indexOf(alias) !== -1 || alias.indexOf(c.key) !== -1) {
                 return BARRIO_ALIASES[alias];
             }
         }
     }
-    // If locality is Madrid but no barrio matched, use "Madrid - Otros barrios"
+    // No alias match — return the best raw name from Google
+    if (candidates.length > 0) return candidates[0].display;
+    // If locality is Madrid but nothing matched
     var isMadrid = components.some(function(c) {
         return c.types.indexOf('locality') !== -1 && c.long_name.toLowerCase() === 'madrid';
     });
@@ -427,17 +365,11 @@ function initAutocomplete() {
             // Auto-detect barrio
             var barrio = detectBarrio(place);
             if (barrio) {
-                var sel = document.getElementById('av-barrio');
-                for (var i = 0; i < sel.options.length; i++) {
-                    if (sel.options[i].value === barrio || sel.options[i].textContent === barrio) {
-                        sel.selectedIndex = i;
-                        // Flash the dropdown to indicate auto-selection
-                        sel.style.transition = 'background .3s';
-                        sel.style.background = '#C8E6C9';
-                        setTimeout(function() { sel.style.background = ''; }, 1500);
-                        break;
-                    }
-                }
+                var barrioInput = document.getElementById('av-barrio');
+                barrioInput.value = barrio;
+                barrioInput.style.transition = 'background .3s';
+                barrioInput.style.background = '#C8E6C9';
+                setTimeout(function() { barrioInput.style.background = ''; }, 1500);
             }
         }
     });
@@ -513,7 +445,7 @@ async function doUpdateAviso(id, payload) {
 async function submitAviso(e) {
     e.preventDefault();
     var payload = buildAvisoPayload();
-    if (!payload.direccion || !payload.barrio_cp || !payload.sacos || !payload.tlf_aviso || !payload.marca) {
+    if (!payload.direccion || !payload.sacos || !payload.tlf_aviso || !payload.marca) {
         showToast('Rellena todos los campos obligatorios', true);
         return false;
     }

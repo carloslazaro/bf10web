@@ -294,11 +294,8 @@
             <form id="aviso-form">
                 <div class="aviso-row">
                     <label>Dirección *<input type="text" id="av-direccion" required></label>
-                    <label>Barrio / CP
-                        <select id="av-barrio">
-                            <option value="">— Seleccionar —</option>
-                        </select>
-                        <input type="text" id="av-barrio-custom" placeholder="Escribe un barrio nuevo..." style="display:none;margin-top:4px">
+                    <label>Barrio / Municipio
+                        <input type="text" id="av-barrio" placeholder="Se rellena automáticamente al elegir dirección" autocomplete="off">
                     </label>
                 </div>
                 <div class="aviso-row">
@@ -975,30 +972,7 @@
 
         // ---------- Aviso recogida modal ----------
         var avisoModal = document.getElementById('aviso-modal');
-        var avisoBarrioSelect = document.getElementById('av-barrio');
-        var allBarrios = barriosMadrid.concat(barriosPueblos).sort();
-
-        // Populate barrio dropdown
-        allBarrios.forEach(function(b) {
-            var opt = document.createElement('option');
-            opt.value = b;
-            opt.textContent = b;
-            avisoBarrioSelect.appendChild(opt);
-        });
-        var optOtro = document.createElement('option');
-        optOtro.value = '__custom__';
-        optOtro.textContent = '+ Escribir otro barrio...';
-        avisoBarrioSelect.appendChild(optOtro);
-        var avBarrioCustom = document.getElementById('av-barrio-custom');
-        avisoBarrioSelect.addEventListener('change', function() {
-            if (this.value === '__custom__') {
-                avBarrioCustom.style.display = '';
-                avBarrioCustom.focus();
-            } else {
-                avBarrioCustom.style.display = 'none';
-                avBarrioCustom.value = '';
-            }
-        });
+        var avisoBarrioInput = document.getElementById('av-barrio');
         // Populate marca dropdown
         var avisoMarcaSelect = document.getElementById('av-marca');
         marcasList.forEach(function(m) {
@@ -1010,7 +984,7 @@
 
         function openAvisoModal() {
             document.getElementById('av-direccion').value = '';
-            avisoBarrioSelect.value = '';
+            avisoBarrioInput.value = '';
             document.getElementById('av-sacos').value = '';
             document.getElementById('av-urgen').value = '';
             document.getElementById('av-interior').checked = false;
@@ -1018,8 +992,6 @@
             document.getElementById('av-tlf2').value = '';
             avEtiqWrap.innerHTML = '';
             avEtiqHint.textContent = '';
-            avBarrioCustom.style.display = 'none';
-            avBarrioCustom.value = '';
             avisoMarcaSelect.value = '';
             document.getElementById('av-observaciones').value = '';
             document.getElementById('av-fecha-aviso').value = new Date().toISOString().split('T')[0];
@@ -1094,7 +1066,7 @@
 
             var payload = {
                 direccion: document.getElementById('av-direccion').value.trim(),
-                barrio_cp: avisoBarrioSelect.value === '__custom__' ? avBarrioCustom.value.trim() : avisoBarrioSelect.value,
+                barrio_cp: avisoBarrioInput.value.trim(),
                 sacos: document.getElementById('av-sacos').value.trim(),
                 urgen: document.getElementById('av-urgen').value,
                 interior: document.getElementById('av-interior').checked ? 'SI' : '',
@@ -1515,32 +1487,31 @@
         components.forEach(function(c) {
             var name = (c.long_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             var nameRaw = (c.long_name || '').toLowerCase();
+            var display = c.long_name || '';
             if (c.types.indexOf('sublocality_level_1') !== -1 || c.types.indexOf('sublocality') !== -1) {
-                candidates.unshift(nameRaw);
-                candidates.unshift(name);
+                candidates.unshift({key: nameRaw, norm: name, display: display});
             }
             if (c.types.indexOf('neighborhood') !== -1) {
-                candidates.push(nameRaw);
-                candidates.push(name);
+                candidates.push({key: nameRaw, norm: name, display: display});
             }
             if (c.types.indexOf('locality') !== -1 && nameRaw !== 'madrid') {
-                candidates.push(nameRaw);
-                candidates.push(name);
+                candidates.push({key: nameRaw, norm: name, display: display});
             }
             if (c.types.indexOf('administrative_area_level_4') !== -1) {
-                candidates.push(nameRaw);
-                candidates.push(name);
+                candidates.push({key: nameRaw, norm: name, display: display});
             }
         });
         for (var i = 0; i < candidates.length; i++) {
-            var key = candidates[i];
-            if (BARRIO_ALIASES[key]) return BARRIO_ALIASES[key];
+            var c = candidates[i];
+            if (BARRIO_ALIASES[c.key]) return BARRIO_ALIASES[c.key];
+            if (BARRIO_ALIASES[c.norm]) return BARRIO_ALIASES[c.norm];
             for (var alias in BARRIO_ALIASES) {
-                if (key.indexOf(alias) !== -1 || alias.indexOf(key) !== -1) {
+                if (c.key.indexOf(alias) !== -1 || alias.indexOf(c.key) !== -1) {
                     return BARRIO_ALIASES[alias];
                 }
             }
         }
+        if (candidates.length > 0) return candidates[0].display;
         var isMadrid = components.some(function(c) {
             return c.types.indexOf('locality') !== -1 && c.long_name.toLowerCase() === 'madrid';
         });
@@ -1556,20 +1527,14 @@
             var place = ac.getPlace();
             if (place && place.formatted_address) {
                 input.value = place.formatted_address;
-                // Auto-detect barrio
                 var barrio = detectBarrio(place);
                 if (barrio) {
-                    var sel = document.getElementById('av-barrio');
-                    if (sel) {
-                        for (var i = 0; i < sel.options.length; i++) {
-                            if (sel.options[i].value === barrio || sel.options[i].textContent === barrio) {
-                                sel.selectedIndex = i;
-                                sel.style.transition = 'background .3s';
-                                sel.style.background = '#C8E6C9';
-                                setTimeout(function() { sel.style.background = ''; }, 1500);
-                                break;
-                            }
-                        }
+                    var barrioInput = document.getElementById('av-barrio');
+                    if (barrioInput) {
+                        barrioInput.value = barrio;
+                        barrioInput.style.transition = 'background .3s';
+                        barrioInput.style.background = '#C8E6C9';
+                        setTimeout(function() { barrioInput.style.background = ''; }, 1500);
                     }
                 }
             }
