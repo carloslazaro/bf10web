@@ -43,7 +43,7 @@
         .stock-qty { font-size:20px; font-weight:800; }
         .stock-qty.positive { color:#2e7d32; } .stock-qty.zero { color:#999; } .stock-qty.negative { color:#c62828; }
 
-        .toolbar { padding: 12px 24px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .toolbar { padding: 10px 24px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .toolbar button { padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
         .toolbar button:hover { background: #f5f5f5; }
         .toolbar .btn-primary { background: #1565C0; color: #fff; border-color: #1565C0; }
@@ -232,7 +232,7 @@
             <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
             <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
         </div>
-        <div class="toolbar" style="padding-top:0;border-top:none;">
+        <div class="toolbar" style="padding-top:8px;border-top:none;border-bottom-width:2px;">
             <button class="btn-primary" id="btn-add-aviso">+ Aviso recogida</button>
             <button id="btn-search-dir" title="Buscar parada (Ctrl+F)">🔍 Buscar</button>
             <div id="search-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#1565C0;padding:8px 16px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;align-items:center;gap:10px;">
