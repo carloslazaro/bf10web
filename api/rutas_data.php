@@ -341,6 +341,9 @@ if ($method === 'POST' && $action === 'import-from-sheets') {
         $barrio    = isset($row[1]) ? trim($row[1]) : '';
         // Skip completely empty rows
         if ($direccion === '' && $barrio === '') continue;
+        // Skip day-header rows ("Dia ...") with empty sacos
+        $sacos = isset($row[2]) ? trim($row[2]) : '';
+        if (preg_match('/^dia\s/i', $direccion) && ($sacos === '' || $sacos === '0')) continue;
         $validRows[] = $row;
     }
 
