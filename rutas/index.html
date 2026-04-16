@@ -218,21 +218,6 @@
             </div>
         </div>
         <div class="toolbar">
-            <button class="filter-btn active" id="btn-pendientes">Por recoger</button>
-            <button class="filter-btn" id="btn-sin-ruta">Sin ruta</button>
-            <button class="filter-btn" id="btn-recogidas">Recogidas</button>
-            <button class="filter-btn" id="btn-todas">Todas</button>
-            <div class="sep"></div>
-            <button class="filter-btn zone-btn" id="btn-madrid">Madrid</button>
-            <button class="filter-btn zone-btn" id="btn-pueblos">Pueblos</button>
-            <div class="sep"></div>
-            <select id="filter-conductor" style="padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff;cursor:pointer">
-                <option value="">Todos conductores</option>
-            </select>
-            <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
-            <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
-        </div>
-        <div class="toolbar" style="padding-top:8px;border-top:none;border-bottom-width:2px;">
             <button class="btn-primary" id="btn-add-aviso">+ Aviso recogida</button>
             <button id="btn-search-dir" title="Buscar parada (Ctrl+F)">🔍 Buscar</button>
             <div id="search-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#1565C0;padding:8px 16px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;align-items:center;gap:10px;">
@@ -247,6 +232,21 @@
             <button id="btn-last-row">Ir a última fila</button>
             <button id="btn-print-route" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500">🖨️ Imprimir ruta</button>
             <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
+        </div>
+        <div class="toolbar" style="padding-top:8px;border-top:none;border-bottom-width:2px;">
+            <button class="filter-btn active" id="btn-pendientes">Por recoger</button>
+            <button class="filter-btn" id="btn-sin-ruta">Sin ruta</button>
+            <button class="filter-btn" id="btn-recogidas">Recogidas</button>
+            <button class="filter-btn" id="btn-todas">Todas</button>
+            <div class="sep"></div>
+            <button class="filter-btn zone-btn" id="btn-madrid">Madrid</button>
+            <button class="filter-btn zone-btn" id="btn-pueblos">Pueblos</button>
+            <div class="sep"></div>
+            <select id="filter-conductor" style="padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff;cursor:pointer">
+                <option value="">Todos conductores</option>
+            </select>
+            <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
+            <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
             <!-- Crear Rutas y Histórico ocultos, accesibles por código 1982/1983 -->
             <button style="display:none" id="btn-crear-rutas" onclick="openCrearRutas()">🚛 Crear Rutas</button>
             <button style="display:none" id="btn-historico" onclick="openHistorico()">📊 Histórico</button>
