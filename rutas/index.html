@@ -1150,33 +1150,88 @@
             }
         });
 
-        // ---------- Search by address ----------
+        // ---------- Search by address with navigation ----------
+        var searchResults = [];
+        var searchCurrent = -1;
+        var searchHighlightTimer = null;
+
+        function clearSearchHighlights() {
+            var trs = document.getElementById('sheet-body').querySelectorAll('tr');
+            trs.forEach(function(tr) { tr.style.background = ''; });
+        }
+
+        function highlightSearchResults() {
+            var trs = document.getElementById('sheet-body').querySelectorAll('tr');
+            searchResults.forEach(function(idx, i) {
+                if (trs[idx]) {
+                    trs[idx].style.background = (i === searchCurrent) ? '#FFEB3B' : '#FFF9C4';
+                }
+            });
+        }
+
+        function scrollToSearchResult(idx) {
+            var trs = document.getElementById('sheet-body').querySelectorAll('tr');
+            if (trs[searchResults[idx]]) {
+                trs[searchResults[idx]].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function updateSearchStatus() {
+            if (!searchResults.length) return;
+            setStatus('Resultado ' + (searchCurrent + 1) + ' de ' + searchResults.length + '  ◀ ▶ para navegar · Esc cerrar', 'saved');
+        }
+
         document.getElementById('btn-search-dir').addEventListener('click', function() {
             var term = prompt('Buscar por dirección:');
             if (!term || !term.trim()) return;
+            clearSearchHighlights();
             var q = term.trim().toLowerCase();
-            var found = [];
+            searchResults = [];
+            searchCurrent = -1;
             for (var i = 0; i < rows.length; i++) {
                 if ((rows[i].direccion || '').toLowerCase().indexOf(q) !== -1) {
-                    found.push(i);
+                    searchResults.push(i);
                 }
             }
-            if (!found.length) {
+            if (!searchResults.length) {
                 setStatus('No se encontraron filas con "' + term.trim() + '"', 'error');
                 return;
             }
-            // Highlight ALL matches and scroll to first
-            var trs = document.getElementById('sheet-body').querySelectorAll('tr');
-            found.forEach(function(idx) {
-                if (trs[idx]) {
-                    trs[idx].style.background = '#FFF9C4';
-                    setTimeout(function() { trs[idx].style.background = ''; }, 5000);
-                }
-            });
-            if (trs[found[0]]) {
-                trs[found[0]].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            searchCurrent = 0;
+            highlightSearchResults();
+            scrollToSearchResult(0);
+            updateSearchStatus();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (!searchResults.length) return;
+            if (e.key === 'Escape') {
+                clearSearchHighlights();
+                searchResults = [];
+                searchCurrent = -1;
+                setStatus('Búsqueda cerrada', 'saved');
+                return;
             }
-            setStatus(found.length + ' resultado(s) para "' + term.trim() + '"', 'saved');
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                if (searchCurrent < searchResults.length - 1) {
+                    e.preventDefault();
+                    searchCurrent++;
+                    clearSearchHighlights();
+                    highlightSearchResults();
+                    scrollToSearchResult(searchCurrent);
+                    updateSearchStatus();
+                }
+            }
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if (searchCurrent > 0) {
+                    e.preventDefault();
+                    searchCurrent--;
+                    clearSearchHighlights();
+                    highlightSearchResults();
+                    scrollToSearchResult(searchCurrent);
+                    updateSearchStatus();
+                }
+            }
         });
 
         // ---------- Download Excel of current filtered view ----------
