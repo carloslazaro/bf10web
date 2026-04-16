@@ -493,7 +493,7 @@
         function showDashboard(user) {
             currentUserName = user.name || '';
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'flex';
             document.getElementById('user-name').textContent = user.name;
             loadData();
         }
