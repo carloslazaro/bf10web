@@ -239,25 +239,36 @@ if ($method === 'POST' && $action === 'reorder') {
     jsonResponse(['success' => true]);
 }
 
-// ---------- POST: Sort by conductor > barrio > direccion ----------
+// ---------- POST: Sort by conductor > barrio > direccion (solo pendientes) ----------
 if ($method === 'POST' && $action === 'sort-by-barrio') {
-    // Get all rows ordered by conductor, barrio_cp, direccion
-    $rows = $pdo->query("
+    // 1. Get recogidas (keep their current order)
+    $recogidas = $pdo->query("
         SELECT id FROM rutas_data
+        WHERE fecha_recogida IS NOT NULL AND fecha_recogida != ''
+        ORDER BY row_order ASC, id ASC
+    ")->fetchAll(PDO::FETCH_COLUMN);
+
+    // 2. Get pendientes sorted by conductor > barrio > direccion
+    $pendientes = $pdo->query("
+        SELECT id FROM rutas_data
+        WHERE fecha_recogida IS NULL OR fecha_recogida = ''
         ORDER BY
             COALESCE(NULLIF(TRIM(conductor), ''), 'ZZZZZ') ASC,
             COALESCE(NULLIF(TRIM(barrio_cp), ''), 'ZZZZZ') ASC,
             COALESCE(NULLIF(TRIM(direccion), ''), 'ZZZZZ') ASC
     ")->fetchAll(PDO::FETCH_COLUMN);
 
+    // 3. Pendientes first, then recogidas at the end
+    $allIds = array_merge($pendientes, $recogidas);
+
     $update = $pdo->prepare("UPDATE rutas_data SET row_order = ? WHERE id = ?");
     $pdo->beginTransaction();
-    foreach ($rows as $i => $id) {
+    foreach ($allIds as $i => $id) {
         $update->execute([$i, $id]);
     }
     $pdo->commit();
 
-    jsonResponse(['success' => true, 'sorted' => count($rows)]);
+    jsonResponse(['success' => true, 'sorted' => count($pendientes)]);
 }
 
 // ---------- POST: Delete row ----------
