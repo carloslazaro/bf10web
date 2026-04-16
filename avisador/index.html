@@ -388,6 +388,7 @@ function buildAvisoPayload() {
         marca: document.getElementById('av-marca').value,
         observaciones: document.getElementById('av-observaciones').value.trim(),
         fecha_aviso: document.getElementById('av-fecha').value,
+        hora_aviso: new Date().toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hour12: false }),
         avisador: currentUser
     };
 }

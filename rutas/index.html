@@ -822,6 +822,39 @@
             if (newVal !== original) {
                 td.classList.add('dirty');
                 saveCell(rowId, field, newVal, td);
+
+                // Auto-fill fecha_aviso y hora_aviso when direccion changes (only if empty)
+                if (field === 'direccion' && newVal) {
+                    var row = rows[idx];
+                    var now = new Date();
+                    var madridTime = now.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hour12: false });
+                    var madridDate = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' }); // YYYY-MM-DD
+
+                    if (!row.fecha_aviso) {
+                        row.fecha_aviso = madridDate;
+                        saveCell(rowId, 'fecha_aviso', madridDate, document.createElement('td'));
+                        var faCol = FIELDS.indexOf('fecha_aviso');
+                        var faTd = document.querySelector('td[data-idx="' + idx + '"][data-col="' + faCol + '"]');
+                        if (faTd) {
+                            faTd.innerHTML = '<div class="cell-view">' + esc(madridDate) + '</div>';
+                            faTd.style.transition = 'background .3s';
+                            faTd.style.background = '#C8E6C9';
+                            setTimeout(function() { faTd.style.background = ''; }, 1500);
+                        }
+                    }
+                    if (!row.hora_aviso) {
+                        row.hora_aviso = madridTime;
+                        saveCell(rowId, 'hora_aviso', madridTime, document.createElement('td'));
+                        var haCol = FIELDS.indexOf('hora_aviso');
+                        var haTd = document.querySelector('td[data-idx="' + idx + '"][data-col="' + haCol + '"]');
+                        if (haTd) {
+                            haTd.innerHTML = '<div class="cell-view">' + esc(madridTime) + '</div>';
+                            haTd.style.transition = 'background .3s';
+                            haTd.style.background = '#C8E6C9';
+                            setTimeout(function() { haTd.style.background = ''; }, 1500);
+                        }
+                    }
+                }
             }
         }
 
@@ -1176,6 +1209,7 @@
                 marca: avisoMarcaSelect.value,
                 observaciones: document.getElementById('av-observaciones').value.trim(),
                 fecha_aviso: document.getElementById('av-fecha-aviso').value,
+                hora_aviso: new Date().toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hour12: false }),
                 avisador: document.getElementById('av-avisador').value.trim(),
             };
 

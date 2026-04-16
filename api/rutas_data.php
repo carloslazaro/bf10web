@@ -517,6 +517,11 @@ if ($method === 'POST' && $action === 'create-aviso') {
     $marca         = trim($data['marca'] ?? '');
     $observaciones = trim($data['observaciones'] ?? '');
     $fecha_aviso   = trim($data['fecha_aviso'] ?? date('Y-m-d'));
+    $hora_aviso    = trim($data['hora_aviso'] ?? '');
+    if (!$hora_aviso) {
+        $madridTz = new DateTimeZone('Europe/Madrid');
+        $hora_aviso = (new DateTime('now', $madridTz))->format('H:i');
+    }
     $avisador      = trim($data['avisador'] ?? '');
 
     if (!$direccion && !$barrio_cp) {
@@ -542,10 +547,10 @@ if ($method === 'POST' && $action === 'create-aviso') {
     }
 
     $stmt = $pdo->prepare("
-        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, avisador, etiquetas$etiquetaCols)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?$etiquetaPlaceholders)
+        INSERT INTO rutas_data (row_order, direccion, barrio_cp, sacos, urgen, interior, tlf_aviso, telefono2, marca, observaciones, fecha_aviso, hora_aviso, avisador, etiquetas$etiquetaCols)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?$etiquetaPlaceholders)
     ");
-    $stmt->execute(array_merge([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $interior, $tlf_aviso, $telefono2, $marca, $observaciones, $fecha_aviso, $avisador, $etiquetasDisplay], $etiquetaValues));
+    $stmt->execute(array_merge([$newOrder, $direccion, $barrio_cp, $sacos, $urgen, $interior, $tlf_aviso, $telefono2, $marca, $observaciones, $fecha_aviso, $hora_aviso, $avisador, $etiquetasDisplay], $etiquetaValues));
     $newId = (int)$pdo->lastInsertId();
 
     // Geocode the new aviso
