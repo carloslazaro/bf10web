@@ -1336,32 +1336,50 @@
             { key: 'etiqueta_3', weight: 2 }
         ];
 
+        // Stop words: ignored unless it's the only token
+        var STOP_WORDS = { 'de': 1, 'del': 1, 'la': 1, 'el': 1, 'las': 1, 'los': 1, 'en': 1, 'a': 1, 'y': 1 };
+
         function scoreRow(row, tokens) {
+            // Build one big searchable string per row (concatenate all fields)
+            var haystack = SEARCH_FIELDS.map(function(f) { return norm(row[f.key]); }).join(' ');
+            if (!haystack) return 0;
+
             var totalScore = 0;
-            var allTokensFound = true;
+            var tokensMatched = 0;
+
             for (var t = 0; t < tokens.length; t++) {
                 var tk = tokens[t];
-                var tokenFound = false;
-                for (var f = 0; f < SEARCH_FIELDS.length; f++) {
-                    var fieldVal = norm(row[SEARCH_FIELDS[f].key]);
-                    if (!fieldVal) continue;
-                    if (fieldVal.indexOf(tk) !== -1) {
-                        // Exact substring: full weight
-                        totalScore += SEARCH_FIELDS[f].weight * 2;
-                        tokenFound = true;
-                    } else if (isFuzzyMatch(tk, fieldVal)) {
-                        // Fuzzy match: partial weight
-                        totalScore += SEARCH_FIELDS[f].weight;
-                        tokenFound = true;
+                var found = false;
+
+                // First try exact substring in concatenated text
+                if (haystack.indexOf(tk) !== -1) {
+                    found = true;
+                    // Bonus: check which specific field matched for weighting
+                    for (var f = 0; f < SEARCH_FIELDS.length; f++) {
+                        var fv = norm(row[SEARCH_FIELDS[f].key]);
+                        if (fv && fv.indexOf(tk) !== -1) {
+                            totalScore += SEARCH_FIELDS[f].weight * 2;
+                            break;
+                        }
                     }
                 }
-                if (!tokenFound) allTokensFound = false;
+                // Fuzzy only for tokens >= 4 chars (no fuzzy on short words)
+                if (!found && tk.length >= 4) {
+                    for (var f2 = 0; f2 < SEARCH_FIELDS.length; f2++) {
+                        var fv2 = norm(row[SEARCH_FIELDS[f2].key]);
+                        if (fv2 && isFuzzyMatch(tk, fv2)) {
+                            found = true;
+                            totalScore += SEARCH_FIELDS[f2].weight;
+                            break;
+                        }
+                    }
+                }
+                if (found) tokensMatched++;
             }
-            // Require at least all tokens found somewhere, or high partial score
-            if (allTokensFound) return totalScore;
-            // Allow partial matches if most tokens found (>=50% score of perfect)
-            if (totalScore >= tokens.length * 5) return totalScore * 0.5;
-            return 0;
+
+            // ALL tokens must match — no partial results
+            if (tokensMatched < tokens.length) return 0;
+            return totalScore;
         }
 
         function doSearch(term) {
@@ -1372,7 +1390,10 @@
                 searchCount.textContent = '';
                 return;
             }
-            var tokens = norm(term).split(/\s+/).filter(function(t) { return t.length > 0; });
+            var allTokens = norm(term).split(/\s+/).filter(function(t) { return t.length > 0; });
+            // Filter stop words unless they're the only token
+            var tokens = allTokens.length > 1 ? allTokens.filter(function(t) { return !STOP_WORDS[t]; }) : allTokens;
+            if (!tokens.length) tokens = allTokens; // fallback if all were stop words
             if (!tokens.length) { searchCount.textContent = ''; return; }
 
             var scored = [];
