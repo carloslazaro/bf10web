@@ -43,16 +43,25 @@ function nextPedidoCode() {
     return "PED-$year-" . str_pad($next, 4, '0', STR_PAD_LEFT);
 }
 
+// ---------- GET: Distinct providers ----------
+if ($method === 'GET' && $action === 'proveedores') {
+    $stmt = $pdo->query("SELECT DISTINCT proveedor FROM pedidos_proveedor WHERE proveedor IS NOT NULL AND proveedor != '' AND deleted_at IS NULL ORDER BY proveedor ASC");
+    $provs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    jsonResponse(['proveedores' => $provs]);
+}
+
 // ---------- GET: List ----------
 if ($method === 'GET' && $action === 'list') {
     $marca = sanitize($_GET['marca'] ?? '');
     $estado = sanitize($_GET['estado'] ?? '');
+    $proveedor = sanitize($_GET['proveedor'] ?? '');
 
     // Active orders (non-recibido)
     $where = ["p.deleted_at IS NULL", "p.estado != 'recibido'"];
     $params = [];
     if ($marca) { $where[] = 'p.marca = ?'; $params[] = $marca; }
     if ($estado) { $where[] = 'p.estado = ?'; $params[] = $estado; }
+    if ($proveedor) { $where[] = 'p.proveedor = ?'; $params[] = $proveedor; }
 
     $sql = "SELECT p.*, u.name AS user_name FROM pedidos_proveedor p LEFT JOIN users u ON u.id = p.user_id";
     $sql .= ' WHERE ' . implode(' AND ', $where);
@@ -65,6 +74,7 @@ if ($method === 'GET' && $action === 'list') {
     $whereR = ["p.deleted_at IS NULL", "p.estado = 'recibido'"];
     $paramsR = [];
     if ($marca) { $whereR[] = 'p.marca = ?'; $paramsR[] = $marca; }
+    if ($proveedor) { $whereR[] = 'p.proveedor = ?'; $paramsR[] = $proveedor; }
 
     $sqlR = "SELECT p.*, u.name AS user_name FROM pedidos_proveedor p LEFT JOIN users u ON u.id = p.user_id";
     $sqlR .= ' WHERE ' . implode(' AND ', $whereR);

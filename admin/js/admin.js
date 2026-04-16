@@ -1548,6 +1548,22 @@
         recibido: '#2e7d32'
     };
 
+    // Load distinct providers into dropdown
+    function loadProveedores() {
+        fetch(API + 'pedidos_proveedor.php?action=proveedores')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var sel = document.getElementById('ped-proveedor');
+                var current = sel.value;
+                sel.innerHTML = '<option value="">Todos los proveedores</option>';
+                (data.proveedores || []).forEach(function (p) {
+                    sel.innerHTML += '<option value="' + p + '">' + p + '</option>';
+                });
+                sel.value = current;
+            });
+    }
+    loadProveedores();
+
     function loadPedidos() {
         if (pedTrashMode) {
             fetch(API + 'pedidos_proveedor.php?action=trash')
@@ -1560,9 +1576,11 @@
         }
         var marca = document.getElementById('ped-marca').value;
         var estado = document.getElementById('ped-estado').value;
+        var proveedor = document.getElementById('ped-proveedor').value;
         var url = 'pedidos_proveedor.php?action=list';
         if (marca) url += '&marca=' + marca;
         if (estado) url += '&estado=' + estado;
+        if (proveedor) url += '&proveedor=' + encodeURIComponent(proveedor);
 
         fetch(API + url)
             .then(function (r) { return r.json(); })
@@ -1667,6 +1685,7 @@
     document.getElementById('btn-ped-clear').addEventListener('click', function () {
         document.getElementById('ped-marca').value = '';
         document.getElementById('ped-estado').value = '';
+        document.getElementById('ped-proveedor').value = '';
         loadPedidos();
     });
 
