@@ -74,6 +74,8 @@
         .row-header .row-add { display: inline-block; width: 16px; height: 16px; line-height: 14px; text-align: center; font-size: 14px; font-weight: 700; color: #1565C0; background: transparent; border: 1px solid transparent; border-radius: 3px; cursor: pointer; margin-left: 1px; vertical-align: middle; opacity: 0.3; }
         .row-header:hover .row-add { opacity: 1; border-color: #1565C0; }
         .row-header .row-add:hover { background: #1565C0; color: #fff; }
+        .new-row-placeholder td { background: #f9f9f9; cursor: pointer; border-bottom: 2px dashed #ccc; }
+        .new-row-placeholder:hover td { background: #e3f2fd; }
         .sheet-table tr.day-row td { background: #1565C0 !important; }
         .sheet-table tr.day-row td .cell-view { color: #fff; font-weight: 700; }
         .sheet-table tr.day-row td.row-header { background: #0D47A1 !important; color: #fff; }
@@ -605,15 +607,52 @@
                 }
                 bhtml += '</tr>';
             }
+            // Fila vacía al final para añadir nueva parada
+            var lastId = rows.length > 0 ? rows[rows.length - 1].id : 0;
+            bhtml += '<tr class="new-row-placeholder" data-afterid="' + lastId + '">';
+            bhtml += '<td class="row-header"><span class="row-num" style="color:#999">+</span></td>';
+            for (var c = 0; c < FIELDS.length; c++) {
+                bhtml += '<td data-col="' + c + '" class="placeholder-cell"><div class="cell-view" style="color:#bbb">' + (c === 0 ? 'Nueva parada...' : '') + '</div></td>';
+            }
+            bhtml += '</tr>';
+
             tbody.innerHTML = bhtml;
             document.getElementById('loading').style.display = 'none';
             document.getElementById('sheet-table').style.display = '';
             selectedTd = null;
             editingCell = null;
+
+            // Si acabamos de insertar fila nueva, enfocar la celda
+            if (pendingNewRowCol !== null && rows.length > 0) {
+                var lastIdx = rows.length - 1;
+                var focusCol = pendingNewRowCol;
+                pendingNewRowCol = null;
+                setTimeout(function() { editCellAt(lastIdx, focusCol); }, 50);
+            }
         }
 
-        // ---------- Cell editing: single click = edit directly ----------
+        // ---------- New row placeholder click ----------
+        var pendingNewRowCol = null;
         document.getElementById('sheet-body').addEventListener('click', function(e) {
+            var placeholderTd = e.target.closest('.new-row-placeholder td.placeholder-cell');
+            if (placeholderTd) {
+                var col = parseInt(placeholderTd.dataset.col) || 0;
+                var tr = placeholderTd.closest('.new-row-placeholder');
+                var afterId = parseInt(tr.dataset.afterid) || 0;
+                pendingNewRowCol = col;
+                // Disable placeholder while inserting
+                tr.style.opacity = '0.5';
+                tr.style.pointerEvents = 'none';
+                fetch(API + '?action=insert-row', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ after_id: afterId }),
+                }).then(function(r) { return r.json(); }).then(function(d) {
+                    if (d.success) { loadData(); }
+                    else { setStatus('Error: ' + (d.error || 'fallo'), 'error'); pendingNewRowCol = null; }
+                }).catch(function() { setStatus('Error de conexión', 'error'); pendingNewRowCol = null; });
+                return;
+            }
+
             var td = e.target.closest('td[data-idx]');
             if (!td || td.classList.contains('editing')) return;
             if (editingCell) commitEdit();
