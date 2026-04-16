@@ -227,7 +227,14 @@
                 <option value="">Todos conductores</option>
             </select>
             <button class="btn-primary" id="btn-add-aviso">+ Aviso recogida</button>
-            <button id="btn-search-dir" title="Buscar por dirección">🔍 Buscar</button>
+            <button id="btn-search-dir" title="Buscar parada (Ctrl+F)">🔍 Buscar</button>
+            <div id="search-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#1565C0;padding:8px 16px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;align-items:center;gap:10px;">
+                <input type="text" id="search-input" placeholder="Buscar dirección, teléfono, barrio, conductor..." style="flex:1;padding:8px 12px;border:none;border-radius:6px;font-size:15px;outline:none;" autocomplete="off">
+                <span id="search-count" style="color:#fff;font-size:13px;min-width:120px;text-align:center;white-space:nowrap"></span>
+                <button id="search-prev" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:16px" title="Anterior (↑)">▲</button>
+                <button id="search-next" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:16px" title="Siguiente (↓)">▼</button>
+                <button id="search-close" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:14px;font-weight:700" title="Cerrar (Esc)">✕</button>
+            </div>
             <button id="btn-download-excel" title="Descargar Excel de la vista actual">📥 Excel</button>
             <button id="btn-last-row">Ir a última fila</button>
             <div class="sep"></div>
@@ -1256,10 +1263,139 @@
             }
         });
 
-        // ---------- Search by address with navigation ----------
+        // ---------- Smart search with fuzzy matching ----------
         var searchResults = [];
         var searchCurrent = -1;
-        var searchHighlightTimer = null;
+        var searchBar = document.getElementById('search-bar');
+        var searchInput = document.getElementById('search-input');
+        var searchCount = document.getElementById('search-count');
+
+        // Normalize: lowercase + strip accents
+        function norm(s) {
+            return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+        }
+
+        // Check if two strings are similar enough (Levenshtein distance <= threshold)
+        function isFuzzyMatch(needle, haystack) {
+            if (haystack.indexOf(needle) !== -1) return true;
+            // For short terms, require exact substring
+            if (needle.length <= 2) return false;
+            // Check if any word in haystack starts with the needle
+            var words = haystack.split(/[\s,.:;\/\-]+/);
+            for (var w = 0; w < words.length; w++) {
+                if (words[w].indexOf(needle) === 0) return true;
+                // Allow 1 char difference for words >= 4 chars
+                if (needle.length >= 4 && words[w].length >= 4) {
+                    if (levenshtein1(needle, words[w])) return true;
+                }
+            }
+            // Check if needle is contained with 1 typo in the full string
+            if (needle.length >= 5) {
+                for (var p = 0; p <= haystack.length - needle.length + 1; p++) {
+                    var chunk = haystack.substr(p, needle.length + 1);
+                    if (levenshtein1(needle, chunk)) return true;
+                }
+            }
+            return false;
+        }
+
+        // Fast check: is Levenshtein distance <= 1?
+        function levenshtein1(a, b) {
+            var la = a.length, lb = b.length;
+            if (Math.abs(la - lb) > 1) return false;
+            if (la === lb) {
+                var diff = 0;
+                for (var i = 0; i < la; i++) { if (a[i] !== b[i]) diff++; if (diff > 1) return false; }
+                return diff <= 1;
+            }
+            // lengths differ by 1: check insertion/deletion
+            var shorter = la < lb ? a : b;
+            var longer = la < lb ? b : a;
+            var found = false;
+            for (var si = 0, li = 0; li < longer.length; li++) {
+                if (shorter[si] !== longer[li]) {
+                    if (found) return false;
+                    found = true;
+                } else { si++; }
+            }
+            return true;
+        }
+
+        // Searchable fields and their weight
+        var SEARCH_FIELDS = [
+            { key: 'direccion', weight: 10 },
+            { key: 'barrio_cp', weight: 6 },
+            { key: 'tlf_aviso', weight: 8 },
+            { key: 'telefono2', weight: 8 },
+            { key: 'conductor', weight: 5 },
+            { key: 'observaciones', weight: 3 },
+            { key: 'marca', weight: 4 },
+            { key: 'avisador', weight: 3 },
+            { key: 'etiqueta_1', weight: 2 },
+            { key: 'etiqueta_2', weight: 2 },
+            { key: 'etiqueta_3', weight: 2 }
+        ];
+
+        function scoreRow(row, tokens) {
+            var totalScore = 0;
+            var allTokensFound = true;
+            for (var t = 0; t < tokens.length; t++) {
+                var tk = tokens[t];
+                var tokenFound = false;
+                for (var f = 0; f < SEARCH_FIELDS.length; f++) {
+                    var fieldVal = norm(row[SEARCH_FIELDS[f].key]);
+                    if (!fieldVal) continue;
+                    if (fieldVal.indexOf(tk) !== -1) {
+                        // Exact substring: full weight
+                        totalScore += SEARCH_FIELDS[f].weight * 2;
+                        tokenFound = true;
+                    } else if (isFuzzyMatch(tk, fieldVal)) {
+                        // Fuzzy match: partial weight
+                        totalScore += SEARCH_FIELDS[f].weight;
+                        tokenFound = true;
+                    }
+                }
+                if (!tokenFound) allTokensFound = false;
+            }
+            // Require at least all tokens found somewhere, or high partial score
+            if (allTokensFound) return totalScore;
+            // Allow partial matches if most tokens found (>=50% score of perfect)
+            if (totalScore >= tokens.length * 5) return totalScore * 0.5;
+            return 0;
+        }
+
+        function doSearch(term) {
+            clearSearchHighlights();
+            searchResults = [];
+            searchCurrent = -1;
+            if (!term || !term.trim()) {
+                searchCount.textContent = '';
+                return;
+            }
+            var tokens = norm(term).split(/\s+/).filter(function(t) { return t.length > 0; });
+            if (!tokens.length) { searchCount.textContent = ''; return; }
+
+            var scored = [];
+            for (var i = 0; i < rows.length; i++) {
+                if (isDayRow(rows[i])) continue;
+                var sc = scoreRow(rows[i], tokens);
+                if (sc > 0) scored.push({ idx: i, score: sc });
+            }
+            // Sort by score descending
+            scored.sort(function(a, b) { return b.score - a.score; });
+            searchResults = scored.map(function(s) { return s.idx; });
+
+            if (!searchResults.length) {
+                searchCount.textContent = 'Sin resultados';
+                searchCount.style.color = '#FFCDD2';
+                return;
+            }
+            searchCount.style.color = '#fff';
+            searchCurrent = 0;
+            highlightSearchResults();
+            scrollToSearchResult(0);
+            updateSearchCount();
+        }
 
         function clearSearchHighlights() {
             var trs = document.getElementById('sheet-body').querySelectorAll('tr');
@@ -1282,60 +1418,82 @@
             }
         }
 
-        function updateSearchStatus() {
+        function updateSearchCount() {
             if (!searchResults.length) return;
-            setStatus('Resultado ' + (searchCurrent + 1) + ' de ' + searchResults.length + '  ◀ ▶ para navegar · Esc cerrar', 'saved');
+            searchCount.textContent = (searchCurrent + 1) + ' / ' + searchResults.length;
         }
 
-        document.getElementById('btn-search-dir').addEventListener('click', function() {
-            var term = prompt('Buscar por dirección:');
-            if (!term || !term.trim()) return;
+        function openSearchBar() {
+            searchBar.style.display = 'flex';
+            searchInput.value = '';
+            searchInput.focus();
+            searchCount.textContent = '';
+        }
+
+        function closeSearchBar() {
+            searchBar.style.display = 'none';
             clearSearchHighlights();
-            var q = term.trim().toLowerCase();
             searchResults = [];
             searchCurrent = -1;
-            for (var i = 0; i < rows.length; i++) {
-                if ((rows[i].direccion || '').toLowerCase().indexOf(q) !== -1) {
-                    searchResults.push(i);
-                }
-            }
-            if (!searchResults.length) {
-                setStatus('No se encontraron filas con "' + term.trim() + '"', 'error');
-                return;
-            }
-            searchCurrent = 0;
-            highlightSearchResults();
-            scrollToSearchResult(0);
-            updateSearchStatus();
+            searchInput.value = '';
+        }
+
+        document.getElementById('btn-search-dir').addEventListener('click', openSearchBar);
+
+        var searchDebounce = null;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(function() { doSearch(searchInput.value); }, 200);
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (!searchResults.length) return;
-            if (e.key === 'Escape') {
-                clearSearchHighlights();
-                searchResults = [];
-                searchCurrent = -1;
-                setStatus('Búsqueda cerrada', 'saved');
-                return;
-            }
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                if (searchCurrent < searchResults.length - 1) {
-                    e.preventDefault();
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { e.preventDefault(); closeSearchBar(); return; }
+            if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (searchResults.length && searchCurrent < searchResults.length - 1) {
                     searchCurrent++;
                     clearSearchHighlights();
                     highlightSearchResults();
                     scrollToSearchResult(searchCurrent);
-                    updateSearchStatus();
+                    updateSearchCount();
                 }
+                return;
             }
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                if (searchCurrent > 0) {
-                    e.preventDefault();
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (searchResults.length && searchCurrent > 0) {
                     searchCurrent--;
                     clearSearchHighlights();
                     highlightSearchResults();
                     scrollToSearchResult(searchCurrent);
-                    updateSearchStatus();
+                    updateSearchCount();
+                }
+                return;
+            }
+        });
+
+        document.getElementById('search-prev').addEventListener('click', function() {
+            if (searchResults.length && searchCurrent > 0) {
+                searchCurrent--;
+                clearSearchHighlights(); highlightSearchResults();
+                scrollToSearchResult(searchCurrent); updateSearchCount();
+            }
+        });
+        document.getElementById('search-next').addEventListener('click', function() {
+            if (searchResults.length && searchCurrent < searchResults.length - 1) {
+                searchCurrent++;
+                clearSearchHighlights(); highlightSearchResults();
+                scrollToSearchResult(searchCurrent); updateSearchCount();
+            }
+        });
+        document.getElementById('search-close').addEventListener('click', closeSearchBar);
+
+        // Ctrl+F / Cmd+F opens search bar
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                if (document.getElementById('dashboard').style.display !== 'none') {
+                    e.preventDefault();
+                    openSearchBar();
                 }
             }
         });
