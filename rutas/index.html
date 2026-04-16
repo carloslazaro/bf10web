@@ -43,7 +43,7 @@
         .stock-qty { font-size:20px; font-weight:800; }
         .stock-qty.positive { color:#2e7d32; } .stock-qty.zero { color:#999; } .stock-qty.negative { color:#c62828; }
 
-        .toolbar { padding: 10px 24px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .toolbar { padding: 10px 24px; background: #fff; border-bottom: none; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .toolbar button { padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
         .toolbar button:hover { background: #f5f5f5; }
         .toolbar .btn-primary { background: #1565C0; color: #fff; border-color: #1565C0; }
@@ -233,7 +233,7 @@
             <button id="btn-print-route" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500">🖨️ Imprimir ruta</button>
             <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
         </div>
-        <div class="toolbar" style="padding-top:8px;border-top:none;border-bottom-width:2px;">
+        <div class="toolbar" style="padding-top:8px;border-top:2px solid #bbb;">
             <button class="filter-btn active" id="btn-pendientes">Por recoger</button>
             <button class="filter-btn" id="btn-sin-ruta">Sin ruta</button>
             <button class="filter-btn" id="btn-recogidas">Recogidas</button>
