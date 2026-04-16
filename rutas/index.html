@@ -982,6 +982,11 @@
             avisoMarcaSelect.appendChild(opt);
         });
 
+        // Dynamic etiqueta inputs based on sacos count
+        var avSacosInput = document.getElementById('av-sacos');
+        var avEtiqWrap = document.getElementById('av-etiquetas-wrap');
+        var avEtiqHint = document.getElementById('av-etiq-hint');
+
         function openAvisoModal() {
             document.getElementById('av-direccion').value = '';
             avisoBarrioInput.value = '';
@@ -1000,11 +1005,6 @@
             avisoModal.style.display = 'flex';
         }
         function closeAvisoModal() { avisoModal.style.display = 'none'; }
-
-        // Dynamic etiqueta inputs based on sacos count
-        var avSacosInput = document.getElementById('av-sacos');
-        var avEtiqWrap = document.getElementById('av-etiquetas-wrap');
-        var avEtiqHint = document.getElementById('av-etiq-hint');
         function buildEtiquetaInputs() {
             var n = parseInt(avSacosInput.value) || 0;
             if (n > 15) n = 15;
