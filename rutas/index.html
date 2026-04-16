@@ -52,10 +52,11 @@
         .toolbar .btn-success:hover { background: #1B5E20; }
         .toolbar .btn-warning { background: #E65100; color: #fff; border-color: #E65100; }
         .toolbar .btn-warning:hover { background: #BF360C; }
-        .toolbar .status { font-size: 12px; color: #888; margin-left: auto; }
-        .toolbar .status.saving { color: #E65100; }
-        .toolbar .status.saved { color: #2E7D32; }
-        .toolbar .status.error { color: #c00; }
+        .status-bar { text-align: center; padding: 4px 0; background: #fff; border-bottom: 1px solid #e0e0e0; }
+        .status-bar .status { font-size: 12px; color: #888; }
+        .status-bar .status.saving { color: #E65100; }
+        .status-bar .status.saved { color: #2E7D32; }
+        .status-bar .status.error { color: #c00; }
         .toolbar .sep { width: 1px; height: 24px; background: #ddd; }
 
         #dashboard { display: flex; flex-direction: column; height: 100vh; }
@@ -247,9 +248,9 @@
             <!-- Crear Rutas y Histórico ocultos, accesibles por código 1982/1983 -->
             <button style="display:none" id="btn-crear-rutas" onclick="openCrearRutas()">🚛 Crear Rutas</button>
             <button style="display:none" id="btn-historico" onclick="openHistorico()">📊 Histórico</button>
-            <span class="status" id="status-msg"></span>
             <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-left:auto;">
         </div>
+        <div class="status-bar"><span class="status" id="status-msg"></span></div>
         <div class="sheet-wrapper" id="sheet-wrapper">
             <div class="loading" id="loading">Cargando datos...</div>
             <table class="sheet-table" id="sheet-table" style="display:none">
