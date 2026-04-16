@@ -233,7 +233,7 @@
             <button id="btn-print-route" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500">🖨️ Imprimir ruta</button>
             <button class="btn-warning" id="btn-ver-borrador" onclick="openBorradorView()" style="display:none">📋 Ver Borrador</button>
         </div>
-        <div class="toolbar" style="padding-top:8px;border-top:2px solid #bbb;">
+        <div class="toolbar" style="padding-top:8px;border-top:2px solid #bbb;position:relative;">
             <button class="filter-btn active" id="btn-pendientes">Por recoger</button>
             <button class="filter-btn" id="btn-sin-ruta">Sin ruta</button>
             <button class="filter-btn" id="btn-recogidas">Recogidas</button>
@@ -246,7 +246,7 @@
                 <option value="">Todos conductores</option>
             </select>
             <button class="btn-success" id="btn-mapa" onclick="openMap()">🗺️ Mapa</button>
-            <input type="text" id="cmd-input" placeholder="Código" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;">
+            <input type="text" id="cmd-input" placeholder="Código" style="position:absolute;right:24px;width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;">
             <!-- Crear Rutas y Histórico ocultos, accesibles por código 1982/1983 -->
             <button style="display:none" id="btn-crear-rutas" onclick="openCrearRutas()">🚛 Crear Rutas</button>
             <button style="display:none" id="btn-historico" onclick="openHistorico()">📊 Histórico</button>
