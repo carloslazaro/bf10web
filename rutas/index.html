@@ -430,17 +430,17 @@
 
         var FIELDS = [
             'direccion', 'barrio_cp', 'sacos', 'urgen', 'interior', 'tlf_aviso', 'telefono2',
-            'conductor', 'etiquetas', 'marca', 'observaciones',
-            'avisador', 'hora_aviso', 'fecha_aviso', 'fecha_recogida', 'fecha_de_ruta',
-            'estado', 'orden', 'swap_pending', 'swap_orden',
-            'etiqueta_1', 'etiqueta_2', 'etiqueta_3', 'etiqueta_4', 'etiqueta_5', 'etiqueta_6'
+            'observaciones', 'conductor', 'marca',
+            'avisador', 'hora_aviso', 'fecha_aviso', 'fecha_recogida',
+            'etiqueta_1', 'etiqueta_2', 'etiqueta_3', 'etiqueta_4', 'etiqueta_5', 'etiqueta_6',
+            'estado'
         ];
         var HEADERS = [
             'DIRECCION', 'BARRIO/CP', 'SACOS', 'URGEN', 'INTERIOR', 'TLF AVISO', 'TLF 2',
-            'CONDUCTOR', 'ETIQUETAS', 'MARCA', 'OBSERVACIONES',
-            'AVISADOR', 'HORA AVISO', 'FECHA AVISO', 'FECHA RECOGIDA', 'FECHA_DE_RUTA',
-            'ESTADO', 'ORDEN', 'SWAP_PENDING', 'SWAP_ORDEN',
-            'ETIQUETA_1', 'ETIQUETA_2', 'ETIQUETA_3', 'ETIQUETA_4', 'ETIQUETA_5', 'ETIQUETA_6'
+            'OBSERVACIONES', 'CONDUCTOR', 'MARCA',
+            'AVISADOR', 'HORA AVISO', 'FECHA AVISO', 'FECHA RECOGIDA',
+            'ETIQUETA 1', 'ETIQUETA 2', 'ETIQUETA 3', 'ETIQUETA 4', 'ETIQUETA 5', 'ETIQUETA 6',
+            'ESTADO'
         ];
 
         // ---------- Auth ----------
@@ -666,6 +666,14 @@
                     return '<option value="' + esc(m) + '"' + (m === val ? ' selected' : '') + '>' + esc(m) + '</option>';
                 }).join('');
                 el.value = val;
+            } else if (field === 'urgen') {
+                el = document.createElement('select');
+                el.className = 'cell-input';
+                var urgenOpts = ['No', 'Si', 'Ayuntamiento', 'Policia'];
+                el.innerHTML = '<option value="">—</option>' + urgenOpts.map(function(u) {
+                    return '<option value="' + u + '"' + (val.toLowerCase() === u.toLowerCase() ? ' selected' : '') + '>' + u + '</option>';
+                }).join('');
+                el.value = val || '';
             } else {
                 el = document.createElement('input');
                 el.className = 'cell-input';
