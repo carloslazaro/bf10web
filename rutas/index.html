@@ -253,6 +253,9 @@
                 <thead id="sheet-head"></thead>
                 <tbody id="sheet-body"></tbody>
             </table>
+            <div style="text-align:center;padding:12px 0 30px;">
+                <button id="btn-first-row" style="padding:8px 24px;background:#1565C0;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">↑ Ir a Primera Fila</button>
+            </div>
         </div>
 
         <!-- Print route panel -->
@@ -1035,6 +1038,10 @@
         document.getElementById('btn-last-row').addEventListener('click', function() {
             var wrapper = document.getElementById('sheet-wrapper');
             wrapper.scrollTop = wrapper.scrollHeight;
+        });
+        document.getElementById('btn-first-row').addEventListener('click', function() {
+            var wrapper = document.getElementById('sheet-wrapper');
+            wrapper.scrollTop = 0;
         });
 
         // ---------- Drag & Drop rows ----------
