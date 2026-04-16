@@ -592,7 +592,11 @@
             var label = labels[currentFilter] || 'todas';
             if (currentZone) label += ' · ' + (currentZone === 'madrid' ? 'Madrid' : 'Pueblos');
             if (currentConductor) label += ' · ' + currentConductor;
-            setStatus(rows.length + ' filas (' + label + ') — ' + new Date().toLocaleTimeString(), 'saved');
+            var totalSacos = 0;
+            rows.forEach(function(r) {
+                if (!isDayRow(r)) totalSacos += parseInt(r.sacos) || 0;
+            });
+            setStatus(totalSacos + ' sacos · ' + rows.length + ' paradas (' + label + ')', 'saved');
         }
 
         // ---------- Render ----------
@@ -607,9 +611,35 @@
 
             var tbody = document.getElementById('sheet-body');
             var bhtml = '';
+            var today = new Date();
+            today.setHours(0,0,0,0);
+
+            function parseDateField(s) {
+                if (!s) return null;
+                s = s.trim();
+                // YYYY-MM-DD
+                var m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+                // DD/MM/YYYY
+                m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+                return null;
+            }
+
             for (var i = 0; i < rows.length; i++) {
                 var r = rows[i];
                 var dayRow = isDayRow(r);
+
+                // Calculate age in days from fecha_aviso
+                var ageDays = -1;
+                if (!dayRow) {
+                    var fa = parseDateField(r.fecha_aviso);
+                    if (fa) {
+                        fa.setHours(0,0,0,0);
+                        ageDays = Math.floor((today - fa) / 86400000);
+                    }
+                }
+
                 bhtml += '<tr data-id="' + r.id + '"' + (dayRow ? ' class="day-row"' : '') + '>';
                 bhtml += '<td class="row-header" data-id="' + r.id + '"><span class="row-drag" draggable="true" title="Arrastrar fila">⠿</span><span class="row-move row-up" data-id="' + r.id + '" title="Subir">▲</span><span class="row-num">' + (i + 1) + '</span><span class="row-move row-down" data-id="' + r.id + '" title="Bajar">▼</span><span class="row-add" data-addafter="' + r.id + '" title="Insertar fila debajo">+</span></td>';
                 for (var c = 0; c < FIELDS.length; c++) {
@@ -617,6 +647,10 @@
                     var cellStyle = '';
                     if (FIELDS[c] === 'urgen' && val && val.toUpperCase() !== 'NO') {
                         cellStyle = ' style="color:#c62828;font-weight:700"';
+                    } else if (FIELDS[c] === 'direccion' && ageDays >= 4) {
+                        cellStyle = ' style="color:#c62828;font-weight:600"'; // rojo: 4+ días
+                    } else if (FIELDS[c] === 'direccion' && ageDays >= 2) {
+                        cellStyle = ' style="color:#1565C0;font-weight:600"'; // azul: 2-3 días
                     }
                     bhtml += '<td data-idx="' + i + '" data-col="' + c + '"' + cellStyle + '><div class="cell-view">' + esc(val) + '</div></td>';
                 }
