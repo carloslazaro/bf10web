@@ -768,6 +768,10 @@
                         });
                     }, 100);
                 })(el, idx);
+            } else if (field === 'interior') {
+                el = document.createElement('select');
+                el.className = 'cell-input';
+                el.innerHTML = '<option value=""' + (!val ? ' selected' : '') + '>No</option><option value="SI"' + (val === 'SI' ? ' selected' : '') + '>SI</option>';
             } else if (field === 'urgen') {
                 el = document.createElement('select');
                 el.className = 'cell-input';
